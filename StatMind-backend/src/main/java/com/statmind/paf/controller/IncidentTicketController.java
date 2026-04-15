@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.statmind.paf.dto.AssignTechnicianRequest;
 
 import java.util.List;
 
@@ -50,6 +51,18 @@ public class IncidentTicketController {
         }
 
         return ResponseEntity.ok(ticket);
+    }
+
+    @PatchMapping("/{id}/assign")
+    public ResponseEntity<?> assignTechnician(@PathVariable String id,
+                                          @Valid @RequestBody AssignTechnicianRequest request) {
+    IncidentTicket ticket = service.assignTechnician(id, request);
+
+    if (ticket == null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
+    }
+
+    return ResponseEntity.ok(ticket);
     }
 
     @DeleteMapping("/{id}")
