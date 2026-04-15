@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.statmind.paf.dto.AssignTechnicianRequest;
+import com.statmind.paf.dto.UpdateStatusRequest;
 
 import java.util.List;
 
@@ -63,6 +64,22 @@ public class IncidentTicketController {
     }
 
     return ResponseEntity.ok(ticket);
+    }
+
+    @PatchMapping("/{id}/status")
+public ResponseEntity<?> updateTicketStatus(@PathVariable String id,
+                                            @Valid @RequestBody UpdateStatusRequest request) {
+    try {
+        IncidentTicket ticket = service.updateTicketStatus(id, request);
+
+        if (ticket == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
+        }
+
+        return ResponseEntity.ok(ticket);
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
     }
 
     @DeleteMapping("/{id}")
