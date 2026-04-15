@@ -4,7 +4,7 @@ import com.statmind.paf.model.IncidentTicket;
 import com.statmind.paf.repository.IncidentTicketRepository;
 import org.springframework.stereotype.Service;
 import com.statmind.paf.dto.AssignTechnicianRequest;
-
+import com.statmind.paf.dto.UpdateStatusRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -68,6 +68,29 @@ public class IncidentTicketService {
 
     return repository.save(existing);
 }
+    public IncidentTicket updateTicketStatus(String id, UpdateStatusRequest request) {
+    IncidentTicket existing = repository.findById(id).orElse(null);
+
+    if (existing == null) {
+        return null;
+    }
+
+    String newStatus = request.getStatus().toUpperCase();
+
+    if (!newStatus.equals("OPEN") &&
+        !newStatus.equals("IN_PROGRESS") &&
+        !newStatus.equals("RESOLVED") &&
+        !newStatus.equals("CLOSED") &&
+        !newStatus.equals("REJECTED")) {
+        throw new IllegalArgumentException("Invalid status value");
+    }
+
+    existing.setStatus(newStatus);
+    existing.setUpdatedAt(LocalDateTime.now());
+
+    return repository.save(existing);
+    }
+    
     public boolean deleteTicket(String id) {
         IncidentTicket existing = repository.findById(id).orElse(null);
 
