@@ -42,7 +42,8 @@ public class IncidentTicket {
 
     private String rejectionReason;
 
-    private String assignedTechnician;
+    private String assignedTechnicianId;
+    private String assignedTechnicianName;
 
     private String resolutionNotes;
 
