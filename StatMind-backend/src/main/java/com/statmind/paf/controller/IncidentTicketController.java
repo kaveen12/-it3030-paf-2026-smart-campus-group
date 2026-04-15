@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.statmind.paf.dto.AssignTechnicianRequest;
 import com.statmind.paf.dto.UpdateStatusRequest;
+import com.statmind.paf.dto.RejectTicketRequest;
+
 
 import java.util.List;
 
@@ -82,6 +84,22 @@ public ResponseEntity<?> updateTicketStatus(@PathVariable String id,
     }
     }
 
+    @PatchMapping("/{id}/reject")
+public ResponseEntity<?> rejectTicket(@PathVariable String id,
+                                      @Valid @RequestBody RejectTicketRequest request) {
+    try {
+        IncidentTicket ticket = service.rejectTicket(id, request);
+
+        if (ticket == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
+        }
+
+        return ResponseEntity.ok(ticket);
+    } catch (IllegalStateException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
+    }
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTicket(@PathVariable String id) {
         boolean deleted = service.deleteTicket(id);
