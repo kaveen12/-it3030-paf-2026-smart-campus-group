@@ -3,6 +3,8 @@ package com.statmind.paf.service;
 import com.statmind.paf.model.IncidentTicket;
 import com.statmind.paf.repository.IncidentTicketRepository;
 import org.springframework.stereotype.Service;
+import com.statmind.paf.dto.AssignTechnicianRequest;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,6 +50,24 @@ public class IncidentTicketService {
         return repository.save(existing);
     }
 
+    public IncidentTicket assignTechnician(String id, AssignTechnicianRequest request) {
+    IncidentTicket existing = repository.findById(id).orElse(null);
+
+    if (existing == null) {
+        return null;
+    }
+
+    existing.setAssignedTechnicianId(request.getAssignedTechnicianId());
+    existing.setAssignedTechnicianName(request.getAssignedTechnicianName());
+
+    if ("OPEN".equals(existing.getStatus())) {
+        existing.setStatus("IN_PROGRESS");
+    }
+
+    existing.setUpdatedAt(LocalDateTime.now());
+
+    return repository.save(existing);
+}
     public boolean deleteTicket(String id) {
         IncidentTicket existing = repository.findById(id).orElse(null);
 
