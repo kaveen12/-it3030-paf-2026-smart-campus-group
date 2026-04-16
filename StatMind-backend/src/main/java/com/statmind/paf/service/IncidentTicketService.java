@@ -130,6 +130,23 @@ public class IncidentTicketService {
     return repository.save(existing);
     }
 
+    public IncidentTicket closeTicket(String id) {
+    IncidentTicket existing = repository.findById(id).orElse(null);
+
+    if (existing == null) {
+        return null;
+    }
+
+    if (!"RESOLVED".equals(existing.getStatus())) {
+        throw new IllegalStateException("Only resolved tickets can be closed");
+    }
+
+    existing.setStatus("CLOSED");
+    existing.setUpdatedAt(LocalDateTime.now());
+
+    return repository.save(existing);
+    }
+
     public boolean deleteTicket(String id) {
         IncidentTicket existing = repository.findById(id).orElse(null);
 
