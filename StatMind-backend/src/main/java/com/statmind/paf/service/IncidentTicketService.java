@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import com.statmind.paf.dto.AssignTechnicianRequest;
 import com.statmind.paf.dto.UpdateStatusRequest;
 import com.statmind.paf.dto.RejectTicketRequest;
+import com.statmind.paf.dto.ResolveTicketRequest;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -105,6 +107,24 @@ public class IncidentTicketService {
 
     existing.setStatus("REJECTED");
     existing.setRejectionReason(request.getRejectionReason());
+    existing.setUpdatedAt(LocalDateTime.now());
+
+    return repository.save(existing);
+    }
+
+    public IncidentTicket resolveTicket(String id, ResolveTicketRequest request) {
+    IncidentTicket existing = repository.findById(id).orElse(null);
+
+    if (existing == null) {
+        return null;
+    }
+
+    if ("CLOSED".equals(existing.getStatus())) {
+        throw new IllegalStateException("Cannot resolve a closed ticket");
+    }
+
+    existing.setResolutionNotes(request.getResolutionNotes());
+    existing.setStatus("RESOLVED");
     existing.setUpdatedAt(LocalDateTime.now());
 
     return repository.save(existing);
