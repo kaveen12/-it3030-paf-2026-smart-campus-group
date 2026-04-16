@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import com.statmind.paf.dto.AssignTechnicianRequest;
 import com.statmind.paf.dto.UpdateStatusRequest;
 import com.statmind.paf.dto.RejectTicketRequest;
-
+import com.statmind.paf.dto.ResolveTicketRequest;
 
 import java.util.List;
 
@@ -89,6 +89,21 @@ public ResponseEntity<?> rejectTicket(@PathVariable String id,
                                       @Valid @RequestBody RejectTicketRequest request) {
     try {
         IncidentTicket ticket = service.rejectTicket(id, request);
+
+        if (ticket == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
+        }
+
+        return ResponseEntity.ok(ticket);
+    } catch (IllegalStateException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
+    }
+    @PatchMapping("/{id}/resolve")
+    public ResponseEntity<?> resolveTicket(@PathVariable String id,
+                                       @Valid @RequestBody ResolveTicketRequest request) {
+    try {
+        IncidentTicket ticket = service.resolveTicket(id, request);
 
         if (ticket == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
