@@ -114,7 +114,23 @@ public ResponseEntity<?> rejectTicket(@PathVariable String id,
         return ResponseEntity.badRequest().body(e.getMessage());
     }
     }
-    
+
+    @PatchMapping("/{id}/close")
+public ResponseEntity<?> closeTicket(@PathVariable String id) {
+    try {
+        IncidentTicket ticket = service.closeTicket(id);
+
+        if (ticket == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
+        }
+
+        return ResponseEntity.ok(ticket);
+    } catch (IllegalStateException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
+    }
+
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTicket(@PathVariable String id) {
         boolean deleted = service.deleteTicket(id);
