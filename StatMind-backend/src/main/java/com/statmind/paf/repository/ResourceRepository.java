@@ -1,17 +1,17 @@
+// ============================================
+// REPOSITORY : ResourceRepository.java
+// package com.statmind.paf.repository
+// ============================================
 package com.statmind.paf.repository;
 
 import com.statmind.paf.model.Resource;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import java.util.List;
+import java.util.Optional;
 
 public interface ResourceRepository extends MongoRepository<Resource, String> {
 
-    List<Resource> findByType(String type);
+    long countByType(String type);
 
-    List<Resource> findByCapacityGreaterThanEqual(int capacity);
-
-    List<Resource> findByLocationContainingIgnoreCase(String location);
-
-    List<Resource> findByTypeAndCapacityGreaterThanEqual(String type, int capacity);
+    Optional<Resource> findByResourceCode(String resourceCode);
 }
