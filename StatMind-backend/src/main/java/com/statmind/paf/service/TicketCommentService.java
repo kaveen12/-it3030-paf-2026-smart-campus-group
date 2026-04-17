@@ -1,6 +1,8 @@
 package com.statmind.paf.service;
 
 import com.statmind.paf.dto.CreateCommentRequest;
+import com.statmind.paf.dto.UpdateCommentRequest;
+import com.statmind.paf.dto.DeleteCommentRequest;
 import com.statmind.paf.model.IncidentTicket;
 import com.statmind.paf.model.TicketComment;
 import com.statmind.paf.repository.IncidentTicketRepository;
@@ -42,5 +44,37 @@ public class TicketCommentService {
 
     public List<TicketComment> getCommentsByTicketId(String ticketId) {
         return commentRepository.findByTicketId(ticketId);
+    }
+
+    public TicketComment updateComment(String commentId, UpdateCommentRequest request) {
+        TicketComment existing = commentRepository.findById(commentId).orElse(null);
+
+        if (existing == null) {
+            return null;
+        }
+
+        if (!existing.getAuthorName().equals(request.getAuthorName())) {
+            throw new IllegalStateException("Only the comment owner can edit this comment");
+        }
+
+        existing.setMessage(request.getMessage());
+        existing.setUpdatedAt(LocalDateTime.now());
+
+        return commentRepository.save(existing);
+    }
+
+    public boolean deleteComment(String commentId, DeleteCommentRequest request) {
+        TicketComment existing = commentRepository.findById(commentId).orElse(null);
+
+        if (existing == null) {
+            return false;
+        }
+
+        if (!existing.getAuthorName().equals(request.getAuthorName())) {
+            throw new IllegalStateException("Only the comment owner can delete this comment");
+        }
+
+        commentRepository.deleteById(commentId);
+        return true;
     }
 }
