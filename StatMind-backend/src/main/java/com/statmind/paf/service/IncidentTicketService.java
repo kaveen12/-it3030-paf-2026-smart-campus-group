@@ -7,7 +7,7 @@ import com.statmind.paf.dto.AssignTechnicianRequest;
 import com.statmind.paf.dto.UpdateStatusRequest;
 import com.statmind.paf.dto.RejectTicketRequest;
 import com.statmind.paf.dto.ResolveTicketRequest;
-
+import com.statmind.paf.dto.AddAttachmentsRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -142,6 +142,32 @@ public class IncidentTicketService {
     }
 
     existing.setStatus("CLOSED");
+    existing.setUpdatedAt(LocalDateTime.now());
+
+    return repository.save(existing);
+    }
+
+    public IncidentTicket addAttachments(String id, AddAttachmentsRequest request) {
+    IncidentTicket existing = repository.findById(id).orElse(null);
+
+    if (existing == null) {
+        return null;
+    }
+
+    List<String> currentAttachments = existing.getAttachmentUrls();
+
+    if (currentAttachments == null) {
+        currentAttachments = new java.util.ArrayList<>();
+    }
+
+    int newTotal = currentAttachments.size() + request.getAttachmentUrls().size();
+
+    if (newTotal > 3) {
+        throw new IllegalStateException("A ticket can have a maximum of 3 attachments");
+    }
+
+    currentAttachments.addAll(request.getAttachmentUrls());
+    existing.setAttachmentUrls(currentAttachments);
     existing.setUpdatedAt(LocalDateTime.now());
 
     return repository.save(existing);
