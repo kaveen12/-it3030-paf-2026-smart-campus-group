@@ -35,6 +35,7 @@ public class ResourceController {
         return service.getResourceById(id);
     }
 
+    // TEST
     @GetMapping("/test")
     public String test() {
         return "Working!";

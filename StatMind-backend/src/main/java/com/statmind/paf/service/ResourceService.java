@@ -32,6 +32,7 @@ public class ResourceService {
 
     // UPDATE
     public Resource updateResource(String id, Resource updated) {
+
         Resource existing = getResourceById(id);
         if (existing == null) return null;
 
@@ -40,7 +41,9 @@ public class ResourceService {
         existing.setCapacity(updated.getCapacity());
         existing.setLocation(updated.getLocation());
         existing.setStatus(updated.getStatus());
-        existing.setAvailabilityWindows(updated.getAvailabilityWindows());
+        existing.setDescription(updated.getDescription());
+        existing.setAvailabilityStart(updated.getAvailabilityStart());
+        existing.setAvailabilityEnd(updated.getAvailabilityEnd());
 
         return repository.save(existing);
     }
@@ -50,18 +53,19 @@ public class ResourceService {
         repository.deleteById(id);
     }
 
-    // SEARCH / FILTER
+    // SEARCH + FILTER
     public List<Resource> search(String type, Integer capacity, String location) {
 
-        if (type != null && capacity != null && location != null) {
-            return repository.findByTypeAndCapacityGreaterThanEqualAndLocationContainingIgnoreCase(
-                    type, capacity, location);
+        if (type != null && capacity != null) {
+            return repository.findByTypeAndCapacityGreaterThanEqual(type, capacity);
+        } else if (type != null) {
+            return repository.findByType(type);
+        } else if (capacity != null) {
+            return repository.findByCapacityGreaterThanEqual(capacity);
+        } else if (location != null) {
+            return repository.findByLocationContainingIgnoreCase(location);
+        } else {
+            return repository.findAll();
         }
-
-        if (type != null) return repository.findByType(type);
-        if (capacity != null) return repository.findByCapacityGreaterThanEqual(capacity);
-        if (location != null) return repository.findByLocationContainingIgnoreCase(location);
-
-        return repository.findAll();
     }
 }

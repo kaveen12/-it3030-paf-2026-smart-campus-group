@@ -13,7 +13,5 @@ public interface ResourceRepository extends MongoRepository<Resource, String> {
 
     List<Resource> findByLocationContainingIgnoreCase(String location);
 
-    List<Resource> findByTypeAndCapacityGreaterThanEqualAndLocationContainingIgnoreCase(
-            String type, int capacity, String location
-    );
+    List<Resource> findByTypeAndCapacityGreaterThanEqual(String type, int capacity);
 }
