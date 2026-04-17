@@ -10,6 +10,7 @@ import com.statmind.paf.dto.AssignTechnicianRequest;
 import com.statmind.paf.dto.UpdateStatusRequest;
 import com.statmind.paf.dto.RejectTicketRequest;
 import com.statmind.paf.dto.ResolveTicketRequest;
+import com.statmind.paf.dto.AddAttachmentsRequest;
 
 import java.util.List;
 
@@ -130,7 +131,22 @@ public ResponseEntity<?> closeTicket(@PathVariable String id) {
     }
     }
 
+    @PatchMapping("/{id}/attachments")
+    public ResponseEntity<?> addAttachments(@PathVariable String id,
+                                        @Valid @RequestBody AddAttachmentsRequest request) {
+    try {
+        IncidentTicket ticket = service.addAttachments(id, request);
 
+        if (ticket == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
+        }
+
+        return ResponseEntity.ok(ticket);
+    } catch (IllegalStateException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
+    }
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTicket(@PathVariable String id) {
         boolean deleted = service.deleteTicket(id);
