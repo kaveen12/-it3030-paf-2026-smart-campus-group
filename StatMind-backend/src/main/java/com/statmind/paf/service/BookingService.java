@@ -77,4 +77,8 @@ public class BookingService {
     public List<Booking> getAllBookings() {
         return bookingRepository.findAll();
     }
+
+    public List<Booking> getBookingsByUserId(String userId) {
+    return bookingRepository.findByUserId(userId);
+    }
 }
