@@ -3,8 +3,11 @@ package com.statmind.paf.controller;
 import com.statmind.paf.model.Resource;
 import com.statmind.paf.service.ResourceService;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +28,7 @@ public class ResourceController {
         return service.saveResource(resource);
     }
 
+     
     // =========================
     // GET ALL
     // =========================
@@ -32,6 +36,8 @@ public class ResourceController {
     public List<Resource> getAllResources() {
         return service.getAllResources();
     }
+
+    
 
     // =========================
     // GET BY ID

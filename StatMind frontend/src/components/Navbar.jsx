@@ -25,8 +25,15 @@ function Navbar() {
               View Resources
             </Link>
           </li>
+
+          <li>
+            <Link to="/bulk" className="block hover:bg-blue-800 p-2 rounded">
+              Bulk Resources
+            </Link>
+          </li>
         </ul>
       </div>
+
 
       {/* Top Navbar */}
       <div className="fixed top-0 left-64 right-0 h-16 bg-white shadow flex items-center justify-between px-6 z-40">

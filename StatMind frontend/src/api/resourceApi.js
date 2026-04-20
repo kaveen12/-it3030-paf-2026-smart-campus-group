@@ -44,3 +44,23 @@ export const deleteResource = async (id) => {
   const res = await axios.delete(`${API_BASE_URL}/${id}`);
   return res.data;
 };
+
+// BULK INSERT
+export const bulkInsert = async (data) => {
+  return axios.post(`${API_BASE_URL}/bulk`, data);
+};
+
+// EXCEL UPLOAD
+export const uploadExcel = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return axios.post(`${API_BASE_URL}/upload-excel`, formData, {
+    headers: { "Content-Type": "multipart/form-data" }
+  });
+};
+
+// EXCEL DOWNLOAD
+export const downloadExcel = () => {
+  window.open(`${API_BASE_URL}/download-excel`);
+};
