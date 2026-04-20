@@ -14,6 +14,13 @@ public class IncidentTicket {
     @Id
     private String id;
 
+    // Resource integration fields
+    private String resourceId;
+    private String resourceCode;
+    private String resourceName;
+    private String location;
+
+    // Temporary backward-compatible field
     @NotBlank(message = "Resource or location is required")
     private String resourceOrLocation;
 
@@ -46,11 +53,17 @@ public class IncidentTicket {
     public IncidentTicket() {
     }
 
-    public IncidentTicket(String id, String resourceOrLocation, String category, String description,
-                          String priority, String preferredContact, String status, String rejectionReason,
-                          String assignedTechnicianId, String assignedTechnicianName, String resolutionNotes,
-                          List<String> attachmentUrls, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public IncidentTicket(String id, String resourceId, String resourceCode, String resourceName, String location,
+                          String resourceOrLocation, String category, String description, String priority,
+                          String preferredContact, String status, String rejectionReason,
+                          String assignedTechnicianId, String assignedTechnicianName,
+                          String resolutionNotes, List<String> attachmentUrls,
+                          LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
+        this.resourceId = resourceId;
+        this.resourceCode = resourceCode;
+        this.resourceName = resourceName;
+        this.location = location;
         this.resourceOrLocation = resourceOrLocation;
         this.category = category;
         this.description = description;
@@ -68,6 +81,38 @@ public class IncidentTicket {
 
     public String getId() {
         return id;
+    }
+
+    public String getResourceId() {
+        return resourceId;
+    }
+
+    public void setResourceId(String resourceId) {
+        this.resourceId = resourceId;
+    }
+
+    public String getResourceCode() {
+        return resourceCode;
+    }
+
+    public void setResourceCode(String resourceCode) {
+        this.resourceCode = resourceCode;
+    }
+
+    public String getResourceName() {
+        return resourceName;
+    }
+
+    public void setResourceName(String resourceName) {
+        this.resourceName = resourceName;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     public String getResourceOrLocation() {
