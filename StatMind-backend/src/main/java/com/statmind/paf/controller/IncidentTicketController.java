@@ -26,9 +26,14 @@ public class IncidentTicketController {
     }
 
     @PostMapping
-    public ResponseEntity<IncidentTicket> createTicket(@Valid @RequestBody IncidentTicket ticket) {
-        return new ResponseEntity<>(service.createTicket(ticket), HttpStatus.CREATED);
+public ResponseEntity<?> createTicket(@Valid @RequestBody IncidentTicket ticket) {
+    try {
+        IncidentTicket createdTicket = service.createTicket(ticket);
+        return new ResponseEntity<>(createdTicket, HttpStatus.CREATED);
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
+}
 
     @GetMapping
     public ResponseEntity<List<IncidentTicket>> getAllTickets() {
