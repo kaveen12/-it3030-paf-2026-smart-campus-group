@@ -47,16 +47,19 @@ public class ResourceService {
     }
 
     // =========================
-    // SEARCH & FILTER ✅ FIXED
+    // SEARCH & FILTER (FIXED)
     // =========================
     public List<Resource> searchResources(String type, Integer capacity, String location) {
 
         List<Resource> resources = repository.findAll();
 
         return resources.stream()
-                .filter(r -> type == null || r.getType().equalsIgnoreCase(type))
-                .filter(r -> capacity == null || r.getCapacity() >= capacity)
-                .filter(r -> location == null || r.getLocation().equalsIgnoreCase(location))
+                .filter(r -> type == null ||
+                        r.getType().equalsIgnoreCase(type))
+                .filter(r -> capacity == null ||
+                        r.getCapacity() >= capacity)
+                .filter(r -> location == null ||
+                        r.getLocation().equalsIgnoreCase(location))
                 .toList();
     }
 
@@ -94,13 +97,19 @@ public class ResourceService {
     }
 
     // =========================
-    // AUTO GENERATE CODE
+    // AUTO GENERATE CODE (FIXED)
     // =========================
     private String generateResourceCode(String type) {
 
+        if (type == null) {
+            return "RES-001";
+        }
+
+        String normalizedType = type.toUpperCase().trim();
+
         String prefix;
 
-        switch (type.toUpperCase()) {
+        switch (normalizedType) {
 
             case "LECTURE_HALL":
                 prefix = "LH";
@@ -124,7 +133,10 @@ public class ResourceService {
                 prefix = "RES";
         }
 
-        long count = repository.countByType(type) + 1;
+        long count = repository.findAll().stream()
+                .filter(r -> r.getType() != null &&
+                        r.getType().equalsIgnoreCase(type))
+                .count() + 1;
 
         return prefix + "-" + String.format("%03d", count);
     }

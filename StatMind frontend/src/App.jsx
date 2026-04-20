@@ -17,6 +17,7 @@ function App() {
             <Route path="/add" element={<AddResource />} />
             <Route path="/view" element={<ViewResources />} />
             <Route path="/edit/:id" element={<EditResource />} />
+
           </Routes>
         </div>
       </div>

@@ -11,7 +11,7 @@ function AddResource() {
   // Form data - NO resourceCode field
   const [formData, setFormData] = useState({
     name: "",
-    type: "LECTURE_HALL",
+    type: "",
     capacity: "",
     location: "",
     startDate: "",
@@ -100,10 +100,12 @@ function AddResource() {
               onChange={handleChange}
               className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="LECTURE_HALL">Lecture Hall</option>
-              <option value="LAB">Lab</option>
-              <option value="AUDITORIUM">Auditorium</option>
-              <option value="CLASSROOM">Classroom</option>
+              <option value="LECTURE_HALL">LECTURE_HALL</option>
+              <option value="LAB">LAB</option>
+              <option value="AUDITORIUM">MEETING_ROOM</option>
+              <option value="CLASSROOM">PROJECTOR</option>
+                <option value="CLASSROOM">CAMERA</option>
+                 <option value="EQUIPMENT">PROJECTOR</option>
             </select>
           </div>
           
