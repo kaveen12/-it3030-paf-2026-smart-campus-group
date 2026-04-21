@@ -1,19 +1,17 @@
 import { useState } from 'react';
 
-function ResourceForm({ initialData, onSubmit, onCancel, isEditing }) {
-  const [formData, setFormData] = useState({
-    resourceCode: initialData?.resourceCode || '',
-    name: initialData?.name || '',
-    type: initialData?.type || 'LECTURE_HALL',
-    capacity: initialData?.capacity || '',
-    location: initialData?.location || '',
-    startDate: initialData?.startDate || '',
-    startTime: initialData?.startTime || '',
-    endDate: initialData?.endDate || '',
-    endTime: initialData?.endTime || '',
-    status: initialData?.status || 'ACTIVE',
-    description: initialData?.description || '',
-  });
+const [formData, setFormData] = useState({
+  name: initialData?.name || '',
+  type: initialData?.type || 'LECTURE_HALL',
+  capacity: initialData?.capacity || '',
+  location: initialData?.location || '',
+  startDate: initialData?.startDate || '',
+  startTime: initialData?.startTime || '',
+  endDate: initialData?.endDate || '',
+  endTime: initialData?.endTime || '',
+  status: initialData?.status || 'ACTIVE',
+  description: initialData?.description || '',
+});
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -63,10 +61,12 @@ function ResourceForm({ initialData, onSubmit, onCancel, isEditing }) {
             onChange={handleChange}
             className="mt-1 block w-full border border-gray-300 rounded-md p-2"
           >
-            <option value="LECTURE_HALL">Lecture Hall</option>
-            <option value="LAB">Lab</option>
-            <option value="AUDITORIUM">Auditorium</option>
-            <option value="CLASSROOM">Classroom</option>
+             <option value="LECTURE_HALL">Lecture Hall</option>
+                <option value="LAB">Lab</option>
+                <option value="MEETING_ROOM">Meeting Room</option>
+               <option value="PROJECTOR">Projector</option>
+             <option value="CAMERA">Camera</option>
+              <option value="EQUIPMENT">Equipment</option>
           </select>
         </div>
 
@@ -135,6 +135,6 @@ function ResourceForm({ initialData, onSubmit, onCancel, isEditing }) {
       </div>
     </form>
   );
-}
+
 
 export default ResourceForm;

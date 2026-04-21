@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface ResourceRepository extends MongoRepository<Resource, String> {
 
-    long countByType(String type);
+    Optional<Resource> findTopByTypeIgnoreCaseOrderByResourceCodeDesc(String type);
 
     Optional<Resource> findByResourceCode(String resourceCode);
 }

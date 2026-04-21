@@ -3,9 +3,8 @@ package com.statmind.paf.controller;
 import com.statmind.paf.model.Resource;
 import com.statmind.paf.service.ResourceService;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,7 +27,21 @@ public class ResourceController {
         return service.saveResource(resource);
     }
 
-     
+    // =========================
+    // UPLOAD CSV
+    // =========================
+   @PostMapping(value = "/upload", consumes = "multipart/form-data")
+public ResponseEntity<String> uploadCSV(@RequestParam("file") MultipartFile file) {
+
+    if (file.isEmpty()) {
+        return ResponseEntity.badRequest().body("File is empty ❌");
+    }
+
+    service.saveBulkResources(file);
+
+    return ResponseEntity.ok("CSV uploaded successfully ✅");
+}
+
     // =========================
     // GET ALL
     // =========================
@@ -36,8 +49,6 @@ public class ResourceController {
     public List<Resource> getAllResources() {
         return service.getAllResources();
     }
-
-    
 
     // =========================
     // GET BY ID

@@ -2,9 +2,14 @@ package com.statmind.paf.service;
 
 import com.statmind.paf.model.Resource;
 import com.statmind.paf.repository.ResourceRepository;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,6 +23,8 @@ public class ResourceService {
     // ADD RESOURCE
     // =========================
     public Resource saveResource(Resource resource) {
+
+        resource.setType(normalizeType(resource.getType()));
 
         String code = generateResourceCode(resource.getType());
         resource.setResourceCode(code);
@@ -47,7 +54,7 @@ public class ResourceService {
     }
 
     // =========================
-    // SEARCH & FILTER ✅ FIXED
+    // SEARCH
     // =========================
     public List<Resource> searchResources(String type, Integer capacity, String location) {
 
@@ -61,6 +68,48 @@ public class ResourceService {
     }
 
     // =========================
+    // BULK UPLOAD
+    // =========================
+    public void saveBulkResources(MultipartFile file) {
+
+        try (Reader reader = new InputStreamReader(file.getInputStream())) {
+
+            Iterable<CSVRecord> records = CSVFormat.DEFAULT
+                    .withFirstRecordAsHeader()
+                    .parse(reader);
+
+            for (CSVRecord record : records) {
+
+                Resource resource = new Resource();
+
+                resource.setName(record.get("name"));
+
+                String type = normalizeType(record.get("type"));
+                resource.setType(type);
+
+                resource.setCapacity(Integer.parseInt(record.get("capacity")));
+                resource.setLocation(record.get("location").trim());
+
+                resource.setStartDate(record.get("startDate"));
+                resource.setStartTime(record.get("startTime"));
+                resource.setEndDate(record.get("endDate"));
+                resource.setEndTime(record.get("endTime"));
+
+                resource.setStatus(record.get("status"));
+                resource.setDescription(record.get("description"));
+
+                String code = generateResourceCode(type);
+                resource.setResourceCode(code);
+
+                repository.save(resource);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("CSV Failed: " + e.getMessage());
+        }
+    }
+
+    // =========================
     // UPDATE
     // =========================
     public Resource updateResource(String id, Resource newData) {
@@ -69,13 +118,14 @@ public class ResourceService {
                 .orElseThrow(() -> new RuntimeException("Resource Not Found"));
 
         resource.setName(newData.getName());
-        resource.setType(newData.getType());
+
+        resource.setType(normalizeType(newData.getType()));
+
         resource.setCapacity(newData.getCapacity());
         resource.setLocation(newData.getLocation());
 
         resource.setStartDate(newData.getStartDate());
         resource.setStartTime(newData.getStartTime());
-
         resource.setEndDate(newData.getEndDate());
         resource.setEndTime(newData.getEndTime());
 
@@ -94,38 +144,61 @@ public class ResourceService {
     }
 
     // =========================
-    // AUTO GENERATE CODE
-    // =========================
-    private String generateResourceCode(String type) {
+    // AUTO CODE GENERATOR
+   private String generateResourceCode(String type) {
 
-        String prefix;
+    type = normalizeType(type);
 
-        switch (type.toUpperCase()) {
+    String prefix = getPrefix(type);
 
-            case "LECTURE_HALL":
-                prefix = "LH";
-                break;
+    Optional<Resource> lastResource =
+            repository.findTopByTypeIgnoreCaseOrderByResourceCodeDesc(type);
 
-            case "LAB":
-                prefix = "LAB";
-                break;
+    int nextNumber = 1;
 
-            case "MEETING_ROOM":
-                prefix = "MR";
-                break;
+    if (lastResource.isPresent()) {
 
-            case "PROJECTOR":
-            case "CAMERA":
-            case "EQUIPMENT":
-                prefix = "EQ";
-                break;
+        String lastCode = lastResource.get().getResourceCode();
 
-            default:
-                prefix = "RES";
+        if (lastCode != null && lastCode.contains("-")) {
+            try {
+                String numberPart = lastCode.split("-")[1];
+                nextNumber = Integer.parseInt(numberPart) + 1;
+            } catch (Exception e) {
+                nextNumber = 1;
+            }
         }
+    }
 
-        long count = repository.countByType(type) + 1;
+    return prefix + "-" + nextNumber;
+}
+    // =========================
+    // NORMALIZE TYPE
+    // =========================
+    private String normalizeType(String type) {
+        if (type == null) return "RES";
 
-        return prefix + "-" + String.format("%03d", count);
+        type = type.toUpperCase().replace(" ", "_").trim();
+
+        return switch (type) {
+            case "LECTURE_HALL" -> "LECTURE_HALL";
+            case "LAB" -> "LAB";
+            case "MEETING_ROOM" -> "MEETING_ROOM";
+            case "PROJECTOR", "CAMERA", "EQUIPMENT" -> "EQUIPMENT";
+            default -> "RES";
+        };
+    }
+
+    // =========================
+    // PREFIX MAPPING
+    // =========================
+    private String getPrefix(String type) {
+        return switch (type) {
+            case "LECTURE_HALL" -> "LH";
+            case "LAB" -> "LAB";
+            case "MEETING_ROOM" -> "MR";
+            case "PROJECTOR", "CAMERA", "EQUIPMENT" -> "EQ";
+            default -> "RES";
+        };
     }
 }

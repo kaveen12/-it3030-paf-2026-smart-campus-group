@@ -1,16 +1,19 @@
 // src/pages/AddResource.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createResource } from "../api/resourceApi";
+import { createResource, uploadCSV } from "../api/resourceApi";
 
 function AddResource() {
   const navigate = useNavigate();
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const [csvFile, setCsvFile] = useState(null);
+
   const [formData, setFormData] = useState({
     name: "",
-    type: "",
+    type: "LECTURE_HALL",
     capacity: "",
     location: "",
     startDate: "",
@@ -23,56 +26,135 @@ function AddResource() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // =========================
+  // CREATE SINGLE RESOURCE
+  // =========================
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    if (!formData.name) {
-      setError("Name is required");
+    try {
+      const submitData = {
+        ...formData,
+        capacity: parseInt(formData.capacity) || 0
+      };
+
+      const result = await createResource(submitData);
+
+      alert(`Resource created! Code: ${result.resourceCode}`);
+      navigate("/view");
+
+    } catch (err) {
+      setError("Failed to create resource");
+    } finally {
       setLoading(false);
+    }
+  };
+
+  // =========================
+  // CSV HANDLERS
+  // =========================
+  const handleFileChange = (e) => {
+    setCsvFile(e.target.files[0]);
+  };
+
+  const handleUploadCSV = async () => {
+    if (!csvFile) {
+      alert("Please select a CSV file");
       return;
     }
 
-    const submitData = {
-      ...formData,
-      capacity: parseInt(formData.capacity) || 0
-    };
-
     try {
-      const result = await createResource(submitData);
-      alert(`Resource created! Code: ${result.resourceCode}`);
+      setLoading(true);
+
+      await uploadCSV(csvFile);
+
+      alert("CSV uploaded successfully!");
       navigate("/view");
+
     } catch (err) {
-      setError("Failed to create resource.");
+      console.error(err);
+      alert("CSV upload failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    // 🔥 CENTER WRAPPER
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 ml-40">
-      
-      <div className="w-full max-w-3xl">
-        <h1 className="text-2xl font-bold mb-4 text-center">
-          Add New Resource
-        </h1>
+    <div className="flex justify-center bg-gray-100 min-h-screen p-6">
 
+      <div className="w-full max-w-5xl ml-28">
+
+        {/* TITLE */}
+        <h1 className="text-3xl font-bold text-center mb-2">
+          Create New Resource
+        </h1>
+        <p className="text-center text-gray-500 mb-6">
+          Add manually or upload CSV to create multiple resources
+        </p>
+
+        {/* =========================
+            CSV UPLOAD CARD
+        ========================== */}
+        <div className="bg-white p-6 rounded-xl shadow mb-6">
+
+          <div className="flex justify-between mb-4">
+            <div>
+              <h2 className="font-semibold text-lg">Bulk Import via CSV</h2>
+              <p className="text-sm text-gray-500">
+                Required: name, type, capacity, location, status
+              </p>
+            </div>
+
+            <a className="text-blue-600 underline text-sm">
+              Download Template
+            </a>
+          </div>
+
+          {/* FILE UPLOAD */}
+          <div className="border-2 border-dashed p-6 text-center rounded-lg">
+
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleFileChange}
+            />
+
+            {csvFile && (
+              <p className="mt-2 text-green-600 font-semibold">
+                {csvFile.name}
+              </p>
+            )}
+
+          </div>
+
+          <div className="mt-4 text-right">
+            <button
+              onClick={handleUploadCSV}
+              className="bg-blue-600 text-white px-5 py-2 rounded"
+            >
+              Upload CSV
+            </button>
+          </div>
+
+        </div>
+
+        {/* ERROR */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="bg-red-100 text-red-700 p-3 rounded mb-4">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow">
-          
+        {/* =========================
+            MANUAL FORM
+        ========================== */}
+        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow">
+
           <div className="grid grid-cols-2 gap-4">
 
             <div className="col-span-2">
@@ -93,17 +175,18 @@ function AddResource() {
             <div>
               <label className="block text-sm font-medium mb-1">Type</label>
               <select
-                name="type"
-                value={formData.type}
-                onChange={handleChange}
-                className="w-full border p-2 rounded"
-              >
-                <option value="LECTURE_HALL">Lecture Hall</option>
-                <option value="LAB">Lab</option>
-                <option value="MEETING_ROOM">Meeting Room</option>
-                <option value="CLASSROOM">Classroom</option>
-                <option value="EQUIPMENT">Equipment</option>
-              </select>
+  name="type"
+  value={formData.type}
+  onChange={handleChange}
+  className="w-full border p-2 rounded"
+>
+  <option value="LECTURE_HALL">Lecture Hall</option>
+  <option value="LAB">Lab</option>
+  <option value="MEETING_ROOM">Meeting Room</option>
+  <option value="PROJECTOR">Projector</option>
+  <option value="CAMERA">Camera</option>
+  <option value="EQUIPMENT">Equipment</option>
+</select>
             </div>
 
             <div>
@@ -217,7 +300,9 @@ function AddResource() {
             </button>
           </div>
 
+
         </form>
+
       </div>
     </div>
   );

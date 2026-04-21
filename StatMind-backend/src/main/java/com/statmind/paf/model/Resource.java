@@ -19,6 +19,7 @@ public class Resource {
     private int capacity;
     private String location;
 
+    
     private String startDate;
     private String startTime;
 

@@ -5,7 +5,8 @@ import Dashboard from "./pages/Dashboard";
 import AddResource from "./pages/AddResource";
 import ViewResources from "./pages/ViewResources";
 import EditResource from "./pages/EditResource";
-import BulkPage from "./pages/BulkPage";
+import BulkInsert from "./pages/BulkInsert";
+
 
 function App() {
   return (
@@ -18,7 +19,8 @@ function App() {
             <Route path="/add" element={<AddResource />} />
             <Route path="/view" element={<ViewResources />} />
             <Route path="/edit/:id" element={<EditResource />} />
-            <Route path="/bulk" element={<BulkPage />} />
+            <Route path="/bulk-insert" element={<BulkInsert />} />
+            
           </Routes>
         </div>
       </div>
