@@ -9,6 +9,7 @@ import com.statmind.paf.model.IncidentTicket;
 import com.statmind.paf.repository.IncidentTicketRepository;
 import com.statmind.paf.repository.ResourceRepository;
 import org.springframework.stereotype.Service;
+import com.statmind.paf.model.Resource;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,20 +27,25 @@ public class IncidentTicketService {
     }
 
     public IncidentTicket createTicket(IncidentTicket ticket) {
-        if (ticket.getResourceId() != null && !ticket.getResourceId().isBlank()) {
-            boolean resourceExists = resourceRepository.existsById(ticket.getResourceId());
+    if (ticket.getResourceId() != null && !ticket.getResourceId().isBlank()) {
 
-            if (!resourceExists) {
-                throw new IllegalArgumentException("Invalid resourceId: resource not found");
-            }
+        Resource resource = resourceRepository.findById(ticket.getResourceId()).orElse(null);
+
+        if (resource == null) {
+            throw new IllegalArgumentException("Invalid resourceId: resource not found");
         }
 
-        ticket.setStatus("OPEN");
-        ticket.setCreatedAt(LocalDateTime.now());
-        ticket.setUpdatedAt(LocalDateTime.now());
-
-        return repository.save(ticket);
+        ticket.setResourceName(resource.getName());
+        ticket.setResourceCode(resource.getResourceCode());
+        ticket.setLocation(resource.getLocation());
     }
+
+    ticket.setStatus("OPEN");
+    ticket.setCreatedAt(LocalDateTime.now());
+    ticket.setUpdatedAt(LocalDateTime.now());
+
+    return repository.save(ticket);
+}
 
     public List<IncidentTicket> getAllTickets() {
         return repository.findAll();
