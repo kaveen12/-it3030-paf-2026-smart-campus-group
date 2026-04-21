@@ -23,6 +23,12 @@ function Navbar() {
             View Resources
           </Link>
         </li>
+
+        <li>
+          <Link to="/my-bookings" className="block hover:bg-blue-800 p-2 rounded">
+            My Bookings
+          </Link>
+        </li>
       </ul>
     </div>
   );

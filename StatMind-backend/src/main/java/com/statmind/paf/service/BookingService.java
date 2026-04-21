@@ -4,7 +4,9 @@ import com.statmind.paf.model.Booking;
 import com.statmind.paf.repository.BookingRepository;
 import com.statmind.paf.util.SequenceGeneratorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -26,6 +28,7 @@ public class BookingService {
         booking.setStatus("PENDING");
 
         // 2️⃣ Conflict Check
+        // Conflict Check
         List<Booking> existingBookings =
                 bookingRepository.findByResourceCodeAndDate(
                         booking.getResourceCode(),
@@ -39,7 +42,11 @@ public class BookingService {
                     booking.getEndTime().isAfter(b.getStartTime());
 
             if (overlap && b.getStatus().equals("APPROVED")) {
-                throw new RuntimeException("Time slot already booked!");
+
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Time slot already booked!"
+                );
             }
         }
 

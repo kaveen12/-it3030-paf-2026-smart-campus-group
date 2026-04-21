@@ -3,7 +3,9 @@ import axios from "axios";
 import { createBooking } from "../api/bookingApi";
 
 function BookingForm() {
+
   const [resources, setResources] = useState([]);
+  const [error, setError] = useState("");
 
   const [form, setForm] = useState({
     resourceCode: "",
@@ -18,15 +20,25 @@ function BookingForm() {
     purpose: "",
     attendees: ""
   });
+//************************ */
+  useEffect(() => {
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  if (storedUser) {
+    setForm(prev => ({
+      ...prev,
+      userId: storedUser.userId,
+      userName: storedUser.userName
+    }));
+  }
+  }, []);
 
-  // 🔹 Load resources from backend
+  // Load resources
   useEffect(() => {
     axios.get("http://localhost:8081/api/resources")
       .then(res => setResources(res.data))
       .catch(err => console.error(err));
   }, []);
 
-  // 🔹 Handle normal input
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -34,8 +46,8 @@ function BookingForm() {
     });
   };
 
-  // 🔹 Handle resource selection + auto-fill
   const handleResourceChange = (e) => {
+
     const selectedCode = e.target.value;
 
     const selectedResource = resources.find(
@@ -51,12 +63,12 @@ function BookingForm() {
     });
   };
 
-  // 🔹 Fix time format (HH:mm → HH:mm:ss)
   const formatTime = (t) => (t && t.length === 5 ? t + ":00" : t);
 
-  // 🔹 Submit form
   const handleSubmit = async (e) => {
+
     e.preventDefault();
+    setError("");
 
     const payload = {
       resourceCode: form.resourceCode,
@@ -68,13 +80,12 @@ function BookingForm() {
       attendees: parseInt(form.attendees || 0)
     };
 
-    console.log("Sending:", payload);
-
     try {
+
       await createBooking(payload);
+
       alert("✅ Booking request submitted!");
 
-      // Reset form
       setForm({
         resourceCode: "",
         resourceName: "",
@@ -90,9 +101,14 @@ function BookingForm() {
       });
 
     } catch (err) {
-      console.error("ERROR:", err);
-      console.error("BACKEND RESPONSE:", err.response?.data);
-      alert(err.response?.data || "❌ Error creating booking");
+
+      let message = "Time slot already booked";
+
+      if (err.response?.data?.message) {
+        message = err.response.data.message;
+      }
+
+      setError(message);
     }
   };
 
@@ -100,13 +116,26 @@ function BookingForm() {
     <div>
       <h2>Create Booking</h2>
 
+      {error && (
+        <div
+          style={{
+            backgroundColor: "#ffe6e6",
+            color: "#b30000",
+            padding: "10px",
+            marginBottom: "10px",
+            borderRadius: "5px"
+          }}
+        >
+          ❌ {error}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit}>
 
-        {/* USER DETAILS */}
         <input
           type="text"
           name="userId"
-          placeholder="User ID (e.g., USER007)"
+          placeholder="User ID"
           value={form.userId}
           onChange={handleChange}
           required
@@ -121,21 +150,21 @@ function BookingForm() {
           required
         />
 
-        {/* RESOURCE DROPDOWN */}
         <select
           value={form.resourceCode}
           onChange={handleResourceChange}
           required
         >
           <option value="">Select Resource</option>
+
           {resources.map(r => (
             <option key={r.id} value={r.resourceCode}>
               {r.name} ({r.resourceCode})
             </option>
           ))}
+
         </select>
 
-        {/* AUTO-FILLED RESOURCE DETAILS */}
         <input
           type="text"
           value={form.resourceName}
@@ -157,7 +186,6 @@ function BookingForm() {
           readOnly
         />
 
-        {/* DATE */}
         <input
           type="date"
           name="date"
@@ -166,7 +194,6 @@ function BookingForm() {
           required
         />
 
-        {/* TIME */}
         <input
           type="time"
           name="startTime"
@@ -183,7 +210,6 @@ function BookingForm() {
           required
         />
 
-        {/* OTHER DETAILS */}
         <input
           type="text"
           name="purpose"
@@ -201,6 +227,7 @@ function BookingForm() {
         />
 
         <button type="submit">Book</button>
+
       </form>
     </div>
   );
