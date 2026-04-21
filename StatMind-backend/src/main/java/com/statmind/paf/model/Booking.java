@@ -17,7 +17,9 @@ public class Booking {
     private String id;
 
     private String bookingId;   // Booking-001
-    private String resourceCode; // from Module A
+    private String resourceCode; // from Module A 
+
+    private String userName; 
 
     private LocalDate date;
     private LocalTime startTime;
