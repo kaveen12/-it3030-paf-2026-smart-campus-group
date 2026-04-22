@@ -1,10 +1,7 @@
-// ============================================
-// MODEL : Resource.java
-// package com.statmind.paf.model
-// ============================================
 package com.statmind.paf.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "resources")
@@ -13,13 +10,14 @@ public class Resource {
     @Id
     private String id;
 
+    @Indexed(unique = true)   // 🔥 Duplicate codes prevent
     private String resourceCode;
+
     private String name;
     private String type;
     private int capacity;
     private String location;
 
-    
     private String startDate;
     private String startTime;
 

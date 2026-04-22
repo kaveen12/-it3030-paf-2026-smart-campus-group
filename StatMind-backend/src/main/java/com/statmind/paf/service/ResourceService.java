@@ -10,7 +10,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import java.util.Optional;
 
 @Service
@@ -24,9 +27,10 @@ public class ResourceService {
     // =========================
     public Resource saveResource(Resource resource) {
 
-        resource.setType(normalizeType(resource.getType()));
+        String type = normalizeType(resource.getType());
+        resource.setType(type);
 
-        String code = generateResourceCode(resource.getType());
+        String code = generateResourceCode(type);
         resource.setResourceCode(code);
 
         return repository.save(resource);
@@ -118,9 +122,7 @@ public class ResourceService {
                 .orElseThrow(() -> new RuntimeException("Resource Not Found"));
 
         resource.setName(newData.getName());
-
         resource.setType(normalizeType(newData.getType()));
-
         resource.setCapacity(newData.getCapacity());
         resource.setLocation(newData.getLocation());
 
@@ -144,35 +146,43 @@ public class ResourceService {
     }
 
     // =========================
-    // AUTO CODE GENERATOR
-   private String generateResourceCode(String type) {
+    // AUTO CODE GENERATOR (FIXED & SAFE)
+    // =========================
+   private final Map<String, Integer> sequenceMap = new HashMap<>();
 
-    type = normalizeType(type);
+private synchronized String generateResourceCode(String type) {
 
     String prefix = getPrefix(type);
 
-    Optional<Resource> lastResource =
-            repository.findTopByTypeIgnoreCaseOrderByResourceCodeDesc(type);
+    // initialize only once from DB
+    if (!sequenceMap.containsKey(prefix)) {
 
-    int nextNumber = 1;
+        List<Resource> resources = repository.findAll();
 
-    if (lastResource.isPresent()) {
+        int max = 0;
 
-        String lastCode = lastResource.get().getResourceCode();
+        for (Resource r : resources) {
 
-        if (lastCode != null && lastCode.contains("-")) {
-            try {
-                String numberPart = lastCode.split("-")[1];
-                nextNumber = Integer.parseInt(numberPart) + 1;
-            } catch (Exception e) {
-                nextNumber = 1;
+            String code = r.getResourceCode();
+
+            if (code != null && code.startsWith(prefix + "-")) {
+
+                try {
+                    int num = Integer.parseInt(code.substring(prefix.length() + 1));
+                    if (num > max) max = num;
+                } catch (Exception ignored) {}
             }
         }
+
+        sequenceMap.put(prefix, max);
     }
 
-    return prefix + "-" + nextNumber;
+    // 🔥 ALWAYS increment (NO reuse)
+    int next = sequenceMap.get(prefix) + 1;
+    sequenceMap.put(prefix, next);
+
+    return prefix + "-" + String.format("%03d", next);
 }
-    // =========================
     // NORMALIZE TYPE
     // =========================
     private String normalizeType(String type) {
@@ -193,12 +203,14 @@ public class ResourceService {
     // PREFIX MAPPING
     // =========================
     private String getPrefix(String type) {
-        return switch (type) {
-            case "LECTURE_HALL" -> "LH";
-            case "LAB" -> "LAB";
-            case "MEETING_ROOM" -> "MR";
-            case "PROJECTOR", "CAMERA", "EQUIPMENT" -> "EQ";
-            default -> "RES";
-        };
-    }
+    if (type == null) return "RES";
+
+    return switch (type.toUpperCase()) {
+        case "LECTURE_HALL" -> "LH";
+        case "LAB" -> "LAB";
+        case "MEETING_ROOM" -> "MR";
+        case "PROJECTOR", "CAMERA", "EQUIPMENT" -> "EQ";
+        default -> "RES";
+    };
+}
 }

@@ -49,7 +49,7 @@ export const uploadCSV = async (file) => {
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch("http://localhost:8081/api/resources/bulk-upload", {
+  const res = await fetch("http://localhost:8081/api/resources/upload", {
     method: "POST",
     body: formData
   });

@@ -35,7 +35,6 @@ function ViewResources() {
 
   // 🔍 SEARCH
   const handleSearch = async (filters) => {
-    console.log("Filters:", filters);
     setLoading(true);
     setError(null);
 
@@ -43,16 +42,11 @@ function ViewResources() {
       const data = await searchResources(filters);
       setResources(data);
     } catch (err) {
-      console.error("ERROR:", err.response || err);
+      console.error(err);
       setError("Search failed");
     } finally {
       setLoading(false);
     }
-  };
-
-  // 🔄 RESET
-  const handleReset = () => {
-    loadResources();
   };
 
   // ❌ DELETE
@@ -67,15 +61,32 @@ function ViewResources() {
     }
   };
 
+  // 🖨️ PRINT REPORT
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
     <div style={{ padding: '24px', paddingTop: '0' }}>
+
+      {/* ❌ this button will NOT print */}
+      <div className="no-print">
+        <button
+          onClick={handlePrint}
+          className="bg-blue-600 text-white px-4 py-2 rounded mb-4"
+        >
+          Download Report
+        </button>
+      </div>
+
       <div style={{ backgroundColor: 'white', minHeight: '100vh', padding: '24px' }}>
 
         <h1 className="text-4xl font-bold text-center text-gray-800 mb-8">
-          View Resources
+          Resource Report
         </h1>
 
-        <div className="mb-6">
+        {/* ❌ hide in print */}
+        <div className="mb-6 no-print">
           <SearchBar onSearch={handleSearch} onReset={loadResources} />
         </div>
 
@@ -91,7 +102,9 @@ function ViewResources() {
           </p>
         )}
 
-        <div className="w-full overflow-x-auto">
+        {/* 📊 REPORT AREA */}
+        <div className="report-area w-full overflow-x-auto">
+
           <table className="w-full text-sm border-collapse">
             <thead className="bg-blue-600 text-white">
               <tr>
@@ -106,9 +119,10 @@ function ViewResources() {
                 <th className="p-3 border">End Time</th>
                 <th className="p-3 border">Status</th>
                 <th className="p-3 border">Description</th>
-                <th className="p-3 border">Actions</th>
+                <th className="p-3 border no-print">Actions</th>
               </tr>
             </thead>
+
             <tbody>
               {resources.length === 0 && !loading ? (
                 <tr>
@@ -128,6 +142,7 @@ function ViewResources() {
                     <td className="p-3 border">{r.startTime}</td>
                     <td className="p-3 border">{r.endDate}</td>
                     <td className="p-3 border">{r.endTime}</td>
+
                     <td className="p-3 border">
                       <span className={`px-2 py-1 rounded text-xs font-bold ${
                         r.status === "ACTIVE"
@@ -137,20 +152,24 @@ function ViewResources() {
                         {r.status}
                       </span>
                     </td>
+
                     <td className="p-3 border max-w-[180px] truncate">
                       {r.description}
                     </td>
-                    <td className="p-3 border whitespace-nowrap">
-                      <a href={`/edit/${r.id}`} className="text-blue-600 mr-3">Edit</a>
+
+                    {/* ❌ hidden in print */}
+                    <td className="p-3 border no-print whitespace-nowrap">
                       <button onClick={() => handleDelete(r.id)} className="text-red-600">
                         Delete
                       </button>
                     </td>
+
                   </tr>
                 ))
               )}
             </tbody>
           </table>
+
         </div>
       </div>
     </div>

@@ -181,4 +181,25 @@
     right: 0;
     border-right-color: var(--border);
   }
+
+  @media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .report-area, .report-area * {
+    visibility: visible;
+  }
+
+  .report-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
 }
