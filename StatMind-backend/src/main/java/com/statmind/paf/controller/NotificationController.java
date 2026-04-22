@@ -51,4 +51,23 @@ public class NotificationController {
     notificationRepository.deleteById(id);
         return "Notification deleted successfully";
     }
+
+    @PostMapping("/booking-status")
+    public Notification sendBookingStatusNotification(@RequestParam String userId,
+                                                  @RequestParam String status) {
+    String message = "Your booking has been " + status;
+        return notificationService.createNotification(userId, message, "BOOKING");
+    }
+
+    @PostMapping("/ticket-status")
+    public Notification sendTicketStatusNotification(@RequestParam String userId,
+                                                 @RequestParam String status) {
+    String message = "Your ticket status changed to " + status;
+        return notificationService.createNotification(userId, message, "TICKET");
+    }
+    @PostMapping("/comment")
+    public Notification sendCommentNotification(@RequestParam String userId) {
+    String message = "A new comment was added to your ticket";
+        return notificationService.createNotification(userId, message, "COMMENT");
+    }
 }
