@@ -56,21 +56,34 @@ public class IncidentTicketService {
     }
 
     public IncidentTicket updateTicket(String id, IncidentTicket updatedTicket) {
-        IncidentTicket existing = repository.findById(id).orElse(null);
+    IncidentTicket existing = repository.findById(id).orElse(null);
 
-        if (existing == null) {
-            return null;
+    if (existing == null) {
+        return null;
+    }
+
+    if (updatedTicket.getResourceId() != null && !updatedTicket.getResourceId().isBlank()) {
+        Resource resource = resourceRepository.findById(updatedTicket.getResourceId()).orElse(null);
+
+        if (resource == null) {
+            throw new IllegalArgumentException("Invalid resourceId: resource not found");
         }
 
-        existing.setResourceOrLocation(updatedTicket.getResourceOrLocation());
-        existing.setCategory(updatedTicket.getCategory());
-        existing.setDescription(updatedTicket.getDescription());
-        existing.setPriority(updatedTicket.getPriority());
-        existing.setPreferredContact(updatedTicket.getPreferredContact());
-        existing.setUpdatedAt(LocalDateTime.now());
-
-        return repository.save(existing);
+        existing.setResourceId(resource.getId());
+        existing.setResourceCode(resource.getResourceCode());
+        existing.setResourceName(resource.getName());
+        existing.setLocation(resource.getLocation());
     }
+
+    existing.setResourceOrLocation(updatedTicket.getResourceOrLocation());
+    existing.setCategory(updatedTicket.getCategory());
+    existing.setDescription(updatedTicket.getDescription());
+    existing.setPriority(updatedTicket.getPriority());
+    existing.setPreferredContact(updatedTicket.getPreferredContact());
+    existing.setUpdatedAt(LocalDateTime.now());
+
+    return repository.save(existing);
+}
 
     public IncidentTicket assignTechnician(String id, AssignTechnicianRequest request) {
         IncidentTicket existing = repository.findById(id).orElse(null);
