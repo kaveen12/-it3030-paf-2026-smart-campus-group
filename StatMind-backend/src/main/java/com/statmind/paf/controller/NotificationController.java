@@ -46,9 +46,13 @@ public class NotificationController {
     notification.setRead(true);
         return notificationRepository.save(notification);
     }
+    
     @DeleteMapping("/{id}")
     public String deleteNotification(@PathVariable String id) {
-    notificationRepository.deleteById(id);
+    Notification notification = notificationRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Notification not found"));
+
+    notificationRepository.delete(notification);
         return "Notification deleted successfully";
     }
 
