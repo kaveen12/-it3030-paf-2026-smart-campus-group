@@ -1,7 +1,7 @@
 // src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import Dashboard from "./pages/Dashboard";
+import ResourceDashboardPage from "./pages/ResourceDashboardPage";
 import AddResource from "./pages/AddResource";
 import ViewResources from "./pages/ViewResources";
 import EditResource from "./pages/EditResource";
@@ -15,7 +15,7 @@ function App() {
         <Navbar />
         <div style={{ marginLeft: '60px', flex: 1, paddingTop: '64px', backgroundColor: 'white' }}>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<ResourceDashboardPage />} />
             <Route path="/add" element={<AddResource />} />
             <Route path="/view" element={<ViewResources />} />
             <Route path="/edit/:id" element={<EditResource />} />
