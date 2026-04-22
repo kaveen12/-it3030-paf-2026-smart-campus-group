@@ -9,8 +9,8 @@ function AddResource() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
   const [csvFile, setCsvFile] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const [formData, setFormData] = useState({
     name: "",
@@ -25,13 +25,88 @@ function AddResource() {
     description: "",
   });
 
+  // ================= VALIDATE SINGLE FIELD =================
+  const validateField = (name, value) => {
+  const today = new Date().toISOString().split("T")[0];
+  let msg = "";
+
+  // Required fields (description only optional)
+  if (name !== "description") {
+    if (!value || value === "") {
+      msg = "This field is required";
+    }
+  }
+
+  // Type default check
+  if (name === "type" && value === "LECTURE_HALL") {
+    msg = "This field is required";
+  }
+
+  // Status default check
+  if (name === "status" && value === "ACTIVE") {
+    msg = "This field is required";
+  }
+
+  // Capacity
+  if (name === "capacity") {
+    if (value && Number(value) <= 0) {
+      msg = "Capacity must be greater than 0";
+    }
+  }
+
+  // Start Date
+  if (name === "startDate") {
+    if (value && value < today) {
+      msg = "Start date must be today or future";
+    }
+  }
+
+  // End Date
+  if (name === "endDate") {
+    if (value && formData.startDate && value < formData.startDate) {
+      msg = "End date must be after start date";
+    }
+  }
+
+  return msg;
+};
+
+  // ================= HANDLE CHANGE =================
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    setFieldErrors((prev) => ({
+      ...prev,
+      [name]: validateField(name, value),
+    }));
   };
 
+  // ================= VALIDATE FORM =================
+  const validateForm = () => {
+    let newErrors = {};
+
+    Object.keys(formData).forEach((key) => {
+      const err = validateField(key, formData[key]);
+      if (err) {
+        newErrors[key] = err;
+      }
+    });
+
+    setFieldErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // ================= SUBMIT =================
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) return;
 
     try {
       setLoading(true);
@@ -46,13 +121,14 @@ function AddResource() {
 
       alert(`Resource Created! Code: ${result.resourceCode}`);
       navigate("/view");
-    } catch {
+    } catch (err) {
       setError("Failed to create resource");
     } finally {
       setLoading(false);
     }
   };
 
+  // ================= CSV =================
   const handleFileChange = (e) => {
     setCsvFile(e.target.files[0]);
   };
@@ -69,7 +145,7 @@ function AddResource() {
 
       alert("CSV Uploaded Successfully!");
       navigate("/view");
-    } catch {
+    } catch (err) {
       alert("CSV Upload Failed");
     } finally {
       setLoading(false);
@@ -80,7 +156,7 @@ function AddResource() {
     <div className="fixed top-16 left-64 right-0 bottom-0 bg-slate-100 overflow-y-auto p-6">
       <div className="max-w-6xl mx-auto space-y-6">
 
-        {/* Page Header */}
+        {/* HEADER */}
         <div className="bg-white rounded-2xl shadow border p-6">
           <h1 className="text-3xl font-bold text-gray-800">
             Add New Resource
@@ -90,7 +166,7 @@ function AddResource() {
           </p>
         </div>
 
-        {/* CSV Upload Card */}
+        {/* CSV UPLOAD */}
         <div className="bg-white rounded-2xl shadow border p-6">
           <div className="flex justify-between items-center mb-5">
             <div>
@@ -102,7 +178,10 @@ function AddResource() {
               </p>
             </div>
 
-            <button className="text-blue-600 hover:underline text-sm font-medium">
+            <button
+              type="button"
+              className="text-blue-600 hover:underline text-sm font-medium"
+            >
               Download Template
             </button>
           </div>
@@ -128,7 +207,9 @@ function AddResource() {
 
           <div className="mt-5 text-right">
             <button
+              type="button"
               onClick={handleUploadCSV}
+              disabled={loading}
               className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium"
             >
               Upload CSV
@@ -136,14 +217,14 @@ function AddResource() {
           </div>
         </div>
 
-        {/* Error */}
+        {/* ERROR */}
         {error && (
           <div className="bg-red-100 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
             {error}
           </div>
         )}
 
-        {/* Form Card */}
+        {/* FORM */}
         <form
           onSubmit={handleSubmit}
           className="bg-white rounded-2xl shadow border p-6"
@@ -154,7 +235,7 @@ function AddResource() {
 
           <div className="grid grid-cols-2 gap-5">
 
-            {/* Name */}
+            {/* NAME */}
             <div className="col-span-2">
               <label className="block text-sm font-medium mb-2">
                 Resource Name
@@ -162,14 +243,18 @@ function AddResource() {
               <input
                 type="text"
                 name="name"
-                required
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full border rounded-lg px-4 py-2"
               />
+              {fieldErrors.name && (
+                <p className="text-red-500 text-sm mt-1">
+                  {fieldErrors.name}
+                </p>
+              )}
             </div>
 
-            {/* Type */}
+            {/* TYPE */}
             <div>
               <label className="block text-sm font-medium mb-2">
                 Type
@@ -187,9 +272,14 @@ function AddResource() {
                 <option value="CAMERA">Camera</option>
                 <option value="EQUIPMENT">Equipment</option>
               </select>
+              {fieldErrors.type && (
+                <p className="text-red-500 text-sm mt-1">
+                  {fieldErrors.type}
+                </p>
+              )}
             </div>
 
-            {/* Capacity */}
+            {/* CAPACITY */}
             <div>
               <label className="block text-sm font-medium mb-2">
                 Capacity
@@ -201,9 +291,14 @@ function AddResource() {
                 onChange={handleChange}
                 className="w-full border rounded-lg px-4 py-2"
               />
+              {fieldErrors.capacity && (
+                <p className="text-red-500 text-sm mt-1">
+                  {fieldErrors.capacity}
+                </p>
+              )}
             </div>
 
-            {/* Location */}
+            {/* LOCATION */}
             <div>
               <label className="block text-sm font-medium mb-2">
                 Location
@@ -215,9 +310,14 @@ function AddResource() {
                 onChange={handleChange}
                 className="w-full border rounded-lg px-4 py-2"
               />
+              {fieldErrors.location && (
+                <p className="text-red-500 text-sm mt-1">
+                  {fieldErrors.location}
+                </p>
+              )}
             </div>
 
-            {/* Status */}
+            {/* STATUS */}
             <div>
               <label className="block text-sm font-medium mb-2">
                 Status
@@ -232,9 +332,14 @@ function AddResource() {
                 <option value="INACTIVE">Inactive</option>
                 <option value="MAINTENANCE">Maintenance</option>
               </select>
+               {fieldErrors.status && (
+                <p className="text-red-500 text-sm mt-1">
+                  {fieldErrors.status}
+                </p>
+              )}
             </div>
 
-            {/* Start Date */}
+            {/* START DATE */}
             <div>
               <label className="block text-sm font-medium mb-2">
                 Start Date
@@ -246,9 +351,14 @@ function AddResource() {
                 onChange={handleChange}
                 className="w-full border rounded-lg px-4 py-2"
               />
+              {fieldErrors.startDate && (
+                <p className="text-red-500 text-sm mt-1">
+                  {fieldErrors.startDate}
+                </p>
+              )}
             </div>
 
-            {/* Start Time */}
+            {/* START TIME */}
             <div>
               <label className="block text-sm font-medium mb-2">
                 Start Time
@@ -260,9 +370,14 @@ function AddResource() {
                 onChange={handleChange}
                 className="w-full border rounded-lg px-4 py-2"
               />
+              {fieldErrors.startTime && (
+                <p className="text-red-500 text-sm mt-1">
+                  {fieldErrors.startTime}
+                </p>
+              )}
             </div>
 
-            {/* End Date */}
+            {/* END DATE */}
             <div>
               <label className="block text-sm font-medium mb-2">
                 End Date
@@ -274,9 +389,14 @@ function AddResource() {
                 onChange={handleChange}
                 className="w-full border rounded-lg px-4 py-2"
               />
+              {fieldErrors.endDate && (
+                <p className="text-red-500 text-sm mt-1">
+                  {fieldErrors.endDate}
+                </p>
+              )}
             </div>
 
-            {/* End Time */}
+            {/* END TIME */}
             <div>
               <label className="block text-sm font-medium mb-2">
                 End Time
@@ -288,16 +408,20 @@ function AddResource() {
                 onChange={handleChange}
                 className="w-full border rounded-lg px-4 py-2"
               />
+              {fieldErrors.endTime && (
+                <p className="text-red-500 text-sm mt-1">
+                  {fieldErrors.endTime}
+                </p>
+              )}
             </div>
 
           </div>
 
-          {/* Description */}
+          {/* DESCRIPTION */}
           <div className="mt-5">
             <label className="block text-sm font-medium mb-2">
               Description
             </label>
-
             <textarea
               rows="4"
               name="description"
@@ -307,7 +431,7 @@ function AddResource() {
             />
           </div>
 
-          {/* Buttons */}
+          {/* BUTTONS */}
           <div className="mt-6 flex justify-center gap-4">
             <button
               type="submit"
@@ -325,8 +449,8 @@ function AddResource() {
               Cancel
             </button>
           </div>
-        </form>
 
+        </form>
       </div>
     </div>
   );

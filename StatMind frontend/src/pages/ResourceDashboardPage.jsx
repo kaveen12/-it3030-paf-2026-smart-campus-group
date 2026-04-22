@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getAllResources } from "../api/resourceApi";
 import ResourceDashboard from "../components/ResourceDashboard";
-import AdminLayout from "../components/AdminLayout";
+import Navbar from "../components/Navbar";
 
 function ResourceDashboardPage() {
   const [resources, setResources] = useState([]);
@@ -23,13 +23,22 @@ function ResourceDashboardPage() {
   };
 
   return (
-    <AdminLayout>
-      {loading ? (
-        <p className="p-6 text-white">Loading...</p>
-      ) : (
-        <ResourceDashboard resources={resources} />
-      )}
-    </AdminLayout>
+    <div className="bg-[#0f172a] min-h-screen overflow-x-hidden">
+
+      {/* ✅ Navbar (sidebar + topbar) */}
+      <Navbar />
+
+      {/* ✅ CONTENT AREA */}
+     <div className="w-full min-h-screen bg-[#0f172a]">
+
+        {loading ? (
+          <p className="p-6 text-white">Loading...</p>
+        ) : (
+          <ResourceDashboard resources={resources} />
+        )}
+
+      </div>
+    </div>
   );
 }
 
