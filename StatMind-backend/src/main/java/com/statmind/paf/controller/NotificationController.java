@@ -46,7 +46,7 @@ public class NotificationController {
     notification.setRead(true);
         return notificationRepository.save(notification);
     }
-    
+
     @DeleteMapping("/{id}")
     public String deleteNotification(@PathVariable String id) {
     Notification notification = notificationRepository.findById(id)
@@ -69,9 +69,21 @@ public class NotificationController {
     String message = "Your ticket status changed to " + status;
         return notificationService.createNotification(userId, message, "TICKET");
     }
+
     @PostMapping("/comment")
     public Notification sendCommentNotification(@RequestParam String userId) {
     String message = "A new comment was added to your ticket";
         return notificationService.createNotification(userId, message, "COMMENT");
     }
+
+    @GetMapping("/user/{userId}/unread-count")
+    public long getUnreadCount(@PathVariable String userId) {
+        return notificationRepository.countByUserIdAndIsReadFalse(userId);
+    }
+
+    @GetMapping("/user/{userId}/unread")
+    public List<Notification> getUnreadNotifications(@PathVariable String userId) {
+        return notificationRepository.findByUserIdAndIsReadFalse(userId);
+    }
+
 }
