@@ -12,4 +12,7 @@ public interface NotificationRepository extends MongoRepository<Notification, St
     long countByUserIdAndIsReadFalse(String userId); 
 
     List<Notification> findByUserIdAndIsReadFalse(String userId);
+
+    List<Notification> findByUserIdAndIsRead(String userId, boolean isRead);
+    
 }

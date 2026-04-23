@@ -86,4 +86,15 @@ public class NotificationController {
         return notificationRepository.findByUserIdAndIsReadFalse(userId);
     }
 
+    @PutMapping("/user/{userId}/read-all")
+    public List<Notification> markAllAsRead(@PathVariable String userId) {
+    List<Notification> notifications = notificationRepository.findByUserIdAndIsRead(userId, false);
+
+    for (Notification notification : notifications) {
+        notification.setRead(true);
+    }
+
+        return notificationRepository.saveAll(notifications);
+    }
+
 }
