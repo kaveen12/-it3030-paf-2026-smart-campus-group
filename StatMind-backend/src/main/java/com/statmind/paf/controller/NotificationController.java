@@ -27,8 +27,9 @@ public class NotificationController {
 
     @GetMapping("/user/{userId}")
     public List<Notification> getNotificationsByUserId(@PathVariable String userId) {
-        return notificationRepository.findByUserId(userId);
+        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
+    
     @PostMapping
     public Notification createNotification(@RequestBody Notification notification) {
         return notificationService.createNotification(
@@ -96,5 +97,7 @@ public class NotificationController {
 
         return notificationRepository.saveAll(notifications);
     }
+
+
 
 }
