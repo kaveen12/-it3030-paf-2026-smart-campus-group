@@ -9,7 +9,7 @@ function App() {
     <Router>
       <div className="flex">
         <Navbar />
-        <div className="ml-64 flex-1 p-6">
+        < div className="ml-[220px] p-6 bg-gray-50 min-h-screen">
           <Routes>
             <Route path="/" element={<BookingListPage  />} />
             <Route path="/create" element={<CreateBooking />} />
