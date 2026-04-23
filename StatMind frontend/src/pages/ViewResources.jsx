@@ -110,7 +110,7 @@ function ViewResources() {
   doc.save("Resource_Report.pdf");
 };
   return (
-    <div className="fixed top-16 left-64 right-0 bottom-0 bg-slate-100 p-4 overflow-hidden">
+    <div className="fixed top-0 left-64 right-0 bottom-0 bg-slate-100 p-4 overflow-hidden">
       <div className="h-full w-full bg-white rounded-2xl shadow-xl border border-gray-200 flex flex-col overflow-hidden">
 
         {/* PAGE TITLE */}
@@ -167,8 +167,8 @@ function ViewResources() {
                 <th className="p-3">Type</th>
                 <th className="p-3 w-[90px]">Capacity</th>
                 <th className="p-3">Location</th>
-                <th className="p-3">Start</th>
-                <th className="p-3">End</th>
+                <th className="p-3">Availability StartDate & Time</th>
+                <th className="p-3">Availability EndDate & Time</th>
                 <th className="p-3 w-[100px]">Status</th>
                 <th className="p-3">Description</th>
                 <th className="p-3 w-[160px]">Actions</th>

@@ -1,45 +1,40 @@
 import { useEffect, useState } from "react";
-import { getAllResources } from "../api/resourceApi";
-import ResourceDashboard from "../components/ResourceDashboard";
 import Navbar from "../components/Navbar";
+import ResourceDashboard from "../components/ResourceDashboard";
+import { getAllResources } from "../api/resourceApi";
 
-function ResourceDashboardPage() {
+export default function ResourceDashboardPage() {
   const [resources, setResources] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadResources();
+    fetchResources();
   }, []);
 
-  const loadResources = async () => {
+  const fetchResources = async () => {
     try {
       const data = await getAllResources();
       setResources(data);
-    } catch (err) {
-      console.error("Error loading resources");
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching resources:", error);
     }
   };
 
   return (
-    <div className="bg-[#0f172a] min-h-screen overflow-x-hidden">
+    <div className="flex bg-gray-100 min-h-screen">
 
-      {/* ✅ Navbar (sidebar + topbar) */}
       <Navbar />
 
-      {/* ✅ CONTENT AREA */}
-     <div className="w-full min-h-screen bg-[#0f172a]">
+      <div className="ml-24 p-6 w-full">
 
-        {loading ? (
-          <p className="p-6 text-white">Loading...</p>
-        ) : (
+        {/* TOP BAR */}
+       
+        {/* DASHBOARD */}
+        <div className="h-[calc(100vh-100px)]">
           <ResourceDashboard resources={resources} />
-        )}
+        </div>
 
       </div>
+
     </div>
   );
 }
-
-export default ResourceDashboardPage;

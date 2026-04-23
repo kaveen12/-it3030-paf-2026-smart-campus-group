@@ -153,9 +153,8 @@ function AddResource() {
   };
 
   return (
-    <div className="fixed top-16 left-64 right-0 bottom-0 bg-slate-100 overflow-y-auto p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
-
+    <div className="ml-48 min-h-screen bg-slate-100 p-6">
+   <div className="max-w-7xl mx-auto space-y-6">
         {/* HEADER */}
         <div className="bg-white rounded-2xl shadow border p-6">
           <h1 className="text-3xl font-bold text-gray-800">
