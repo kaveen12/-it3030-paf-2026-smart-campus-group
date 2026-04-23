@@ -1,8 +1,10 @@
 package com.statmind.paf.controller;
 
 import com.statmind.paf.model.User;
+import com.statmind.paf.exception.ResourceNotFoundException;
 import com.statmind.paf.model.Role;
 import com.statmind.paf.repository.UserRepository;
+import com.statmind.paf.exception.ResourceNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,7 +40,7 @@ public class UserController {
     }
 
     User user = userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
     user.setRole(role);
         return userRepository.save(user);

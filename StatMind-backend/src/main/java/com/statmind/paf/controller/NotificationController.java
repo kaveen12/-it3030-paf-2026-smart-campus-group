@@ -1,7 +1,9 @@
 package com.statmind.paf.controller;
 
+import com.statmind.paf.exception.ResourceNotFoundException;
 import com.statmind.paf.model.Notification;
 import com.statmind.paf.repository.NotificationRepository;
+import com.statmind.paf.exception.ResourceNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import com.statmind.paf.service.NotificationService;
 
@@ -29,7 +31,7 @@ public class NotificationController {
     public List<Notification> getNotificationsByUserId(@PathVariable String userId) {
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
-    
+
     @PostMapping
     public Notification createNotification(@RequestBody Notification notification) {
         return notificationService.createNotification(
@@ -42,7 +44,7 @@ public class NotificationController {
     @PutMapping("/{id}/read")
     public Notification markAsRead(@PathVariable String id) {
     Notification notification = notificationRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Notification not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Notification not found"));
 
     notification.setRead(true);
         return notificationRepository.save(notification);
