@@ -6,9 +6,65 @@ const STATUS_STYLES = {
   PENDING:  "bg-yellow-50 text-yellow-700 border-yellow-200",
 };
 
+function DownloadIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
+  );
+}
+
+function downloadBookingAsText(booking) {
+  const lines = [
+    `BOOKING DETAILS`,
+    `===============`,
+    `Booking ID   : #${booking.bookingId}`,
+    `Purpose      : ${booking.purpose}`,
+    `Resource     : ${booking.resourceCode}`,
+    `Status       : ${booking.status}`,
+    ``,
+    `USER INFO`,
+    `---------`,
+    `User         : ${booking.userId}`,
+    `Attendees    : ${booking.attendees}`,
+    ``,
+    `SCHEDULE`,
+    `--------`,
+    `Date         : ${booking.date}`,
+    `Time         : ${booking.startTime} – ${booking.endTime}`,
+  ];
+
+  if (booking.status === "REJECTED" && booking.rejectionReason) {
+    lines.push(``, `REJECTION REASON`, `----------------`, booking.rejectionReason);
+  }
+
+  lines.push(``, `Generated on : ${new Date().toLocaleString()}`);
+
+  const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `booking-${booking.bookingId}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function BookingCard({ booking, onStatusChange }) {
   const [showRejectInput, setShowRejectInput] = React.useState(false);
   const [reason, setReason] = React.useState("");
+  const [downloading, setDownloading] = React.useState(false);
 
   const statusClass =
     STATUS_STYLES[booking.status] ||
@@ -29,6 +85,14 @@ function BookingCard({ booking, onStatusChange }) {
     onStatusChange(booking.id, "REJECTED", reason.trim());
     setShowRejectInput(false);
     setReason("");
+  }
+
+  function handleDownload() {
+    setDownloading(true);
+    setTimeout(() => {
+      downloadBookingAsText(booking);
+      setDownloading(false);
+    }, 400);
   }
 
   return (
@@ -53,11 +117,28 @@ function BookingCard({ booking, onStatusChange }) {
           </div>
         </div>
 
-        <span
-          className={`text-[11px] font-semibold px-3 py-1 rounded-full border whitespace-nowrap ${statusClass}`}
-        >
-          {booking.status}
-        </span>
+        <div className="flex flex-col items-end gap-2">
+          <span
+            className={`text-[11px] font-semibold px-3 py-1 rounded-full border whitespace-nowrap ${statusClass}`}
+          >
+            {booking.status}
+          </span>
+
+          {/* Download Button */}
+          <button
+            onClick={handleDownload}
+            disabled={downloading}
+            title="Download booking details"
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-medium transition-all duration-150
+              ${downloading
+                ? "border-slate-200 bg-slate-50 text-slate-300 cursor-not-allowed"
+                : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 hover:border-slate-300 active:scale-95"
+              }`}
+          >
+            <DownloadIcon />
+            {downloading ? "Saving…" : "Download"}
+          </button>
+        </div>
       </div>
 
       {/* Divider */}
