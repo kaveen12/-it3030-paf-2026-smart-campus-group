@@ -43,8 +43,7 @@ function AddResource() {
     msg = "This field is required";
   }
 
-  // Status default check
-  // Status validation (only check empty)
+  // Status 
 if (name === "status") {
   if (!value) {
     msg = "This field is required";
@@ -148,7 +147,7 @@ if (name === "status") {
       await uploadCSV(csvFile);
 
       alert("CSV Uploaded Successfully!");
-      navigate("/view");
+      navigate("/viewResource");
     } catch (err) {
       alert("CSV Upload Failed");
     } finally {
