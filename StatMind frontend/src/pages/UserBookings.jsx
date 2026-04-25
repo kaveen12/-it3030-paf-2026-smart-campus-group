@@ -7,19 +7,23 @@ function MyBookings() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("ALL");
   const [userId, setUserId] = useState("");
+  const [userName, setUserName] = useState("");
+  const [cancellingId, setCancellingId] = useState(null);
+  const [confirmId, setConfirmId] = useState(null); // ID of booking pending confirmation
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser?.userId) {
-      setUserId(storedUser.userId);
-      fetchBookings(storedUser.userId);
+    if (storedUser?._id) {
+      setUserId(storedUser._id);
+      setUserName(storedUser.name || "");
+      fetchBookings(storedUser._id);
     }
   }, []);
 
   const fetchBookings = (uid) => {
     setLoading(true);
     axios
-      .get(`http://localhost:8081/api/bookings/user/${uid}`)
+      .get(`http://localhost:8081/api/bookings/users/${uid}`)
       .then((res) => {
         setBookings(res.data);
         setLoading(false);
@@ -27,6 +31,28 @@ function MyBookings() {
       .catch((err) => {
         console.error(err);
         setLoading(false);
+      });
+  };
+
+  const handleCancelBooking = (bookingId) => {
+    setCancellingId(bookingId);
+    axios
+      .put(`http://localhost:8081/api/bookings/${bookingId}/cancel`)
+      .then(() => {
+        // Update status locally without refetching
+        setBookings((prev) =>
+          prev.map((b) =>
+            (b._id || b.id) === bookingId ? { ...b, status: "CANCELLED" } : b
+          )
+        );
+        setCancellingId(null);
+        setConfirmId(null);
+      })
+      .catch((err) => {
+        console.error(err);
+        setCancellingId(null);
+        setConfirmId(null);
+        alert("Failed to cancel booking. Please try again.");
       });
   };
 
@@ -80,14 +106,18 @@ function MyBookings() {
       {/* Sidebar Navbar */}
       <UserNavbar />
 
-      {/* Main Content — offset for sidebar (ml-56) and top navbar (mt-14) */}
+      {/* Main Content */}
       <main className="ml-56 mt-14 flex-1 py-10 px-6">
         <div className="max-w-5xl mx-auto">
 
           {/* Page Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-800 tracking-tight">My Bookings</h1>
-            <p className="text-sm text-gray-400 mt-1">All your booking requests in one place</p>
+            <p className="text-sm text-gray-400 mt-1">
+              {userName
+                ? `Welcome, ${userName} — all your booking requests in one place`
+                : "All your booking requests in one place"}
+            </p>
           </div>
 
           {/* Stat Cards */}
@@ -150,23 +180,30 @@ function MyBookings() {
           {!loading && filtered.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filtered.map((b) => {
+                const bookingId = b._id || b.id;
                 const { badge, dot } = statusStyle(b.status);
+                const isApproved = b.status?.toUpperCase() === "APPROVED";
+                const isCancelling = cancellingId === bookingId;
+                const isConfirming = confirmId === bookingId;
+
                 return (
                   <div
-                    key={b.id}
+                    key={bookingId}
                     className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow"
                   >
                     {/* Card Header */}
                     <div className="px-5 pt-5 pb-3 flex items-start justify-between gap-2">
                       <div>
                         <p className="text-[10px] text-gray-400 font-medium tracking-wider">
-                          #{b.bookingCode || `Booking-${b.id}`}
+                          #{b.bookingCode || `Booking-${bookingId}`}
                         </p>
                         <p className="text-base font-bold text-gray-800 mt-0.5">
                           {b.purpose || "—"}
                         </p>
                       </div>
-                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shrink-0 ${badge}`}>
+                      <span
+                        className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shrink-0 ${badge}`}
+                      >
                         {b.status}
                       </span>
                     </div>
@@ -185,7 +222,7 @@ function MyBookings() {
                     <div className="px-5 py-4 grid grid-cols-2 gap-y-3">
                       <div>
                         <p className="text-[9px] uppercase tracking-widest text-gray-400 mb-0.5">User</p>
-                        <p className="text-xs font-semibold text-gray-700">{b.userId || "—"}</p>
+                        <p className="text-xs font-semibold text-gray-700">{userName || "—"}</p>
                       </div>
                       <div>
                         <p className="text-[9px] uppercase tracking-widest text-gray-400 mb-0.5">Attendees</p>
@@ -205,19 +242,53 @@ function MyBookings() {
                       </div>
                     </div>
 
-                    {/* Approval message */}
-                    {b.status?.toUpperCase() === "APPROVED" && (
-                      <div className="px-5 pb-4">
-                        <p className="text-xs text-green-500 font-medium">
+                    {/* ── APPROVED: show message + cancel button ── */}
+                    {isApproved && (
+                      <div className="px-5 pb-5">
+                        <p className="text-xs text-green-500 font-medium mb-3">
                           ✓ This booking has been approved
                         </p>
+
+                        {/* Confirm dialog inline */}
+                        {isConfirming ? (
+                          <div className="bg-red-50 border border-red-100 rounded-xl px-3 py-3">
+                            <p className="text-xs text-red-600 font-medium mb-2">
+                              Are you sure you want to cancel this booking?
+                            </p>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleCancelBooking(bookingId)}
+                                disabled={isCancelling}
+                                className="flex-1 py-1.5 rounded-lg bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-colors disabled:opacity-60"
+                              >
+                                {isCancelling ? "Cancelling..." : "Yes, Cancel"}
+                              </button>
+                              <button
+                                onClick={() => setConfirmId(null)}
+                                disabled={isCancelling}
+                                className="flex-1 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-600 text-xs font-semibold hover:border-gray-400 transition-colors disabled:opacity-60"
+                              >
+                                Keep It
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setConfirmId(bookingId)}
+                            className="w-full py-2 rounded-xl border border-red-200 text-red-500 text-xs font-semibold hover:bg-red-50 transition-colors"
+                          >
+                            Cancel Booking
+                          </button>
+                        )}
                       </div>
                     )}
 
                     {/* Rejection reason */}
                     {b.status?.toUpperCase() === "REJECTED" && b.rejectionReason && (
                       <div className="mx-5 mb-4 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
-                        <p className="text-[9px] uppercase tracking-widest text-red-400 mb-1">Rejection Reason</p>
+                        <p className="text-[9px] uppercase tracking-widest text-red-400 mb-1">
+                          Rejection Reason
+                        </p>
                         <p className="text-xs text-red-600">{b.rejectionReason}</p>
                       </div>
                     )}
@@ -227,6 +298,15 @@ function MyBookings() {
                       <div className="px-5 pb-4">
                         <p className="text-xs text-amber-500 font-medium">
                           ⏳ Awaiting admin approval
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Cancelled notice */}
+                    {b.status?.toUpperCase() === "CANCELLED" && (
+                      <div className="px-5 pb-4">
+                        <p className="text-xs text-gray-400 font-medium">
+                          ✕ This booking has been cancelled
                         </p>
                       </div>
                     )}
