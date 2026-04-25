@@ -1,60 +1,59 @@
 import { Link, useLocation } from "react-router-dom";
 
-
 const navItems = [
-    {
+  {
     to: "/",
-    label: "Admin Dashboard",
+    label: "Dashboard",
     icon: (
-      <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
-        <rect x="2" y="2" width="5" height="5" rx="1.5" fill="currentColor" opacity="0.7" />
-        <rect x="9" y="2" width="5" height="5" rx="1.5" fill="currentColor" opacity="0.7" />
-        <rect x="2" y="9" width="5" height="5" rx="1.5" fill="currentColor" opacity="0.7" />
-        <rect x="9" y="9" width="5" height="5" rx="1.5" fill="currentColor" />
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+        <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
       </svg>
     ),
   },
   {
     to: "/resourceDashboard",
-    label: " Resource Dashboard",
+    label: "Resource Management",
     icon: (
-      <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
-        <rect x="1" y="1" width="6" height="9" rx="1.5" fill="currentColor" opacity="0.7" />
-        <rect x="9" y="6" width="6" height="9" rx="1.5" fill="currentColor" opacity="0.7" />
-        <rect x="1" y="12" width="6" height="3" rx="1.5" fill="currentColor" />
-        <rect x="9" y="1" width="6" height="3" rx="1.5" fill="currentColor" />
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+        <ellipse cx="12" cy="7" rx="8" ry="3" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M4 7v5c0 1.657 3.582 3 8 3s8-1.343 8-3V7" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M4 12v5c0 1.657 3.582 3 8 3s8-1.343 8-3v-5" stroke="currentColor" strokeWidth="1.8" />
       </svg>
     ),
   },
   {
-    to: "/addResource",
-    label: "Add Resource",
+    to: "/bookings",
+    label: "Booking Management",
     icon: (
-      <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
-        <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1.5" />
-        <line x1="8" y1="5" x2="8" y2="11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-        <line x1="5" y1="8" x2="11" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="4" width="18" height="17" rx="2" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M3 9h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M8 2v4M16 2v4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M7 13h4M7 17h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     ),
   },
   {
-    to: "/viewResource",
-    label: "View Resources",
+    to: "/tickets",
+    label: "Ticket Management",
     icon: (
-      <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
-        <circle cx="8" cy="5" r="3" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M2 13c0-2.7 2.6-5 6-5s6 2.3 6 5" stroke="currentColor" strokeWidth="1.5" />
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+        <path d="M2 9a2 2 0 012-2h16a2 2 0 012 2v1.5a2.5 2.5 0 000 5V17a2 2 0 01-2 2H4a2 2 0 01-2-2v-1.5a2.5 2.5 0 000-5V9z" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M9 2v3M9 19v3M15 2v3M15 19v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     ),
   },
 ];
 
-function ResourcesNavbar() {
+function AdminNavbar() {
   const { pathname } = useLocation();
 
   return (
     <>
-      {/* 🔷 SIDEBAR */}
+      {/* SIDEBAR */}
       <aside className="fixed left-0 top-0 w-56 h-screen bg-[#0f172a] flex flex-col p-4 z-50">
 
         {/* LOGO */}
@@ -77,12 +76,12 @@ function ResourcesNavbar() {
 
             return (
               <Link
-                key={to}
+                key={label}
                 to={to}
-                className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition ${
+                className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs transition ${
                   active
                     ? "bg-[#1e3a5f] text-blue-300"
-                    :"text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                    : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
                 }`}
               >
                 {icon}
@@ -100,9 +99,9 @@ function ResourcesNavbar() {
         </div>
       </aside>
 
-      {/* 🔷 TOP NAVBAR */}
+      {/* TOP NAVBAR */}
       <header className="fixed top-0 left-56 right-0 h-14 bg-white border-b flex items-center justify-between px-6 z-40 shadow-sm">
-        
+
         {/* LEFT */}
         <h1 className="text-lg font-semibold text-gray-800">
           Admin Panel
@@ -110,19 +109,14 @@ function ResourcesNavbar() {
 
         {/* RIGHT */}
         <div className="flex items-center gap-4">
-          
-          <span className="text-sm text-gray-600">
-            Admin
-          </span>
-
+          <span className="text-sm text-gray-600">Admin</span>
           <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm">
             Logout
           </button>
-
         </div>
       </header>
     </>
   );
 }
 
-export default ResourcesNavbar;
+export default AdminNavbar;

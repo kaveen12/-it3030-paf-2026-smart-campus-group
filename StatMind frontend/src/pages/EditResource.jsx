@@ -1,6 +1,7 @@
 // src/pages/EditResource.jsx
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import Navbar from "../components/ResourceNavbar";
 
 function EditResource() {
   const navigate = useNavigate();
@@ -96,7 +97,7 @@ function EditResource() {
       if (!response.ok) throw new Error("Update failed");
 
       alert("Resource updated successfully");
-      navigate("/view");
+      navigate("/viewResource");
     } catch (err) {
       console.error(err);
       setError("Update failed.");
@@ -116,10 +117,12 @@ function EditResource() {
   }
 
   return (
+    <>
+  <Navbar />
     <div className="min-h-screen bg-gray-100 overflow-x-hidden">
 
       {/* MAIN CONTENT */}
-      <div className="ml-64 pt-4 min-h-screen">
+      <div className="fixed top-14 left-56 right-0 bottom-0 bg-slate-100 p-4 overflow-auto">
 
         <div className="p-6">
 
@@ -181,10 +184,11 @@ function EditResource() {
                     className="w-full border border-gray-300 rounded-lg p-2"
                   >
                     <option value="LECTURE_HALL">Lecture Hall</option>
-                    <option value="LAB">Lab</option>
-                    <option value="AUDITORIUM">Auditorium</option>
-                    <option value="CLASSROOM">Classroom</option>
-                    <option value="CONFERENCE_ROOM">Conference Room</option>
+                <option value="LAB">Lab</option>
+                <option value="MEETING_ROOM">Meeting Room</option>
+                <option value="PROJECTOR">Projector</option>
+                <option value="CAMERA">Camera</option>
+                <option value="EQUIPMENT">Equipment</option>
                   </select>
                 </div>
 
@@ -340,6 +344,7 @@ function EditResource() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

@@ -44,9 +44,12 @@ function AddResource() {
   }
 
   // Status default check
-  if (name === "status" && value === "ACTIVE") {
+  // Status validation (only check empty)
+if (name === "status") {
+  if (!value) {
     msg = "This field is required";
   }
+}
 
   // Capacity
   if (name === "capacity") {
@@ -121,7 +124,7 @@ function AddResource() {
       const result = await createResource(submitData);
 
       alert(`Resource Created! Code: ${result.resourceCode}`);
-      navigate("/view");
+      navigate("/viewResource");
     } catch (err) {
       setError("Failed to create resource");
     } finally {
@@ -447,7 +450,7 @@ function AddResource() {
 
             <button
               type="button"
-              onClick={() => navigate("/view")}
+              onClick={() => navigate("/viewResource")}
               className="border px-6 py-2 rounded-lg hover:bg-gray-100"
             >
               Cancel

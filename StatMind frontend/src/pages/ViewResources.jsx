@@ -65,7 +65,7 @@ function ViewResources() {
   };
 
   const handleEdit = (id) => {
-    navigate(`/edit/${id}`);
+    navigate(`/editResource/${id}`);
   };
 
  const handleDownloadPDF = () => {
