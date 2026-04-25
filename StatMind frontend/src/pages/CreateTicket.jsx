@@ -18,9 +18,8 @@ export const CreateTicket = () => {
       const createdTicket = await ticketAPI.createTicket(formData);
       setSuccess(true);
 
-      // Redirect to ticket details after 2 seconds
       setTimeout(() => {
-        navigate(`/tickets/${createdTicket.id}`);
+        navigate(`/user/tickets/${createdTicket.id}`);
       }, 2000);
     } catch (err) {
       setError(err.message || 'Failed to create ticket');
@@ -30,16 +29,15 @@ export const CreateTicket = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-8 py-6">
+    <div className="p-8">
+      <div className="bg-white border-b border-gray-200 px-8 py-6 rounded-lg shadow-sm mb-8">
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Create Incident Ticket</h1>
             <p className="text-gray-500 mt-1">Report a new maintenance issue</p>
           </div>
           <button
-            onClick={() => navigate('/tickets')}
+            onClick={() => navigate('/user/tickets')}
             className="text-gray-600 hover:text-gray-900 font-medium"
           >
             ← Back
@@ -47,23 +45,20 @@ export const CreateTicket = () => {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="p-8">
-        <div className="max-w-3xl">
-          {success && (
-            <div className="mb-6 p-4 bg-green-100 text-green-700 rounded-lg border border-green-300">
-              ✓ Ticket created successfully! Redirecting...
-            </div>
-          )}
+      <div className="max-w-3xl">
+        {success && (
+          <div className="mb-6 p-4 bg-green-100 text-green-700 rounded-lg border border-green-300">
+            ✓ Ticket created successfully! Redirecting...
+          </div>
+        )}
 
-          {error && !success && (
-            <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg border border-red-300">
-              ✗ {error}
-            </div>
-          )}
+        {error && !success && (
+          <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg border border-red-300">
+            ✗ {error}
+          </div>
+        )}
 
-          <TicketForm onSubmit={handleSubmit} loading={loading} />
-        </div>
+        <TicketForm onSubmit={handleSubmit} loading={loading} />
       </div>
     </div>
   );

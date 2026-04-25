@@ -38,25 +38,39 @@ export const TicketDetail = () => {
   }, [ticketId]);
 
   const fetchTicketDetails = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const [ticketData, commentsData, logsData] = await Promise.all([
-        ticketAPI.getTicketById(ticketId),
-        commentAPI.getComments(ticketId),
-        activityLogAPI.getActivityLogs(ticketId),
-      ]);
+  setLoading(true);
+  setError('');
 
-      setTicket(ticketData);
+  try {
+    // 1. Get ticket (MAIN)
+    const ticketData = await ticketAPI.getTicketById(ticketId);
+    setTicket(ticketData);
+    setStatusData({ status: ticketData?.status || '' });
+
+    // 2. Try comments (optional)
+    try {
+      const commentsData = await commentAPI.getComments(ticketId);
       setComments(Array.isArray(commentsData) ? commentsData : []);
-      setLogs(Array.isArray(logsData) ? logsData : []);
-      setStatusData({ status: ticketData?.status || '' });
-    } catch (err) {
-      setError(err.message || 'Failed to fetch ticket details');
-    } finally {
-      setLoading(false);
+    } catch (e) {
+      console.log("Comments not available yet");
+      setComments([]);
     }
-  };
+
+    // 3. Try logs (optional)
+    try {
+      const logsData = await activityLogAPI.getActivityLogs(ticketId);
+      setLogs(Array.isArray(logsData) ? logsData : []);
+    } catch (e) {
+      console.log("Logs not available yet");
+      setLogs([]);
+    }
+
+  } catch (err) {
+    setError("Failed to load ticket");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleAssignTechnician = async () => {
     if (!assignData.assignedTechnicianName.trim()) {

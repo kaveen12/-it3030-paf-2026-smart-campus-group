@@ -1,70 +1,33 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AdminLayout } from "./components/AdminLayout";
 import { UserLayout } from "./components/UserLayout";
+
 import { TicketDashboard } from "./pages/TicketDashboard";
-import { CreateTicket } from "./pages/CreateTicket";
 import { TicketDetail } from "./pages/TicketDetail";
+import { CreateTicket } from "./pages/CreateTicket";
+
+import { UserTicketHome } from "./pages/UserTicketHome";
+import { UserTickets } from "./pages/UserTickets";
+import { UserTicketDetail } from "./pages/UserTicketDetail";
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* USER ROUTES */}
-        <Route
-          path="/user/tickets"
-          element={
-            <UserLayout>
-              <CreateTicket />
-            </UserLayout>
-          }
-        />
 
-        <Route
-          path="/user/tickets/create"
-          element={
-            <UserLayout>
-              <CreateTicket />
-            </UserLayout>
-          }
-        />
+        {/* USER */}
+        <Route path="/user/tickets" element={<UserLayout><UserTicketHome /></UserLayout>} />
+        <Route path="/user/tickets/create" element={<UserLayout><CreateTicket /></UserLayout>} />
+        <Route path="/user/tickets/list" element={<UserLayout><UserTickets /></UserLayout>} />
+        <Route path="/user/tickets/:ticketId" element={<UserLayout><UserTicketDetail /></UserLayout>} />
 
-        <Route
-          path="/user/tickets/:ticketId"
-          element={
-            <UserLayout>
-              <TicketDetail />
-            </UserLayout>
-          }
-        />
-
-        {/* ADMIN ROUTES */}
-        <Route
-          path="/admin/tickets"
-          element={
-            <AdminLayout>
-              <TicketDashboard />
-            </AdminLayout>
-          }
-        />
-
-        <Route
-          path="/admin/tickets/:ticketId"
-          element={
-            <AdminLayout>
-              <TicketDetail />
-            </AdminLayout>
-          }
-        />
+        {/* ADMIN */}
+        <Route path="/admin/tickets" element={<AdminLayout><TicketDashboard /></AdminLayout>} />
+        <Route path="/admin/tickets/:ticketId" element={<AdminLayout><TicketDetail /></AdminLayout>} />
 
         {/* DEFAULT */}
-        <Route
-          path="/"
-          element={
-            <UserLayout>
-              <CreateTicket />
-            </UserLayout>
-          }
-        />
+        <Route path="/" element={<UserLayout><UserTicketHome /></UserLayout>} />
+
       </Routes>
     </Router>
   );
