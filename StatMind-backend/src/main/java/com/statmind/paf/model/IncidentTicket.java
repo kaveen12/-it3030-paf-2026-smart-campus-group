@@ -36,6 +36,11 @@ public class IncidentTicket {
     @NotBlank(message = "Preferred contact is required")
     private String preferredContact;
 
+    // Created-by fields
+    private String createdById;
+    private String createdByName;
+    private String createdByRole;
+
     private String status = "OPEN";
 
     private String rejectionReason;
@@ -53,12 +58,27 @@ public class IncidentTicket {
     public IncidentTicket() {
     }
 
-    public IncidentTicket(String id, String resourceId, String resourceCode, String resourceName, String location,
-                          String resourceOrLocation, String category, String description, String priority,
-                          String preferredContact, String status, String rejectionReason,
-                          String assignedTechnicianId, String assignedTechnicianName,
-                          String resolutionNotes, List<String> attachmentUrls,
-                          LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public IncidentTicket(String id,
+                          String resourceId,
+                          String resourceCode,
+                          String resourceName,
+                          String location,
+                          String resourceOrLocation,
+                          String category,
+                          String description,
+                          String priority,
+                          String preferredContact,
+                          String createdById,
+                          String createdByName,
+                          String createdByRole,
+                          String status,
+                          String rejectionReason,
+                          String assignedTechnicianId,
+                          String assignedTechnicianName,
+                          String resolutionNotes,
+                          List<String> attachmentUrls,
+                          LocalDateTime createdAt,
+                          LocalDateTime updatedAt) {
         this.id = id;
         this.resourceId = resourceId;
         this.resourceCode = resourceCode;
@@ -69,6 +89,9 @@ public class IncidentTicket {
         this.description = description;
         this.priority = priority;
         this.preferredContact = preferredContact;
+        this.createdById = createdById;
+        this.createdByName = createdByName;
+        this.createdByRole = createdByRole;
         this.status = status;
         this.rejectionReason = rejectionReason;
         this.assignedTechnicianId = assignedTechnicianId;
@@ -153,6 +176,30 @@ public class IncidentTicket {
 
     public void setPreferredContact(String preferredContact) {
         this.preferredContact = preferredContact;
+    }
+
+    public String getCreatedById() {
+        return createdById;
+    }
+
+    public void setCreatedById(String createdById) {
+        this.createdById = createdById;
+    }
+
+    public String getCreatedByName() {
+        return createdByName;
+    }
+
+    public void setCreatedByName(String createdByName) {
+        this.createdByName = createdByName;
+    }
+
+    public String getCreatedByRole() {
+        return createdByRole;
+    }
+
+    public void setCreatedByRole(String createdByRole) {
+        this.createdByRole = createdByRole;
     }
 
     public String getStatus() {
