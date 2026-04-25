@@ -6,10 +6,10 @@ import com.statmind.paf.dto.RejectTicketRequest;
 import com.statmind.paf.dto.ResolveTicketRequest;
 import com.statmind.paf.dto.UpdateStatusRequest;
 import com.statmind.paf.model.IncidentTicket;
+import com.statmind.paf.model.Resource;
 import com.statmind.paf.repository.IncidentTicketRepository;
 import com.statmind.paf.repository.ResourceRepository;
 import org.springframework.stereotype.Service;
-import com.statmind.paf.model.Resource;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,33 +19,46 @@ public class IncidentTicketService {
 
     private final IncidentTicketRepository repository;
     private final ResourceRepository resourceRepository;
+    private final TicketActivityLogService activityLogService;
 
     public IncidentTicketService(IncidentTicketRepository repository,
-                                 ResourceRepository resourceRepository) {
+                                 ResourceRepository resourceRepository,
+                                 TicketActivityLogService activityLogService) {
         this.repository = repository;
         this.resourceRepository = resourceRepository;
+        this.activityLogService = activityLogService;
     }
 
     public IncidentTicket createTicket(IncidentTicket ticket) {
-    if (ticket.getResourceId() != null && !ticket.getResourceId().isBlank()) {
+        if (ticket.getResourceId() != null && !ticket.getResourceId().isBlank()) {
 
-        Resource resource = resourceRepository.findById(ticket.getResourceId()).orElse(null);
+            Resource resource = resourceRepository.findById(ticket.getResourceId()).orElse(null);
 
-        if (resource == null) {
-            throw new IllegalArgumentException("Invalid resourceId: resource not found");
+            if (resource == null) {
+                throw new IllegalArgumentException("Invalid resourceId: resource not found");
+            }
+
+            ticket.setResourceName(resource.getName());
+            ticket.setResourceCode(resource.getResourceCode());
+            ticket.setLocation(resource.getLocation());
         }
 
-        ticket.setResourceName(resource.getName());
-        ticket.setResourceCode(resource.getResourceCode());
-        ticket.setLocation(resource.getLocation());
+        ticket.setStatus("OPEN");
+        ticket.setCreatedAt(LocalDateTime.now());
+        ticket.setUpdatedAt(LocalDateTime.now());
+
+        IncidentTicket saved = repository.save(ticket);
+
+        activityLogService.createLog(
+                saved.getId(),
+                "CREATED",
+                saved.getCreatedByName() != null ? saved.getCreatedByName() : "SYSTEM",
+                saved.getCreatedByRole() != null ? saved.getCreatedByRole() : "USER",
+                "Ticket created"
+        );
+
+        return saved;
     }
-
-    ticket.setStatus("OPEN");
-    ticket.setCreatedAt(LocalDateTime.now());
-    ticket.setUpdatedAt(LocalDateTime.now());
-
-    return repository.save(ticket);
-}
 
     public List<IncidentTicket> getAllTickets() {
         return repository.findAll();
@@ -56,34 +69,49 @@ public class IncidentTicketService {
     }
 
     public IncidentTicket updateTicket(String id, IncidentTicket updatedTicket) {
-    IncidentTicket existing = repository.findById(id).orElse(null);
+        IncidentTicket existing = repository.findById(id).orElse(null);
 
-    if (existing == null) {
-        return null;
-    }
-
-    if (updatedTicket.getResourceId() != null && !updatedTicket.getResourceId().isBlank()) {
-        Resource resource = resourceRepository.findById(updatedTicket.getResourceId()).orElse(null);
-
-        if (resource == null) {
-            throw new IllegalArgumentException("Invalid resourceId: resource not found");
+        if (existing == null) {
+            return null;
         }
 
-        existing.setResourceId(resource.getId());
-        existing.setResourceCode(resource.getResourceCode());
-        existing.setResourceName(resource.getName());
-        existing.setLocation(resource.getLocation());
+        if (updatedTicket.getResourceId() != null && !updatedTicket.getResourceId().isBlank()) {
+            Resource resource = resourceRepository.findById(updatedTicket.getResourceId()).orElse(null);
+
+            if (resource == null) {
+                throw new IllegalArgumentException("Invalid resourceId: resource not found");
+            }
+
+            existing.setResourceId(resource.getId());
+            existing.setResourceCode(resource.getResourceCode());
+            existing.setResourceName(resource.getName());
+            existing.setLocation(resource.getLocation());
+        }
+
+        existing.setResourceOrLocation(updatedTicket.getResourceOrLocation());
+        existing.setCategory(updatedTicket.getCategory());
+        existing.setDescription(updatedTicket.getDescription());
+        existing.setPriority(updatedTicket.getPriority());
+        existing.setPreferredContact(updatedTicket.getPreferredContact());
+
+        existing.setCreatedById(updatedTicket.getCreatedById());
+        existing.setCreatedByName(updatedTicket.getCreatedByName());
+        existing.setCreatedByRole(updatedTicket.getCreatedByRole());
+
+        existing.setUpdatedAt(LocalDateTime.now());
+
+        IncidentTicket saved = repository.save(existing);
+
+        activityLogService.createLog(
+                saved.getId(),
+                "UPDATED",
+                saved.getCreatedByName() != null ? saved.getCreatedByName() : "SYSTEM",
+                saved.getCreatedByRole() != null ? saved.getCreatedByRole() : "USER",
+                "Ticket details updated"
+        );
+
+        return saved;
     }
-
-    existing.setResourceOrLocation(updatedTicket.getResourceOrLocation());
-    existing.setCategory(updatedTicket.getCategory());
-    existing.setDescription(updatedTicket.getDescription());
-    existing.setPriority(updatedTicket.getPriority());
-    existing.setPreferredContact(updatedTicket.getPreferredContact());
-    existing.setUpdatedAt(LocalDateTime.now());
-
-    return repository.save(existing);
-}
 
     public IncidentTicket assignTechnician(String id, AssignTechnicianRequest request) {
         IncidentTicket existing = repository.findById(id).orElse(null);
@@ -101,7 +129,17 @@ public class IncidentTicketService {
 
         existing.setUpdatedAt(LocalDateTime.now());
 
-        return repository.save(existing);
+        IncidentTicket saved = repository.save(existing);
+
+        activityLogService.createLog(
+                saved.getId(),
+                "ASSIGNED",
+                request.getAssignedTechnicianName(),
+                "TECHNICIAN",
+                "Assigned to technician " + request.getAssignedTechnicianName()
+        );
+
+        return saved;
     }
 
     public IncidentTicket updateTicketStatus(String id, UpdateStatusRequest request) {
@@ -124,7 +162,17 @@ public class IncidentTicketService {
         existing.setStatus(newStatus);
         existing.setUpdatedAt(LocalDateTime.now());
 
-        return repository.save(existing);
+        IncidentTicket saved = repository.save(existing);
+
+        activityLogService.createLog(
+                saved.getId(),
+                "STATUS_UPDATED",
+                "SYSTEM",
+                "SYSTEM",
+                "Status changed to " + newStatus
+        );
+
+        return saved;
     }
 
     public IncidentTicket rejectTicket(String id, RejectTicketRequest request) {
@@ -142,7 +190,17 @@ public class IncidentTicketService {
         existing.setRejectionReason(request.getRejectionReason());
         existing.setUpdatedAt(LocalDateTime.now());
 
-        return repository.save(existing);
+        IncidentTicket saved = repository.save(existing);
+
+        activityLogService.createLog(
+                saved.getId(),
+                "REJECTED",
+                "ADMIN",
+                "ADMIN",
+                "Ticket rejected: " + request.getRejectionReason()
+        );
+
+        return saved;
     }
 
     public IncidentTicket resolveTicket(String id, ResolveTicketRequest request) {
@@ -160,7 +218,17 @@ public class IncidentTicketService {
         existing.setStatus("RESOLVED");
         existing.setUpdatedAt(LocalDateTime.now());
 
-        return repository.save(existing);
+        IncidentTicket saved = repository.save(existing);
+
+        activityLogService.createLog(
+                saved.getId(),
+                "RESOLVED",
+                saved.getAssignedTechnicianName() != null ? saved.getAssignedTechnicianName() : "TECHNICIAN",
+                "TECHNICIAN",
+                "Ticket resolved: " + request.getResolutionNotes()
+        );
+
+        return saved;
     }
 
     public IncidentTicket closeTicket(String id) {
@@ -177,7 +245,17 @@ public class IncidentTicketService {
         existing.setStatus("CLOSED");
         existing.setUpdatedAt(LocalDateTime.now());
 
-        return repository.save(existing);
+        IncidentTicket saved = repository.save(existing);
+
+        activityLogService.createLog(
+                saved.getId(),
+                "CLOSED",
+                "SYSTEM",
+                "SYSTEM",
+                "Ticket closed"
+        );
+
+        return saved;
     }
 
     public IncidentTicket addAttachments(String id, AddAttachmentsRequest request) {
@@ -203,7 +281,17 @@ public class IncidentTicketService {
         existing.setAttachmentUrls(currentAttachments);
         existing.setUpdatedAt(LocalDateTime.now());
 
-        return repository.save(existing);
+        IncidentTicket saved = repository.save(existing);
+
+        activityLogService.createLog(
+                saved.getId(),
+                "ATTACHMENTS_ADDED",
+                "SYSTEM",
+                "USER",
+                request.getAttachmentUrls().size() + " attachment(s) added"
+        );
+
+        return saved;
     }
 
     public boolean deleteTicket(String id) {
@@ -212,6 +300,14 @@ public class IncidentTicketService {
         if (existing == null) {
             return false;
         }
+
+        activityLogService.createLog(
+                existing.getId(),
+                "DELETED",
+                "SYSTEM",
+                "ADMIN",
+                "Ticket deleted"
+        );
 
         repository.deleteById(id);
         return true;
