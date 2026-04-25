@@ -6,12 +6,14 @@ import ViewResources from "./pages/ViewResources";
 import EditResource from "./pages/EditResource";
 import BulkInsert from "./pages/BulkInsert";
 import AdminDashboard from "./pages/AdminDashboard";
+import UserViewResource from "./pages/UserViewResource";
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<AdminDashboard />} />
+         <Route path="/admin" element={<UserViewResource />} />
         <Route path="/resourceDashboard" element={<ResourceDashboardPage />} />
 
         <Route path="/addResource" element={<AddResource />} />
