@@ -15,6 +15,17 @@ const navItems = [
     ),
   },
   {
+    to: "/resources",
+    label: "Resources",
+    icon: (
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+        <ellipse cx="12" cy="7" rx="8" ry="3" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M4 7v5c0 1.657 3.582 3 8 3s8-1.343 8-3V7" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M4 12v5c0 1.657 3.582 3 8 3s8-1.343 8-3v-5" stroke="currentColor" strokeWidth="1.8" />
+      </svg>
+    ),
+  },
+  {
     to: "/notifications",
     label: "Notifications",
     icon: (
