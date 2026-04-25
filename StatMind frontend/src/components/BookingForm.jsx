@@ -6,6 +6,7 @@ function BookingForm() {
   const [resources, setResources] = useState([]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
 
   const [form, setForm] = useState({
     resourceCode: "",
@@ -38,8 +39,54 @@ function BookingForm() {
       .catch(err => console.error(err));
   }, []);
 
+  const today = new Date().toISOString().split("T")[0];
+
+  const validate = () => {
+    const errors = {};
+
+    if (!form.userId.trim())
+      errors.userId = "User ID is required.";
+
+    if (!form.userName.trim())
+      errors.userName = "User Name is required.";
+
+    if (!form.resourceCode)
+      errors.resourceCode = "Please select a resource.";
+
+    if (!form.date) {
+      errors.date = "Date is required.";
+    } else if (form.date < today) {
+      errors.date = "Date cannot be in the past.";
+    }
+
+    if (!form.startTime)
+      errors.startTime = "Start time is required.";
+
+    if (!form.endTime) {
+      errors.endTime = "End time is required.";
+    } else if (form.startTime && form.endTime <= form.startTime) {
+      errors.endTime = "End time must be after start time.";
+    }
+
+    if (!form.purpose.trim())
+      errors.purpose = "Purpose is required.";
+
+    if (!form.attendees && form.attendees !== 0) {
+      errors.attendees = "Number of attendees is required.";
+    } else if (parseInt(form.attendees) < 1) {
+      errors.attendees = "Attendees must be at least 1.";
+    }
+
+    return errors;
+  };
+
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    // Clear validation error on change
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({ ...prev, [name]: "" }));
+    }
   };
 
   const handleResourceChange = (e) => {
@@ -52,6 +99,9 @@ function BookingForm() {
       type: selectedResource?.type || "",
       location: selectedResource?.location || ""
     });
+    if (validationErrors.resourceCode) {
+      setValidationErrors(prev => ({ ...prev, resourceCode: "" }));
+    }
   };
 
   const formatTime = (t) => (t && t.length === 5 ? t + ":00" : t);
@@ -60,6 +110,12 @@ function BookingForm() {
     e.preventDefault();
     setError("");
     setSuccess(false);
+
+    const errors = validate();
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
 
     const payload = {
       resourceCode: form.resourceCode,
@@ -74,6 +130,7 @@ function BookingForm() {
     try {
       await createBooking(payload);
       setSuccess(true);
+      setValidationErrors({});
       setForm({
         resourceCode: "",
         resourceName: "",
@@ -96,27 +153,29 @@ function BookingForm() {
     }
   };
 
-  // Matches exactly: white bg inputs, light gray border, blue focus — same as booking cards
   const inputBase =
     "w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 placeholder-gray-300 transition focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100";
+
+  const inputError =
+    "w-full rounded-lg border border-red-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 placeholder-gray-300 transition focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-100";
 
   const readOnlyInput =
     "w-full rounded-lg border border-gray-100 bg-gray-50 px-4 py-2.5 text-sm text-gray-400 cursor-not-allowed";
 
-  // Matches "USER", "ATTENDEES", "DATE", "TIME" label style in the booking cards
   const labelBase =
     "block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2";
 
-  // Matches section dividers — same small-caps gray style as card meta
   const sectionLabel =
     "text-xs font-extrabold uppercase tracking-widest text-gray-600 text-center mb-5";
 
+  const fieldClass = (name) =>
+    validationErrors[name] ? inputError : inputBase;
+
   return (
-    // bg-gray-50 — same page background as All Bookings
     <div className="min-h-screen bg-gray-50 py-10 px-6">
       <div className="max-w-2xl mx-auto">
 
-        {/* Page title — matches "All Bookings" heading exactly */}
+        {/* Page title */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
             Create Booking
@@ -126,13 +185,15 @@ function BookingForm() {
           </p>
         </div>
 
-        {/* Alerts — match the APPROVED/REJECTED card badge colors */}
+        {/* Server error */}
         {error && (
           <div className="flex items-start gap-2 bg-red-50 border border-red-100 text-red-500 rounded-2xl px-4 py-3 mb-5 text-sm">
             <span>✕</span>
             <span>{error}</span>
           </div>
         )}
+
+        {/* Success */}
         {success && (
           <div className="flex items-start gap-2 bg-green-50 border border-green-100 text-green-600 rounded-2xl px-4 py-3 mb-5 text-sm">
             <span>✓</span>
@@ -140,10 +201,9 @@ function BookingForm() {
           </div>
         )}
 
-        {/* Main card — white, rounded-2xl, light border + shadow, same as booking cards */}
+        {/* Form card */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-
-          <form onSubmit={handleSubmit} className="p-8 space-y-7">
+          <form onSubmit={handleSubmit} className="p-8 space-y-7" noValidate>
 
             {/* USER INFORMATION */}
             <div>
@@ -157,9 +217,11 @@ function BookingForm() {
                     placeholder="e.g. USR-001"
                     value={form.userId}
                     onChange={handleChange}
-                    required
-                    className={inputBase}
+                    className={fieldClass("userId")}
                   />
+                  {validationErrors.userId && (
+                    <p className="text-red-400 text-[11px] mt-1">{validationErrors.userId}</p>
+                  )}
                 </div>
                 <div>
                   <label className={labelBase}>User Name</label>
@@ -169,9 +231,11 @@ function BookingForm() {
                     placeholder="Full name"
                     value={form.userName}
                     onChange={handleChange}
-                    required
-                    className={inputBase}
+                    className={fieldClass("userName")}
                   />
+                  {validationErrors.userName && (
+                    <p className="text-red-400 text-[11px] mt-1">{validationErrors.userName}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -186,8 +250,7 @@ function BookingForm() {
                 <select
                   value={form.resourceCode}
                   onChange={handleResourceChange}
-                  required
-                  className={inputBase}
+                  className={fieldClass("resourceCode")}
                 >
                   <option value="">Choose a resource…</option>
                   {resources.map(r => (
@@ -196,44 +259,29 @@ function BookingForm() {
                     </option>
                   ))}
                 </select>
+                {validationErrors.resourceCode && (
+                  <p className="text-red-400 text-[11px] mt-1">{validationErrors.resourceCode}</p>
+                )}
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className={labelBase}>Resource Name</label>
-                  <input
-                    type="text"
-                    value={form.resourceName}
-                    placeholder="Auto-filled"
-                    readOnly
-                    className={readOnlyInput}
-                  />
+                  <input type="text" value={form.resourceName} placeholder="Auto-filled" readOnly className={readOnlyInput} />
                 </div>
                 <div>
                   <label className={labelBase}>Type</label>
-                  <input
-                    type="text"
-                    value={form.type}
-                    placeholder="Auto-filled"
-                    readOnly
-                    className={readOnlyInput}
-                  />
+                  <input type="text" value={form.type} placeholder="Auto-filled" readOnly className={readOnlyInput} />
                 </div>
                 <div>
                   <label className={labelBase}>Location</label>
-                  <input
-                    type="text"
-                    value={form.location}
-                    placeholder="Auto-filled"
-                    readOnly
-                    className={readOnlyInput}
-                  />
+                  <input type="text" value={form.location} placeholder="Auto-filled" readOnly className={readOnlyInput} />
                 </div>
               </div>
             </div>
 
             <hr className="border-gray-100" />
 
-            {/* SCHEDULE — matches DATE / TIME label style in cards */}
+            {/* SCHEDULE */}
             <div>
               <p className={sectionLabel}>Schedule</p>
               <div className="grid grid-cols-3 gap-4">
@@ -243,10 +291,13 @@ function BookingForm() {
                     type="date"
                     name="date"
                     value={form.date}
+                    min={today}
                     onChange={handleChange}
-                    required
-                    className={inputBase}
+                    className={fieldClass("date")}
                   />
+                  {validationErrors.date && (
+                    <p className="text-red-400 text-[11px] mt-1">{validationErrors.date}</p>
+                  )}
                 </div>
                 <div>
                   <label className={labelBase}>Start Time</label>
@@ -255,9 +306,11 @@ function BookingForm() {
                     name="startTime"
                     value={form.startTime}
                     onChange={handleChange}
-                    required
-                    className={inputBase}
+                    className={fieldClass("startTime")}
                   />
+                  {validationErrors.startTime && (
+                    <p className="text-red-400 text-[11px] mt-1">{validationErrors.startTime}</p>
+                  )}
                 </div>
                 <div>
                   <label className={labelBase}>End Time</label>
@@ -266,9 +319,11 @@ function BookingForm() {
                     name="endTime"
                     value={form.endTime}
                     onChange={handleChange}
-                    required
-                    className={inputBase}
+                    className={fieldClass("endTime")}
                   />
+                  {validationErrors.endTime && (
+                    <p className="text-red-400 text-[11px] mt-1">{validationErrors.endTime}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -287,8 +342,11 @@ function BookingForm() {
                     placeholder="e.g. Lecture"
                     value={form.purpose}
                     onChange={handleChange}
-                    className={inputBase}
+                    className={fieldClass("purpose")}
                   />
+                  {validationErrors.purpose && (
+                    <p className="text-red-400 text-[11px] mt-1">{validationErrors.purpose}</p>
+                  )}
                 </div>
                 <div>
                   <label className={labelBase}>Attendees</label>
@@ -296,16 +354,19 @@ function BookingForm() {
                     type="number"
                     name="attendees"
                     placeholder="0"
-                    min="0"
+                    min="1"
                     value={form.attendees}
                     onChange={handleChange}
-                    className={inputBase}
+                    className={fieldClass("attendees")}
                   />
+                  {validationErrors.attendees && (
+                    <p className="text-red-400 text-[11px] mt-1">{validationErrors.attendees}</p>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Submit — matches the dark "ALL" active filter pill from the page */}
+            {/* Submit */}
             <div className="pt-1">
               <button
                 type="submit"

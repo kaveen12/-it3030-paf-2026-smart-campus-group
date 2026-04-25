@@ -10,7 +10,6 @@ function App() {
             <Route path="/bookings" element={<BookingListPage  />} />
             <Route path="/" element={<CreateBooking />} />
             <Route path="/my-bookings" element={<UserBookings />} />
-            <Route path="*" element={<BookingListPage />} />
           </Routes>
     </Router>
   );
