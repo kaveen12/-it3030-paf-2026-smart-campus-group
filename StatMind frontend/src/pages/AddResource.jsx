@@ -184,12 +184,7 @@ if (name === "status") {
               </p>
             </div>
 
-            <button
-              type="button"
-              className="text-blue-600 hover:underline text-sm font-medium"
-            >
-              Download Template
-            </button>
+            
           </div>
 
           <div className="border-2 border-dashed border-blue-300 rounded-xl p-8 text-center bg-blue-50">
