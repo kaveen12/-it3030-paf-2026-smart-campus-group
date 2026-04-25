@@ -11,6 +11,7 @@ import SearchBar from "../components/SearchBar";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import autoTable from "jspdf-autotable";
+import Navbar from "../components/ResourceNavbar";
 
 
 function ViewResources() {
@@ -110,7 +111,9 @@ function ViewResources() {
   doc.save("Resource_Report.pdf");
 };
   return (
-    <div className="fixed top-0 left-64 right-0 bottom-0 bg-slate-100 p-4 overflow-hidden">
+     <>
+    <Navbar />
+    <div className="fixed top-14 left-56 right-0 bottom-0 bg-slate-100 p-4 overflow-hidden">
       <div className="h-full w-full bg-white rounded-2xl shadow-xl border border-gray-200 flex flex-col overflow-hidden">
 
         {/* PAGE TITLE */}
@@ -160,7 +163,7 @@ function ViewResources() {
           className="flex-1 overflow-y-auto overflow-x-hidden"
         >
           <table className="w-full table-fixed text-sm">
-            <thead className="sticky top-0 bg-blue-700 text-white z-10">
+            <thead className="sticky top-0 bg-gradient-to-r from-sky-200 to-blue-200 text-gray-700 z-10 shadow">
               <tr>
                 <th className="p-3 w-[90px]">Code</th>
                 <th className="p-3">Name</th>
@@ -254,6 +257,7 @@ function ViewResources() {
 
       </div>
     </div>
+     </>
   );
 }
 

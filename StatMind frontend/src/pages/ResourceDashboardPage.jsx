@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/ResourceNavbar";
 import ResourceDashboard from "../components/ResourceDashboard";
 import { getAllResources } from "../api/resourceApi";
 

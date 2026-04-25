@@ -76,7 +76,7 @@ export default function ResourceDashboard({ resources }) {
   const COLORS = ["#22c55e", "#ef4444"];
 
   return (
-    <div className="fixed top-0 left-56 right-0 bottom-0 bg-slate-100 p-4 overflow-hidden">
+    <div className="fixed top-14 left-56 right-0 bottom-0 bg-slate-100 p-4 overflow-hidden">
       <div className="w-full h-full bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 flex flex-col gap-5 overflow-hidden">
 
         {/* HEADER */}

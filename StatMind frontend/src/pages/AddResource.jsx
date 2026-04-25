@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createResource, uploadCSV } from "../api/resourceApi";
+import Navbar from "../components/ResourceNavbar";
 
 function AddResource() {
   const navigate = useNavigate();
@@ -153,8 +154,11 @@ function AddResource() {
   };
 
   return (
-    <div className="ml-48 min-h-screen bg-slate-100 p-6">
-     <div className="max-w-7xl mx-auto space-y-6">
+     <>
+    <Navbar />
+
+   <div className="ml-56 mt-14 min-h-screen bg-slate-100 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
 
         {/* HEADER */}
         <div className="bg-white rounded-2xl shadow border p-6">
@@ -453,6 +457,7 @@ function AddResource() {
         </form>
       </div>
     </div>
+    </>
   );
 }
 
