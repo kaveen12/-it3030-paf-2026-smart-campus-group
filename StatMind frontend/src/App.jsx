@@ -1,6 +1,10 @@
 // src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ResourceDashboardPage from "./pages/ResourceDashboardPage";
+import Notifications from "./pages/Notifications";
+import UserManagement from "./pages/UserManagement";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import AddResource from "./pages/AddResource";
 import ViewResources from "./pages/ViewResources";
 import EditResource from "./pages/EditResource";
@@ -13,8 +17,14 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<AdminDashboard />} />
-        <Route path="/my-dashboard" element={<UserDashboard />} />
+        <Route path="/" element={<Login />} />
+      <Route path="/notifications" element={<Notifications />} />
+      <Route path="/users" element={<UserManagement />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="user/dashboard" element={<UserDashboard />} />
          <Route path="/admin" element={<UserViewResource />} />
         <Route path="/resourceDashboard" element={<ResourceDashboardPage />} />
 

@@ -50,7 +50,7 @@ function Login() {
     }
 
     if (resolvedRole === 'ADMIN') {
-      navigate('/admin/dashboard');
+      navigate('/admin');
     } else {
       navigate('/user/dashboard');
     }
