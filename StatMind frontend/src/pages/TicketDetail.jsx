@@ -172,7 +172,7 @@ export const TicketDetail = () => {
     try {
       await ticketAPI.deleteTicket(ticketId);
       alert('Ticket deleted successfully');
-      navigate('/tickets');
+      navigate('/admin/tickets')
     } catch (err) {
       alert(err.message || 'Failed to delete ticket');
     }
@@ -202,7 +202,7 @@ export const TicketDetail = () => {
         <div className="bg-red-100 text-red-700 p-6 rounded-lg max-w-2xl">
           <p className="font-medium mb-4">{error || 'Ticket not found'}</p>
           <button
-            onClick={() => navigate('/tickets')}
+            onClick={() => navigate('/admin/tickets')}
             className="text-blue-600 underline font-medium"
           >
             ← Back to Dashboard
@@ -222,7 +222,7 @@ export const TicketDetail = () => {
             <p className="text-gray-500 mt-1">Status: {ticket.status}</p>
           </div>
           <button
-            onClick={() => navigate('/tickets')}
+            onClick={() => navigate('/admin/tickets')}
             className="text-gray-600 hover:text-gray-900 font-medium"
           >
             ← Back
@@ -419,8 +419,13 @@ export const TicketDetail = () => {
 
           {/* Comments Tab */}
           {activeTab === 'comments' && (
-            <CommentsSection ticketId={ticketId} comments={comments} onCommentAdded={fetchTicketDetails} />
-          )}
+  <CommentsSection
+    ticketId={ticketId}
+    comments={comments}
+    currentUserName="Admin"
+    currentUserRole="ADMIN"
+  />
+)}
 
           {/* Activity Tab */}
           {activeTab === 'activity' && <ActivityLogTimeline logs={logs} />}

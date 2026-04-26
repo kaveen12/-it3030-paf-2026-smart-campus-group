@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ticketAPI, commentAPI } from "../api/ticketService";
 import { StatusBadge } from "../components/StatusBadge";
 import { PriorityBadge } from "../components/PriorityBadge";
+import { CommentsSection } from "../components/CommentsSection";
 
 export const UserTicketDetail = () => {
   const { ticketId } = useParams();
@@ -20,12 +21,6 @@ export const UserTicketDetail = () => {
     description: "",
     priority: "",
     preferredContact: "",
-  });
-
-  const [commentData, setCommentData] = useState({
-    authorName: "User",
-    authorRole: "USER",
-    message: "",
   });
 
   const categories = [
@@ -102,30 +97,6 @@ export const UserTicketDetail = () => {
       navigate("/user/tickets/list");
     } catch (err) {
       alert(err.message || "Failed to delete ticket");
-    }
-  };
-
-  const handleAddComment = async () => {
-    if (!commentData.authorName.trim()) {
-      alert("Please enter your name");
-      return;
-    }
-
-    if (!commentData.message.trim()) {
-      alert("Please enter a comment");
-      return;
-    }
-
-    try {
-      await commentAPI.createComment(ticketId, commentData);
-      setCommentData({
-        authorName: commentData.authorName,
-        authorRole: "USER",
-        message: "",
-      });
-      fetchTicketDetails();
-    } catch (err) {
-      alert(err.message || "Failed to add comment");
     }
   };
 
@@ -316,74 +287,12 @@ export const UserTicketDetail = () => {
             )}
           </div>
 
-          <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Comments
-            </h2>
-
-            <div className="space-y-3 mb-6">
-              {comments.length === 0 ? (
-                <p className="text-gray-600">No comments yet.</p>
-              ) : (
-                comments.map((comment) => (
-                  <div
-                    key={comment.id}
-                    className="border border-gray-200 rounded-lg p-4 bg-gray-50"
-                  >
-                    <div className="flex justify-between">
-                      <p className="font-medium text-gray-900">
-                        {comment.authorName}
-                        <span className="ml-2 text-xs text-gray-500">
-                          {comment.authorRole}
-                        </span>
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {comment.createdAt
-                          ? new Date(comment.createdAt).toLocaleString()
-                          : ""}
-                      </p>
-                    </div>
-                    <p className="mt-2 text-gray-700">{comment.message}</p>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <div className="border-t pt-4 space-y-3">
-              <input
-                type="text"
-                placeholder="Your name"
-                value={commentData.authorName}
-                onChange={(e) =>
-                  setCommentData({
-                    ...commentData,
-                    authorName: e.target.value,
-                  })
-                }
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900"
-              />
-
-              <textarea
-                placeholder="Write a comment..."
-                value={commentData.message}
-                onChange={(e) =>
-                  setCommentData({
-                    ...commentData,
-                    message: e.target.value,
-                  })
-                }
-                rows="3"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900"
-              />
-
-              <button
-                onClick={handleAddComment}
-                className="bg-[#2563eb] hover:bg-[#1e3a5f] text-white px-5 py-2 rounded-lg font-medium"
-              >
-                Add Comment
-              </button>
-            </div>
-          </div>
+          <CommentsSection
+            ticketId={ticketId}
+            comments={comments}
+            currentUserName="User"
+            currentUserRole="USER"
+          />
         </div>
 
         <div className="space-y-6">

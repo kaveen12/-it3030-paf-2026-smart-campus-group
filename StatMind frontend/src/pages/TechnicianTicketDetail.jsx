@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ticketAPI, commentAPI } from "../api/ticketService";
 import { StatusBadge } from "../components/StatusBadge";
 import { PriorityBadge } from "../components/PriorityBadge";
+import { CommentsSection } from "../components/CommentsSection";
 
 const TECHNICIAN_NAME = "Kasun Technician";
 
@@ -12,7 +13,7 @@ export const TechnicianTicketDetail = () => {
 
   const [ticket, setTicket] = useState(null);
   const [comments, setComments] = useState([]);
-  const [note, setNote] = useState("");
+  const [resolutionNote, setResolutionNote] = useState("");
   const [attachmentUrl, setAttachmentUrl] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -38,25 +39,8 @@ export const TechnicianTicketDetail = () => {
     }
   };
 
-  const addNote = async () => {
-    if (!note.trim()) {
-      alert("Please enter a note");
-      return;
-    }
-
-    await commentAPI.createComment(ticketId, {
-      authorName: TECHNICIAN_NAME,
-      authorRole: "TECHNICIAN",
-      message: note,
-    });
-
-    setNote("");
-    alert("Technician note added");
-    load();
-  };
-
-  const resolve = async () => {
-    if (!note.trim()) {
+  const resolveTicket = async () => {
+    if (!resolutionNote.trim()) {
       alert("Please enter a repair note before marking as resolved");
       return;
     }
@@ -64,14 +48,14 @@ export const TechnicianTicketDetail = () => {
     await commentAPI.createComment(ticketId, {
       authorName: TECHNICIAN_NAME,
       authorRole: "TECHNICIAN",
-      message: `Repair completed: ${note}`,
+      message: `Repair completed: ${resolutionNote}`,
     });
 
     await ticketAPI.resolveTicket(ticketId, {
-      resolutionNotes: note,
+      resolutionNotes: resolutionNote,
     });
 
-    setNote("");
+    setResolutionNote("");
     alert("Ticket marked as resolved");
     load();
   };
@@ -184,63 +168,34 @@ export const TechnicianTicketDetail = () => {
             </div>
           </div>
 
+          <CommentsSection
+            ticketId={ticketId}
+            comments={comments}
+            currentUserName={TECHNICIAN_NAME}
+            currentUserRole="TECHNICIAN"
+          />
+
           <div className="bg-white rounded-xl shadow border border-gray-100 p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Technician Notes / Comments
+              Mark Work as Resolved
             </h2>
 
-            <div className="space-y-3 mb-6">
-              {comments.length === 0 ? (
-                <p className="text-gray-600">No notes or comments yet.</p>
-              ) : (
-                comments.map((comment) => (
-                  <div
-                    key={comment.id}
-                    className="bg-gray-50 border border-gray-200 rounded-lg p-4"
-                  >
-                    <div className="flex justify-between">
-                      <p className="font-medium text-gray-900">
-                        {comment.authorName}
-                        <span className="ml-2 text-xs text-gray-500">
-                          {comment.authorRole}
-                        </span>
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {comment.createdAt
-                          ? new Date(comment.createdAt).toLocaleString()
-                          : ""}
-                      </p>
-                    </div>
-                    <p className="text-gray-700 mt-2">{comment.message}</p>
-                  </div>
-                ))
-              )}
-            </div>
-
             <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={resolutionNote}
+              onChange={(e) => setResolutionNote(e.target.value)}
+              disabled={isResolved}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
               rows="4"
-              placeholder="Add repair note, diagnosis, or completion details..."
+              placeholder="Write repair note before resolving..."
             />
 
-            <div className="flex gap-3 mt-4">
-              <button
-                onClick={addNote}
-                className="bg-[#2563eb] hover:bg-[#1e3a5f] text-white px-5 py-2 rounded-lg font-medium"
-              >
-                Add Note
-              </button>
-
-              <button
-                onClick={resolve}
-                disabled={isResolved}
-                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-5 py-2 rounded-lg font-medium"
-              >
-                Mark as Resolved
-              </button>
-            </div>
+            <button
+              onClick={resolveTicket}
+              disabled={isResolved}
+              className="mt-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-5 py-2 rounded-lg font-medium"
+            >
+              Mark as Resolved
+            </button>
           </div>
 
           <div className="bg-white rounded-xl shadow border border-gray-100 p-6">

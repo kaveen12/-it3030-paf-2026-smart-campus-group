@@ -1,185 +1,171 @@
-import { useState } from 'react';
-import { commentAPI } from '../api/ticketService';
+import { useState, useEffect } from "react";
+import { commentAPI } from "../api/ticketService";
 
-export const CommentsSection = ({ ticketId, comments: initialComments, onCommentAdded }) => {
-  const [comments, setComments] = useState(initialComments || []);
-  const [newComment, setNewComment] = useState({
-    authorName: '',
-    authorRole: 'USER',
-    message: '',
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+export const CommentsSection = ({
+  ticketId,
+  comments: initialComments = [],
+  currentUserName,
+  currentUserRole,
+}) => {
+  const [comments, setComments] = useState(initialComments);
+  const [message, setMessage] = useState("");
   const [editingId, setEditingId] = useState(null);
-  const [editData, setEditData] = useState({});
+  const [editText, setEditText] = useState("");
 
-  const handleAddComment = async () => {
-    if (!newComment.authorName.trim() || !newComment.message.trim()) {
-      setError('Author name and message are required');
-      return;
-    }
+  useEffect(() => {
+    setComments(initialComments);
+  }, [initialComments]);
 
-    setLoading(true);
-    setError('');
+  const handleAdd = async () => {
+    if (!message.trim()) return;
 
-    try {
-      const createdComment = await commentAPI.createComment(ticketId, newComment);
-      setComments([...comments, createdComment]);
-      setNewComment({ authorName: '', authorRole: 'USER', message: '' });
-      if (onCommentAdded) onCommentAdded();
-    } catch (err) {
-      setError(err.message || 'Failed to add comment');
-    } finally {
-      setLoading(false);
-    }
+    const newComment = {
+      authorName: currentUserName,
+      authorRole: currentUserRole,
+      message,
+    };
+
+    const saved = await commentAPI.createComment(ticketId, newComment);
+    setComments([...comments, saved]);
+    setMessage("");
   };
 
-  const handleDeleteComment = async (commentId) => {
-    if (!window.confirm('Are you sure you want to delete this comment?')) return;
-
-    try {
-      await commentAPI.deleteComment(ticketId, commentId);
-      setComments(comments.filter((c) => c.id !== commentId));
-    } catch (err) {
-      setError(err.message || 'Failed to delete comment');
-    }
+  const handleDelete = async (id) => {
+    await commentAPI.deleteComment(ticketId, id);
+    setComments(comments.filter((c) => c.id !== id));
   };
 
-  const handleEditComment = async (commentId) => {
-    setLoading(true);
-    setError('');
+  const handleUpdate = async (id) => {
+    const updated = await commentAPI.updateComment(ticketId, id, {
+      message: editText,
+    });
 
-    try {
-      const updatedComment = await commentAPI.updateComment(ticketId, commentId, editData);
-      setComments(comments.map((c) => (c.id === commentId ? updatedComment : c)));
-      setEditingId(null);
-      setEditData({});
-    } catch (err) {
-      setError(err.message || 'Failed to update comment');
-    } finally {
-      setLoading(false);
-    }
+    setComments(comments.map((c) => (c.id === id ? updated : c)));
+    setEditingId(null);
+  };
+
+  const roleColor = (role) => {
+    if (role === "ADMIN") return "bg-red-100 text-red-600";
+    if (role === "TECHNICIAN") return "bg-green-100 text-green-600";
+    return "bg-blue-100 text-blue-600";
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-xl font-semibold text-gray-900 mb-6">Comments</h3>
+    <div className="bg-white p-6 rounded-xl shadow-sm">
+      <h2 className="text-lg font-semibold mb-4">Comments</h2>
 
-      {/* Add Comment Form */}
-      <div className="mb-8 p-4 bg-gray-50 rounded-lg">
-        <h4 className="font-medium text-gray-900 mb-4">Add Comment</h4>
+      {/* ADD COMMENT */}
+      <div className="flex gap-3 mb-6">
+        <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center">
+          {currentUserName[0]}
+        </div>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm">
-            {error}
-          </div>
-        )}
-
-        <div className="space-y-3">
-          <input
-            type="text"
-            placeholder="Your name"
-            value={newComment.authorName}
-            onChange={(e) => setNewComment({ ...newComment, authorName: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-
-          <select
-            value={newComment.authorRole}
-            onChange={(e) => setNewComment({ ...newComment, authorRole: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="USER">User</option>
-            <option value="TECHNICIAN">Technician</option>
-            <option value="ADMIN">Admin</option>
-          </select>
-
+        <div className="flex-1">
           <textarea
-            placeholder="Your comment..."
-            value={newComment.message}
-            onChange={(e) => setNewComment({ ...newComment, message: e.target.value })}
-            rows="3"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Write a comment..."
+            className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-400"
           />
 
           <button
-            onClick={handleAddComment}
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400"
+            onClick={handleAdd}
+            className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
           >
-            {loading ? 'Adding...' : 'Add Comment'}
+            Post
           </button>
         </div>
       </div>
 
-      {/* Comments List */}
+      {/* COMMENTS LIST */}
       <div className="space-y-4">
-        {comments.length === 0 ? (
-          <p className="text-gray-500 text-center py-4">No comments yet</p>
-        ) : (
-          comments.map((comment) => (
-            <div key={comment.id} className="border border-gray-200 rounded-lg p-4">
-              {editingId === comment.id ? (
-                <div className="space-y-3">
-                  <textarea
-                    value={editData.message || comment.message}
-                    onChange={(e) => setEditData({ ...editData, message: e.target.value })}
-                    rows="3"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEditComment(comment.id)}
-                      disabled={loading}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400"
+        {comments.map((c) => {
+          const isOwner =
+            c.authorName === currentUserName &&
+            c.authorRole === currentUserRole;
+
+          return (
+            <div key={c.id} className="flex gap-3">
+              {/* Avatar */}
+              <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-sm">
+                {c.authorName[0]}
+              </div>
+
+              <div className="flex-1">
+                <div className="bg-gray-100 p-3 rounded-lg">
+                  {/* Name + Role */}
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-semibold text-sm">
+                      {c.authorName}
+                    </span>
+
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded ${roleColor(
+                        c.authorRole
+                      )}`}
                     >
-                      {loading ? 'Saving...' : 'Save'}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setEditingId(null);
-                        setEditData({});
-                      }}
-                      className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <p className="font-medium text-gray-900">{comment.authorName}</p>
-                      <p className="text-xs text-gray-500">{comment.authorRole}</p>
-                    </div>
-                    <span className="text-xs text-gray-400">
-                      {new Date(comment.createdAt).toLocaleString()}
+                      {c.authorRole}
                     </span>
                   </div>
-                  <p className="text-gray-700 mb-3">{comment.message}</p>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => {
-                        setEditingId(comment.id);
-                        setEditData({ message: comment.message });
-                      }}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteComment(comment.id)}
-                      className="text-red-600 hover:text-red-800 text-sm font-medium"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </>
-              )}
+
+                  {/* Message */}
+                  {editingId === c.id ? (
+                    <>
+                      <textarea
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        className="w-full border rounded p-2 text-sm"
+                      />
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={() => handleUpdate(c.id)}
+                          className="text-blue-600 text-sm"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="text-gray-500 text-sm"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-sm text-gray-700">{c.message}</p>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="text-xs text-gray-400 mt-1 flex gap-3">
+                  <span>
+                    {new Date(c.createdAt).toLocaleString()}
+                  </span>
+
+                  {isOwner && editingId !== c.id && (
+                    <>
+                      <button
+                        onClick={() => {
+                          setEditingId(c.id);
+                          setEditText(c.message);
+                        }}
+                        className="text-blue-500"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(c.id)}
+                        className="text-red-500"
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
-          ))
-        )}
+          );
+        })}
       </div>
     </div>
   );
