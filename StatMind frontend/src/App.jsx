@@ -10,6 +10,10 @@ import { UserTicketHome } from "./pages/UserTicketHome";
 import { UserTickets } from "./pages/UserTickets";
 import { UserTicketDetail } from "./pages/UserTicketDetail";
 
+import { TechnicianLayout } from "./components/TechnicianLayout";
+import { TechnicianTickets } from "./pages/TechnicianTickets";
+import { TechnicianTicketDetail } from "./pages/TechnicianTicketDetail";
+
 function App() {
   return (
     <Router>
@@ -25,9 +29,33 @@ function App() {
         <Route path="/admin/tickets" element={<AdminLayout><TicketDashboard /></AdminLayout>} />
         <Route path="/admin/tickets/:ticketId" element={<AdminLayout><TicketDetail /></AdminLayout>} />
 
-        {/* DEFAULT */}
-        <Route path="/" element={<UserLayout><UserTicketHome /></UserLayout>} />
+        <Route
+  path="/technician/tickets"
+  element={
+    <TechnicianLayout>
+      <TechnicianTickets />
+    </TechnicianLayout>
+  }
+/>
 
+<Route
+  path="/technician/tickets/:ticketId"
+  element={
+    <TechnicianLayout>
+      <TechnicianTicketDetail />
+    </TechnicianLayout>
+  }
+/>
+
+        {/* DEFAULT */}
+        <Route
+  path="/"
+  element={
+    <UserLayout>
+      <UserTicketHome />
+    </UserLayout>
+  }
+/>
       </Routes>
     </Router>
   );
