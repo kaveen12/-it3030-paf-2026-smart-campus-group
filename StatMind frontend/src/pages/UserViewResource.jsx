@@ -35,26 +35,45 @@ function UserViewResource() {
     loadResources();
   };
 
+  // ✅ STATS (FIXED)
+  const activeResources = resources.filter(
+    (r) => r.status === "ACTIVE"
+  ).length;
+
+  const totalCapacity = resources.reduce(
+    (sum, r) => sum + (r.capacity || 0),
+    0
+  );
+
+  const matchingResults = resources.length; // because search already filters data
+
   return (
     <>
       <UserNavbar />
 
-      <div className="fixed top-14 left-56 right-0 bottom-0 bg-slate-100 p-6 overflow-auto">
+      <div className="ml-56 mt-14 bg-slate-100 min-h-screen p-6">
 
-        <div className="bg-white rounded-2xl shadow p-6 min-h-full">
+        {/* HERO */}
+        <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-6 rounded-2xl shadow mb-6">
+          <h1 className="text-3xl font-bold">
+            Browse active rooms and equipment
+          </h1>
+          <p className="text-slate-300 mt-2 text-sm">
+            Explore available campus resources, filter by type, location, and capacity.
+          </p>
+        </div>
 
-          {/* HEADER */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">
-              Facility Catalogue
-            </h1>
-            <p className="text-gray-500">
-              Browse available lecture halls, labs, rooms & equipment
-            </p>
-          </div>
+        {/* STATS CARDS (FIXED) */}
+       
 
-          {/* FILTER BAR */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
+        {/* FILTER */}
+        <div className="bg-white p-5 rounded-xl shadow mb-6">
+
+          <h2 className="font-semibold text-gray-700 mb-3">
+            Find the right resource
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
 
             <input
               type="text"
@@ -103,43 +122,46 @@ function UserViewResource() {
             </div>
 
           </div>
+        </div>
 
-          {/* CONTENT */}
-          {loading ? (
-            <p className="text-center text-blue-600">Loading...</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {/* RESULTS */}
+        {loading ? (
+          <p className="text-center text-blue-600">Loading...</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 
-              {resources.map((r) => (
-                <div
-                  key={r.id}
-                  className="bg-slate-50 rounded-xl shadow hover:shadow-lg transition p-5 border"
-                >
+            {resources.map((r) => (
+              <div
+                key={r.id}
+                className="bg-white rounded-xl shadow hover:shadow-lg transition p-5 border"
+              >
 
-                  {/* TITLE */}
-                  <h2 className="text-lg font-bold text-gray-800">
-                    {r.name}
-                  </h2>
-
-                  {/* TYPE BADGE */}
+                <div className="flex justify-between items-center mb-3">
                   <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
                     {r.type}
                   </span>
 
-                  {/* DETAILS */}
-                  <div className="mt-3 text-sm text-gray-600 space-y-1">
-                    <p>📍 {r.location}</p>
-                    <p>👥 Capacity: {r.capacity}</p>
-                    <p>📌 Status: {r.status}</p>
-                  </div>
-
+                  <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                    {r.status}
+                  </span>
                 </div>
-              ))}
 
-            </div>
-          )}
+                <h2 className="text-lg font-bold text-gray-800">
+                  {r.name}
+                </h2>
 
-        </div>
+                <div className="mt-3 text-sm text-gray-600 space-y-1">
+                  <p>📍 {r.location}</p>
+                  <p>👥 Capacity: {r.capacity}</p>
+                  <p>Status:{r.status}</p>
+                </div>
+
+              </div>
+            ))}
+
+          </div>
+        )}
+
       </div>
     </>
   );
