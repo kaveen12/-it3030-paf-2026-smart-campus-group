@@ -13,9 +13,9 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/" element={<AdminDashboard />} />
         <Route path="/my-dashboard" element={<UserDashboard />} />
-         <Route path="/" element={<UserViewResource />} />
+         <Route path="/admin" element={<UserViewResource />} />
         <Route path="/resourceDashboard" element={<ResourceDashboardPage />} />
 
         <Route path="/addResource" element={<AddResource />} />
