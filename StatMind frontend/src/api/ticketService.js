@@ -166,7 +166,6 @@ export const commentAPI = {
 
 // Activity log endpoints
 export const activityLogAPI = {
-  // Get activity logs for a ticket
   getActivityLogs: async (ticketId) => {
     try {
       const response = await apiClient.get(`/tickets/${ticketId}/logs`);
