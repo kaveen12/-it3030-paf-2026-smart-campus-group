@@ -1,83 +1,231 @@
-import { useState } from "react";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
+import { googleLogin, loginUser } from '../api/authApi';
+import { addNotification } from '../utils/notifications';
+import './Auth.css';
+
+const getErrorMessage = (err) => {
+  if (err.response?.data?.message) {
+    const message = err.response.data.message;
+    if (typeof message === 'string') {
+      return message;
+    }
+    if (typeof message === 'object') {
+      return Object.values(message).join(', ');
+    }
+  }
+
+  if (err.message === 'Network Error') {
+    return 'Cannot reach backend server. Please start Spring Boot backend on port 8080.';
+  }
+
+  return 'Login failed. Please try again.';
+};
 
 function Login() {
-  const [userId, setUserId] = useState("");
-  const [role, setRole] = useState("USER");
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleAuthSuccess = (data) => {
+    localStorage.setItem('flexitUser', JSON.stringify(data));
+
+    const resolvedRole = String(data.role || '').toUpperCase();
+    const resolvedUserId = data.userId || data.id;
+    const resolvedName = data.userName || data.fullName || data.name || 'User';
+
+    if (resolvedRole === 'USER' && resolvedUserId) {
+      addNotification({
+        userId: resolvedUserId,
+        title: `Welcome back, ${resolvedName}!`,
+        message: 'You have successfully logged in to your FlexIT workspace.',
+        type: 'greeting',
+        actionUrl: '/user/dashboard',
+      });
+    }
+
+    if (resolvedRole === 'ADMIN') {
+      navigate('/admin/dashboard');
+    } else {
+      navigate('/user/dashboard');
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    setError('');
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
 
-    if (!userId.trim()) {
-      alert("Please enter a user ID");
+    try {
+      if (!formData.email || !formData.password) {
+        setError('Please fill in all fields');
+        return;
+      }
+
+      const data = await loginUser({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      handleAuthSuccess(data);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    if (!credentialResponse?.credential) {
+      setError('Google authentication failed. Please try again.');
       return;
     }
 
-    localStorage.setItem("userId", userId);
-    localStorage.setItem("role", role);
+    setLoading(true);
+    setError('');
 
-    window.location.href = "/";
+    try {
+      const data = await googleLogin({ idToken: credentialResponse.credential });
+      handleAuthSuccess(data);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-800 px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-700">StatMind</h1>
-          <p className="text-gray-500 mt-2">
-            Smart Campus Operations Hub
-          </p>
-        </div>
-
-        <form onSubmit={handleLogin} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              User ID
-            </label>
-            <input
-              type="text"
-              placeholder="Example: user1"
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+    <div className="auth-page login-page">
+      <div className="auth-container login-layout">
+        <section className="auth-info-section" aria-label="Flexit overview">
+          <div className="brand-lockup" aria-label="Flexit">
+            <span className="brand-mark">
+              <img src="/favicon.svg" alt="" />
+            </span>
+            <span className="brand-name">Flexit</span>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Login Role
-            </label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <div className="auth-copy">
+            <p className="eyebrow">Smart campus workspace</p>
+            <h1 className="info-title">Welcome back to your campus command center.</h1>
+            <p className="info-desc">
+              Sign in to manage resources, view updates, and keep daily campus work moving from one simple dashboard.
+            </p>
+          </div>
+
+          <div className="mini-cards-container">
+            <div className="mini-card">
+              <div className="mini-card-icon">01</div>
+              <div className="mini-card-text">
+                <h3>Fast access</h3>
+                <p>Continue to your dashboard without unnecessary steps.</p>
+              </div>
+            </div>
+
+            <div className="mini-card">
+              <div className="mini-card-icon">02</div>
+              <div className="mini-card-text">
+                <h3>Secure sessions</h3>
+                <p>Your account data stays protected while you work.</p>
+              </div>
+            </div>
+
+            <div className="mini-card">
+              <div className="mini-card-icon">03</div>
+              <div className="mini-card-text">
+                <h3>Clear updates</h3>
+                <p>See campus activity and resource status at a glance.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <main className="auth-card" aria-label="Sign in form">
+          <div className="auth-card-header">
+            <p className="eyebrow">Account login</p>
+            <h2>Sign in</h2>
+            <p className="auth-subtitle">Use your registered email and password to continue.</p>
+          </div>
+
+          {error && <div className="error-message">{error}</div>}
+
+          <form onSubmit={handleSubmit} className="auth-form">
+            <div className="form-group">
+              <label htmlFor="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="name@example.com"
+                value={formData.email}
+                onChange={handleChange}
+                autoComplete="email"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={handleChange}
+                autoComplete="current-password"
+                required
+              />
+            </div>
+
+            <button type="submit" className="btn-submit" disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign in'}
+            </button>
+          </form>
+
+          <div className="auth-divider">
+            <span>or</span>
+          </div>
+
+          <div className="social-login">
+            <div className="social-btn-wrapper">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError('Google authentication failed. Please try again.')}
+                text="signin_with"
+                shape="rectangular"
+                width="100%"
+              />
+            </div>
+          </div>
+
+          <p className="auth-footer">
+            New to Flexit?{' '}
+            <a
+              href="#signup"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/signup');
+              }}
             >
-              <option value="USER">USER</option>
-              <option value="ADMIN">ADMIN</option>
-              <option value="TECHNICIAN">TECHNICIAN</option>
-            </select>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-blue-700 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition"
-          >
-            Login
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <button
-            type="button"
-            className="w-full border border-gray-300 py-3 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition"
-            onClick={() => alert("Google OAuth can be integrated here")}
-          >
-            Continue with Google
-          </button>
-        </div>
-
-        <p className="text-xs text-gray-400 text-center mt-6">
-          This login simulates OAuth user access for demo purposes.
-        </p>
+              Create an account
+            </a>
+          </p>
+        </main>
       </div>
     </div>
   );
