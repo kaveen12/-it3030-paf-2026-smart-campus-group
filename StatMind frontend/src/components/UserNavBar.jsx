@@ -112,7 +112,7 @@ function UserNavbar() {
 
         {/* LEFT */}
         <h1 className="text-lg font-semibold text-gray-800">
-          User Panel
+          UniCore
         </h1>
 
         {/* RIGHT */}

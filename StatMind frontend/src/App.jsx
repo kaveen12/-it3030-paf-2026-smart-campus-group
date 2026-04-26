@@ -7,8 +7,8 @@ function App() {
   return (
     <Router>
           <Routes>
-            <Route path="/bookings" element={<BookingListPage  />} />
-            <Route path="/" element={<CreateBooking />} />
+            <Route path="/" element={<BookingListPage  />} />
+            <Route path="/create-booking" element={<CreateBooking />} />
             <Route path="/my-bookings" element={<UserBookings />} />
           </Routes>
     </Router>

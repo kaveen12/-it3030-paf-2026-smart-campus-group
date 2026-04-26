@@ -15,6 +15,20 @@ const navItems = [
     ),
   },
   {
+    to: "/users",
+    label: "User Management",
+    icon: (
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8" />
+        <path 
+        d="M4 20c0-3.314 3.582-6 8-6s8 2.686 8 6" 
+        stroke="currentColor" 
+        strokeWidth="1.8"
+        />
+      </svg>
+    ),
+  },
+  {
     to: "/resources",
     label: "Resource Management",
     icon: (
