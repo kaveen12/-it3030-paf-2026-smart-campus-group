@@ -36,7 +36,7 @@ const navItems = [
     ),
   },
   {
-    to: "/",
+    to: "/Bookings",
     label: "Bookings",
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
