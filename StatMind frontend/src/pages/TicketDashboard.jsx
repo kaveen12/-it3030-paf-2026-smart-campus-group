@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ticketAPI } from '../api/ticketService';
 import { TicketTable } from '../components/TicketTable';
-import { StatusBadge } from '../components/StatusBadge';
 
 export const TicketDashboard = () => {
   const navigate = useNavigate();
@@ -38,6 +37,7 @@ export const TicketDashboard = () => {
   const fetchTickets = async () => {
     setLoading(true);
     setError('');
+
     try {
       const data = await ticketAPI.getAllTickets();
       setTickets(Array.isArray(data) ? data : []);
@@ -52,7 +52,6 @@ export const TicketDashboard = () => {
   const applyFilters = () => {
     let filtered = tickets;
 
-    // Search filter
     if (searchTerm) {
       filtered = filtered.filter(
         (ticket) =>
@@ -63,17 +62,14 @@ export const TicketDashboard = () => {
       );
     }
 
-    // Status filter
     if (statusFilter) {
       filtered = filtered.filter((ticket) => ticket.status === statusFilter);
     }
 
-    // Priority filter
     if (priorityFilter) {
       filtered = filtered.filter((ticket) => ticket.priority === priorityFilter);
     }
 
-    // Category filter
     if (categoryFilter) {
       filtered = filtered.filter((ticket) => ticket.category === categoryFilter);
     }
@@ -81,20 +77,18 @@ export const TicketDashboard = () => {
     setFilteredTickets(filtered);
   };
 
-  const getSummary = () => {
-    return {
-      total: tickets.length,
-      open: tickets.filter((t) => t.status === 'OPEN').length,
-      inProgress: tickets.filter((t) => t.status === 'IN_PROGRESS').length,
-      resolved: tickets.filter((t) => t.status === 'RESOLVED').length,
-      closed: tickets.filter((t) => t.status === 'CLOSED').length,
-    };
-  };
+  const getSummary = () => ({
+    total: tickets.length,
+    open: tickets.filter((t) => t.status === 'OPEN').length,
+    inProgress: tickets.filter((t) => t.status === 'IN_PROGRESS').length,
+    resolved: tickets.filter((t) => t.status === 'RESOLVED').length,
+    closed: tickets.filter((t) => t.status === 'CLOSED').length,
+  });
 
   const summary = getSummary();
 
   const handleViewTicket = (ticketId) => {
-    navigate(`/tickets/${ticketId}`);
+    navigate(`/admin/tickets/${ticketId}`);
   };
 
   const SummaryCard = ({ title, count, color }) => (
@@ -106,25 +100,14 @@ export const TicketDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white border-b border-gray-200 px-8 py-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Incident Ticketing</h1>
-            <p className="text-gray-500 mt-1">Manage campus maintenance incidents</p>
-          </div>
-          <button
-            onClick={() => navigate('/tickets/create')}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium"
-          >
-            + Create Ticket
-          </button>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Incident Ticketing</h1>
+          <p className="text-gray-500 mt-1">Manage campus maintenance incidents</p>
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="p-8">
-        {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
           <SummaryCard title="Total Tickets" count={summary.total} color="border-blue-500" />
           <SummaryCard title="Open" count={summary.open} color="border-blue-500" />
@@ -133,9 +116,9 @@ export const TicketDashboard = () => {
           <SummaryCard title="Closed" count={summary.closed} color="border-gray-500" />
         </div>
 
-        {/* Filters */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Filters</h3>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
@@ -157,9 +140,7 @@ export const TicketDashboard = () => {
               >
                 <option value="">All Status</option>
                 {statuses.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
+                  <option key={status} value={status}>{status}</option>
                 ))}
               </select>
             </div>
@@ -173,9 +154,7 @@ export const TicketDashboard = () => {
               >
                 <option value="">All Priority</option>
                 {priorities.map((priority) => (
-                  <option key={priority} value={priority}>
-                    {priority}
-                  </option>
+                  <option key={priority} value={priority}>{priority}</option>
                 ))}
               </select>
             </div>
@@ -189,9 +168,7 @@ export const TicketDashboard = () => {
               >
                 <option value="">All Categories</option>
                 {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
+                  <option key={category} value={category}>{category}</option>
                 ))}
               </select>
             </div>
@@ -213,32 +190,25 @@ export const TicketDashboard = () => {
           </div>
         </div>
 
-        {/* Error Message */}
         {error && (
           <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg">
             {error}
-            <button
-              onClick={fetchTickets}
-              className="ml-4 underline font-medium hover:text-red-900"
-            >
+            <button onClick={fetchTickets} className="ml-4 underline font-medium">
               Retry
             </button>
           </div>
         )}
 
-        {/* Loading State */}
         {loading ? (
           <div className="text-center py-12">
             <p className="text-gray-500">Loading tickets...</p>
           </div>
         ) : (
           <>
-            {/* Results count */}
             <div className="mb-4 text-sm text-gray-600">
               Showing {filteredTickets.length} of {tickets.length} tickets
             </div>
 
-            {/* Ticket Table */}
             <TicketTable
               tickets={filteredTickets}
               onView={handleViewTicket}

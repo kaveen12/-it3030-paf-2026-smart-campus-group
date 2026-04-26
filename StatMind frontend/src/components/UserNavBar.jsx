@@ -14,7 +14,7 @@ const navItems = [
     ),
   },
   {
-    to: "/",
+    to: "/bookings",
     label: "Bookings",
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
@@ -43,10 +43,7 @@ function UserNavbar() {
 
   return (
     <>
-      {/* SIDEBAR */}
       <aside className="fixed left-0 top-0 w-56 h-screen bg-[#0f172a] flex flex-col p-4 z-50">
-
-        {/* LOGO */}
         <div className="flex items-center gap-2.5 px-2 mb-7">
           <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -59,10 +56,9 @@ function UserNavbar() {
           <span className="text-[15px] font-medium text-white">StatMind</span>
         </div>
 
-        {/* NAVIGATION */}
         <nav className="flex flex-col gap-1">
           {navItems.map(({ to, label, icon }) => {
-            const active = pathname === to;
+            const active = pathname === to || pathname.startsWith(`${to}/`);
 
             return (
               <Link
@@ -81,7 +77,6 @@ function UserNavbar() {
           })}
         </nav>
 
-        {/* SIDEBAR LOGOUT */}
         <div className="mt-auto pt-4 border-t border-gray-700">
           <button className="w-full text-left px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-red-400 rounded">
             Logout
@@ -89,15 +84,9 @@ function UserNavbar() {
         </div>
       </aside>
 
-      {/* TOP NAVBAR */}
       <header className="fixed top-0 left-56 right-0 h-14 bg-white border-b flex items-center justify-between px-6 z-40 shadow-sm">
+        <h1 className="text-lg font-semibold text-gray-800">User Panel</h1>
 
-        {/* LEFT */}
-        <h1 className="text-lg font-semibold text-gray-800">
-          User Panel
-        </h1>
-
-        {/* RIGHT */}
         <div className="flex items-center gap-4">
           <span className="text-sm text-gray-600">User</span>
           <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm">
