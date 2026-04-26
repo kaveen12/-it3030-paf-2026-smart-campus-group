@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
+import logo from "../assets/logo-UniCore.png";
 
 const navItems = [
   {
-    to: "/notifications",
-    label: "Notifications",
+    to: "/my-dashboard",
+    label: "My Dashboard",
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
         <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
@@ -14,8 +15,8 @@ const navItems = [
     ),
   },
   {
-    to: "/bookings",
-    label: "Bookings",
+    to: "/resources",
+    label: "Resources",
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
         <ellipse cx="12" cy="7" rx="8" ry="3" stroke="currentColor" strokeWidth="1.8" />
@@ -25,14 +26,34 @@ const navItems = [
     ),
   },
   {
-    to: "/user/tickets",
-    label: "Tickets",
+    to: "/notifications",
+    label: "Notifications",
+    icon: (
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+        <path d="M12 3a7 7 0 00-7 7v4l-1.5 2.5A1 1 0 004.5 18h15a1 1 0 00.86-1.5L19 14V10a7 7 0 00-7-7z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M10 21a2 2 0 004 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    to: "/bookings",
+    label: "Bookings",
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
         <rect x="3" y="4" width="18" height="17" rx="2" stroke="currentColor" strokeWidth="1.8" />
         <path d="M3 9h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
         <path d="M8 2v4M16 2v4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
         <path d="M7 13h4M7 17h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    to: "/user/tickets",
+    label: "Tickets",
+    icon: (
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+        <path d="M2 9a2 2 0 012-2h16a2 2 0 012 2v1.5a2.5 2.5 0 000 5V17a2 2 0 01-2 2H4a2 2 0 01-2-2v-1.5a2.5 2.5 0 000-5V9z" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M9 2v3M9 19v3M15 2v3M15 19v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     ),
   },
@@ -45,15 +66,12 @@ function UserNavbar() {
     <>
       <aside className="fixed left-0 top-0 w-56 h-screen bg-[#0f172a] flex flex-col p-4 z-50">
         <div className="flex items-center gap-2.5 px-2 mb-7">
-          <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <rect x="2" y="2" width="5" height="5" rx="1.5" fill="white" />
-              <rect x="9" y="2" width="5" height="5" rx="1.5" fill="white" opacity="0.6" />
-              <rect x="2" y="9" width="5" height="5" rx="1.5" fill="white" opacity="0.6" />
-              <rect x="9" y="9" width="5" height="5" rx="1.5" fill="white" />
-            </svg>
-          </div>
-          <span className="text-[15px] font-medium text-white">StatMind</span>
+          <img
+            src={logo}
+            alt="UniCore Logo"
+            className="w-8 h-8 object-contain rounded-lg"
+          />
+          <span className="text-[15px] font-medium text-white">UniCore</span>
         </div>
 
         <nav className="flex flex-col gap-1">
@@ -85,7 +103,7 @@ function UserNavbar() {
       </aside>
 
       <header className="fixed top-0 left-56 right-0 h-14 bg-white border-b flex items-center justify-between px-6 z-40 shadow-sm">
-        <h1 className="text-lg font-semibold text-gray-800">User Panel</h1>
+        <h1 className="text-lg font-semibold text-gray-800">UniCore</h1>
 
         <div className="flex items-center gap-4">
           <span className="text-sm text-gray-600">User</span>
