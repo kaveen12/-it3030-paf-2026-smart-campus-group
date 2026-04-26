@@ -29,7 +29,7 @@ const navItems = [
     ),
   },
   {
-    to: "/resourceDashboard",
+    to: "/resources",
     label: "Resource Management",
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">

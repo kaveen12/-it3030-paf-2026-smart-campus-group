@@ -15,7 +15,7 @@ const navItems = [
     ),
   },
   {
-    to: "/",
+    to: "/resources",
     label: "Resources",
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
@@ -36,7 +36,7 @@ const navItems = [
     ),
   },
   {
-    to: "/booking",
+    to: "/",
     label: "Bookings",
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
@@ -112,7 +112,7 @@ function UserNavbar() {
 
         {/* LEFT */}
         <h1 className="text-lg font-semibold text-gray-800">
-          User Panel
+          UniCore
         </h1>
 
         {/* RIGHT */}
