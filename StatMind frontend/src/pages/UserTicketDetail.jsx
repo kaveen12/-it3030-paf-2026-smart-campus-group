@@ -10,7 +10,6 @@ export const UserTicketDetail = () => {
 
   const [ticket, setTicket] = useState(null);
   const [comments, setComments] = useState([]);
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -95,11 +94,7 @@ export const UserTicketDetail = () => {
   };
 
   const handleDeleteTicket = async () => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this ticket?"
-    );
-
-    if (!confirmDelete) return;
+    if (!window.confirm("Are you sure you want to delete this ticket?")) return;
 
     try {
       await ticketAPI.deleteTicket(ticketId);
@@ -123,13 +118,11 @@ export const UserTicketDetail = () => {
 
     try {
       await commentAPI.createComment(ticketId, commentData);
-
       setCommentData({
         authorName: commentData.authorName,
         authorRole: "USER",
         message: "",
       });
-
       fetchTicketDetails();
     } catch (err) {
       alert(err.message || "Failed to add comment");
@@ -137,7 +130,7 @@ export const UserTicketDetail = () => {
   };
 
   if (loading) {
-    return <div className="p-8 text-gray-500">Loading ticket...</div>;
+    return <div className="p-8 text-gray-700">Loading ticket...</div>;
   }
 
   if (error || !ticket) {
@@ -148,7 +141,7 @@ export const UserTicketDetail = () => {
         </div>
         <button
           onClick={() => navigate("/user/tickets/list")}
-          className="mt-4 text-blue-600 underline"
+          className="mt-4 text-blue-600 underline font-medium"
         >
           Back to My Tickets
         </button>
@@ -159,21 +152,21 @@ export const UserTicketDetail = () => {
   const canEditOrDelete = ticket.status === "OPEN";
 
   return (
-    <div className="p-8">
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
+    <div className="p-8 bg-gray-50 min-h-screen">
+      <div className="bg-white rounded-xl shadow p-6 mb-6 border border-gray-100">
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
               Ticket #{ticket.id?.substring(0, 8)}
             </h1>
-            <p className="text-gray-500 mt-1">
+            <p className="text-gray-600 mt-1">
               Track your submitted incident ticket
             </p>
           </div>
 
           <button
             onClick={() => navigate("/user/tickets/list")}
-            className="text-gray-600 hover:text-gray-900"
+            className="text-[#1e3a5f] font-medium hover:underline"
           >
             ← Back
           </button>
@@ -187,38 +180,42 @@ export const UserTicketDetail = () => {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 space-y-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold mb-4">Ticket Details</h2>
+          <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Ticket Details
+            </h2>
 
             {!editMode ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <p className="text-sm text-gray-500">Resource</p>
-                  <p className="font-medium">
+                  <p className="text-sm text-gray-600">Resource</p>
+                  <p className="font-medium text-gray-900">
                     {ticket.resourceName || ticket.resourceOrLocation || "N/A"}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-sm text-gray-500">Location</p>
-                  <p className="font-medium">
+                  <p className="text-sm text-gray-600">Location</p>
+                  <p className="font-medium text-gray-900">
                     {ticket.location || ticket.resourceOrLocation || "N/A"}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-sm text-gray-500">Category</p>
-                  <p className="font-medium">{ticket.category}</p>
+                  <p className="text-sm text-gray-600">Category</p>
+                  <p className="font-medium text-gray-900">{ticket.category}</p>
                 </div>
 
                 <div>
-                  <p className="text-sm text-gray-500">Preferred Contact</p>
-                  <p className="font-medium">{ticket.preferredContact}</p>
+                  <p className="text-sm text-gray-600">Preferred Contact</p>
+                  <p className="font-medium text-gray-900">
+                    {ticket.preferredContact}
+                  </p>
                 </div>
 
                 <div className="md:col-span-2">
-                  <p className="text-sm text-gray-500">Description</p>
-                  <p className="font-medium whitespace-pre-wrap">
+                  <p className="text-sm text-gray-600">Description</p>
+                  <p className="font-medium text-gray-900 whitespace-pre-wrap">
                     {ticket.description}
                   </p>
                 </div>
@@ -226,7 +223,7 @@ export const UserTicketDetail = () => {
             ) : (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Location / Resource
                   </label>
                   <input
@@ -238,13 +235,13 @@ export const UserTicketDetail = () => {
                         resourceOrLocation: e.target.value,
                       })
                     }
-                    className="w-full border rounded-lg px-3 py-2"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Category
                     </label>
                     <select
@@ -252,7 +249,7 @@ export const UserTicketDetail = () => {
                       onChange={(e) =>
                         setEditData({ ...editData, category: e.target.value })
                       }
-                      className="w-full border rounded-lg px-3 py-2"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white"
                     >
                       {categories.map((category) => (
                         <option key={category} value={category}>
@@ -263,7 +260,7 @@ export const UserTicketDetail = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Priority
                     </label>
                     <select
@@ -271,7 +268,7 @@ export const UserTicketDetail = () => {
                       onChange={(e) =>
                         setEditData({ ...editData, priority: e.target.value })
                       }
-                      className="w-full border rounded-lg px-3 py-2"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white"
                     >
                       {priorities.map((priority) => (
                         <option key={priority} value={priority}>
@@ -283,7 +280,7 @@ export const UserTicketDetail = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Description
                   </label>
                   <textarea
@@ -295,12 +292,12 @@ export const UserTicketDetail = () => {
                       })
                     }
                     rows="4"
-                    className="w-full border rounded-lg px-3 py-2"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Preferred Contact
                   </label>
                   <input
@@ -312,24 +309,26 @@ export const UserTicketDetail = () => {
                         preferredContact: e.target.value,
                       })
                     }
-                    className="w-full border rounded-lg px-3 py-2"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900"
                   />
                 </div>
               </div>
             )}
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold mb-4">Comments</h2>
+          <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Comments
+            </h2>
 
             <div className="space-y-3 mb-6">
               {comments.length === 0 ? (
-                <p className="text-gray-500">No comments yet.</p>
+                <p className="text-gray-600">No comments yet.</p>
               ) : (
                 comments.map((comment) => (
                   <div
                     key={comment.id}
-                    className="border rounded-lg p-4 bg-gray-50"
+                    className="border border-gray-200 rounded-lg p-4 bg-gray-50"
                   >
                     <div className="flex justify-between">
                       <p className="font-medium text-gray-900">
@@ -361,7 +360,7 @@ export const UserTicketDetail = () => {
                     authorName: e.target.value,
                   })
                 }
-                className="w-full border rounded-lg px-3 py-2"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900"
               />
 
               <textarea
@@ -374,12 +373,12 @@ export const UserTicketDetail = () => {
                   })
                 }
                 rows="3"
-                className="w-full border rounded-lg px-3 py-2"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900"
               />
 
               <button
                 onClick={handleAddComment}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg"
+                className="bg-[#2563eb] hover:bg-[#1e3a5f] text-white px-5 py-2 rounded-lg font-medium"
               >
                 Add Comment
               </button>
@@ -388,20 +387,22 @@ export const UserTicketDetail = () => {
         </div>
 
         <div className="space-y-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold mb-4">Status</h2>
+          <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Status
+            </h2>
 
-            <p className="text-sm text-gray-500">Current Status</p>
-            <p className="font-semibold mb-4">{ticket.status}</p>
+            <p className="text-sm text-gray-600">Current Status</p>
+            <p className="font-semibold text-gray-900 mb-4">{ticket.status}</p>
 
-            <p className="text-sm text-gray-500">Assigned Technician</p>
-            <p className="font-semibold mb-4">
+            <p className="text-sm text-gray-600">Assigned Technician</p>
+            <p className="font-semibold text-gray-900 mb-4">
               {ticket.assignedTechnicianName || "Not assigned yet"}
             </p>
 
             {ticket.rejectionReason && (
               <>
-                <p className="text-sm text-gray-500">Rejection Reason</p>
+                <p className="text-sm text-gray-600">Rejection Reason</p>
                 <p className="font-semibold text-red-600 mb-4">
                   {ticket.rejectionReason}
                 </p>
@@ -410,7 +411,7 @@ export const UserTicketDetail = () => {
 
             {ticket.resolutionNotes && (
               <>
-                <p className="text-sm text-gray-500">Resolution Notes</p>
+                <p className="text-sm text-gray-600">Resolution Notes</p>
                 <p className="font-semibold text-green-600">
                   {ticket.resolutionNotes}
                 </p>
@@ -418,11 +419,13 @@ export const UserTicketDetail = () => {
             )}
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold mb-4">User Actions</h2>
+          <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              User Actions
+            </h2>
 
             {!canEditOrDelete && (
-              <p className="text-sm text-gray-500 mb-4">
+              <p className="text-sm text-gray-600 mb-4">
                 This ticket can no longer be edited or deleted because its
                 status is {ticket.status}.
               </p>
@@ -432,7 +435,7 @@ export const UserTicketDetail = () => {
               <button
                 disabled={!canEditOrDelete}
                 onClick={() => setEditMode(true)}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white py-2 rounded-lg mb-3"
+                className="w-full bg-[#2563eb] hover:bg-[#1e3a5f] disabled:bg-gray-400 text-white py-2 rounded-lg mb-3 font-medium"
               >
                 Edit Ticket
               </button>
@@ -440,13 +443,13 @@ export const UserTicketDetail = () => {
               <div className="space-y-3">
                 <button
                   onClick={handleUpdateTicket}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg"
+                  className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-medium"
                 >
                   Save Changes
                 </button>
                 <button
                   onClick={() => setEditMode(false)}
-                  className="w-full bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-lg"
+                  className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg font-medium"
                 >
                   Cancel
                 </button>
@@ -456,7 +459,7 @@ export const UserTicketDetail = () => {
             <button
               disabled={!canEditOrDelete}
               onClick={handleDeleteTicket}
-              className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white py-2 rounded-lg mt-3"
+              className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white py-2 rounded-lg mt-3 font-medium"
             >
               Delete Ticket
             </button>
