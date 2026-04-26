@@ -43,7 +43,7 @@ function Login() {
       addNotification({
         userId: resolvedUserId,
         title: `Welcome back, ${resolvedName}!`,
-        message: 'You have successfully logged in to your FlexIT workspace.',
+        message: 'You have successfully logged in to your UniCore workspace.',
         type: 'greeting',
         actionUrl: '/user/dashboard',
       });
@@ -111,16 +111,16 @@ function Login() {
   return (
     <div className="auth-page login-page">
       <div className="auth-container login-layout">
-        <section className="auth-info-section" aria-label="Flexit overview">
-          <div className="brand-lockup" aria-label="Flexit">
+        <section className="auth-info-section" aria-label="UniCore overview">
+          <div className="brand-lockup" aria-label="UniCore">
             <span className="brand-mark">
               <img src="/favicon.svg" alt="" />
             </span>
-            <span className="brand-name">Flexit</span>
+            <span className="brand-name">UniCore</span>
           </div>
 
           <div className="auth-copy">
-            <p className="eyebrow">Smart campus workspace</p>
+            <p className="eyebrow">Smart Campus Workspace</p>
             <h1 className="info-title">Welcome back to your campus command center.</h1>
             <p className="info-desc">
               Sign in to manage resources, view updates, and keep daily campus work moving from one simple dashboard.
@@ -214,7 +214,7 @@ function Login() {
           </div>
 
           <p className="auth-footer">
-            New to Flexit?{' '}
+            New to UniCore?{' '}
             <a
               href="#signup"
               onClick={(e) => {

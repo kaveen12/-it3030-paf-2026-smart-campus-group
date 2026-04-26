@@ -12,7 +12,7 @@ function Notifications() {
   const fetchNotifications = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:8081/api/notifications/user/user1"
+        `http://localhost:8081/api/notifications/user/${localStorage.getItem("userId")}`
       );
       setNotifications(res.data);
     } catch (error) {
