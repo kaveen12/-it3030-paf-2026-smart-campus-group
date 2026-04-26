@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import logo from "../assets/logo-UniCore.png";
 
 const navItems = [
   {
@@ -10,6 +11,20 @@ const navItems = [
         <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
         <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
         <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+      </svg>
+    ),
+  },
+  {
+    to: "/users",
+    label: "User Management",
+    icon: (
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8" />
+        <path 
+        d="M4 20c0-3.314 3.582-6 8-6s8 2.686 8 6" 
+        stroke="currentColor" 
+        strokeWidth="1.8"
+        />
       </svg>
     ),
   },
@@ -57,17 +72,14 @@ function AdminNavbar() {
       <aside className="fixed left-0 top-0 w-56 h-screen bg-[#0f172a] flex flex-col p-4 z-50">
 
         {/* LOGO */}
-        <div className="flex items-center gap-2.5 px-2 mb-7">
-          <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <rect x="2" y="2" width="5" height="5" rx="1.5" fill="white" />
-              <rect x="9" y="2" width="5" height="5" rx="1.5" fill="white" opacity="0.6" />
-              <rect x="2" y="9" width="5" height="5" rx="1.5" fill="white" opacity="0.6" />
-              <rect x="9" y="9" width="5" height="5" rx="1.5" fill="white" />
-            </svg>
+          <div className="flex items-center gap-2.5 px-2 mb-7">
+              <img
+                src={logo}
+                alt="StatMind Logo"
+                className="w-8 h-8 object-contain rounded-lg"
+              />
+              <span className="text-[15px] font-medium text-white">UniCore</span>
           </div>
-          <span className="text-[15px] font-medium text-white">StatMind</span>
-        </div>
 
         {/* NAVIGATION */}
         <nav className="flex flex-col gap-1">
