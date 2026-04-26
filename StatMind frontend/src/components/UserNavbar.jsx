@@ -62,6 +62,47 @@ const navItems = [
 function UserNavbar() {
   const { pathname } = useLocation();
 
+  const userId = localStorage.getItem("userId");
+  const userName = localStorage.getItem("name") || "User";
+  const userEmail = localStorage.getItem("email") || "";
+  const role = localStorage.getItem("role") || "USER";
+
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    fetchNotifications();
+    fetchUnreadCount();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8081/api/notifications/user/${userId}`
+      );
+      setNotifications(res.data);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  const fetchUnreadCount = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8081/api/notifications/user/${userId}/unread-count`
+      );
+      setUnreadCount(res.data);
+    } catch (error) {
+      console.error("Error fetching unread count:", error);
+    }
+  };
+
+  const logout = () => {
+    localStorage.clear();
+    window.location.href = "/";
+  };
+
   return (
     <>
       {/* SIDEBAR */}
