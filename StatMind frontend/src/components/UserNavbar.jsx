@@ -3,7 +3,7 @@ import logo from "../assets/logo-UniCore.png";
 
 const navItems = [
   {
-    to: "/my-dashboard",
+    to: "user/dashboard",
     label: "My Dashboard",
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
