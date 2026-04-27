@@ -1,4 +1,4 @@
-import UserNavbar from "./UserNavBar";
+import UserNavbar from "./usernav";
 
 export const UserLayout = ({ children }) => {
   return (

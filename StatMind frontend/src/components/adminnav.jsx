@@ -3,8 +3,8 @@ import logo from "../assets/logo-UniCore.png";
 
 const navItems = [
   {
-    to: "/my-dashboard",
-    label: "My Dashboard",
+    path: "/admin",
+    name: "Dashboard",
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
         <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
@@ -15,8 +15,22 @@ const navItems = [
     ),
   },
   {
-    to: "/resources",
-    label: "Resources",
+    path: "/users",
+    name: "User Management",
+    icon: (
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8" />
+        <path
+          d="M4 20c0-3.314 3.582-6 8-6s8 2.686 8 6"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        />
+      </svg>
+    ),
+  },
+  {
+    path: "/resourceDashboard",
+    name: "Resource Management",
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
         <ellipse cx="12" cy="7" rx="8" ry="3" stroke="currentColor" strokeWidth="1.8" />
@@ -26,18 +40,8 @@ const navItems = [
     ),
   },
   {
-    to: "/notifications",
-    label: "Notifications",
-    icon: (
-      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-        <path d="M12 3a7 7 0 00-7 7v4l-1.5 2.5A1 1 0 004.5 18h15a1 1 0 00.86-1.5L19 14V10a7 7 0 00-7-7z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M10 21a2 2 0 004 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
-    to: "/",
-    label: "Bookings",
+    path: "/bookings",
+    name: "Booking Management",
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
         <rect x="3" y="4" width="18" height="17" rx="2" stroke="currentColor" strokeWidth="1.8" />
@@ -48,19 +52,23 @@ const navItems = [
     ),
   },
   {
-    to: "/tickets",
-    label: "Tickets",
+    path: "/admin/tickets",
+    name: "Ticket Management",
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-        <path d="M2 9a2 2 0 012-2h16a2 2 0 012 2v1.5a2.5 2.5 0 000 5V17a2 2 0 01-2 2H4a2 2 0 01-2-2v-1.5a2.5 2.5 0 000-5V9z" stroke="currentColor" strokeWidth="1.8" />
+        <path
+          d="M2 9a2 2 0 012-2h16a2 2 0 012 2v1.5a2.5 2.5 0 000 5V17a2 2 0 01-2 2H4a2 2 0 01-2-2v-1.5a2.5 2.5 0 000-5V9z"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        />
         <path d="M9 2v3M9 19v3M15 2v3M15 19v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     ),
   },
 ];
 
-function UserNavbar() {
-  const { pathname } = useLocation();
+function AdminNavbar() {
+  const location = useLocation();
 
   return (
     <>
@@ -68,38 +76,34 @@ function UserNavbar() {
       <aside className="fixed left-0 top-0 w-56 h-screen bg-[#0f172a] flex flex-col p-4 z-50">
 
         {/* LOGO */}
-        <div className="flex items-center gap-2.5 px-2 mb-7">
-          <img
-            src={logo}
-            alt="StatMind Logo"
-            className="w-8 h-8 object-contain rounded-lg"
-          />
-          <span className="text-[15px] font-medium text-white">UniCore</span>
+        <div className="flex items-center gap-3 mb-8">
+          <img src={logo} alt="UniCore Logo" className="w-8 h-8 rounded-lg" />
+          <span className="text-white font-semibold text-sm">UniCore</span>
         </div>
 
-        {/* NAVIGATION */}
+        {/* NAV LINKS */}
         <nav className="flex flex-col gap-1">
-          {navItems.map(({ to, label, icon }) => {
-            const active = pathname === to;
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
 
             return (
               <Link
-                key={label}
-                to={to}
+                key={item.name}
+                to={item.path}
                 className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs transition ${
-                  active
+                  isActive
                     ? "bg-[#1e3a5f] text-blue-300"
                     : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
                 }`}
               >
-                {icon}
-                {label}
+                {item.icon}
+                {item.name}
               </Link>
             );
           })}
         </nav>
 
-        {/* SIDEBAR LOGOUT */}
+        {/* LOGOUT */}
         <div className="mt-auto pt-4 border-t border-gray-700">
           <button className="w-full text-left px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-red-400 rounded">
             Logout
@@ -109,15 +113,13 @@ function UserNavbar() {
 
       {/* TOP NAVBAR */}
       <header className="fixed top-0 left-56 right-0 h-14 bg-white border-b flex items-center justify-between px-6 z-40 shadow-sm">
-
-        {/* LEFT */}
+        
         <h1 className="text-lg font-semibold text-gray-800">
-          UniCore
+          Admin Panel
         </h1>
 
-        {/* RIGHT */}
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">User</span>
+          <span className="text-sm text-gray-600">Admin</span>
           <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm">
             Logout
           </button>
@@ -127,4 +129,4 @@ function UserNavbar() {
   );
 }
 
-export default UserNavbar;
+export default AdminNavbar;
