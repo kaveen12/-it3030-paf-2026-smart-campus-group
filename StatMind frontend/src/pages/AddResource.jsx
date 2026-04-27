@@ -38,10 +38,9 @@ function AddResource() {
     }
   }
 
-  // Type default check
-  if (name === "type" && value === "LECTURE_HALL") {
-    msg = "This field is required";
-  }
+  if (name === "type" && (!value || value === "")) {
+  msg = "This field is required";
+}
 
   // Status 
 if (name === "status") {
@@ -266,6 +265,7 @@ if (name === "status") {
                 onChange={handleChange}
                 className="w-full border rounded-lg px-4 py-2"
               >
+                <option value="">Select Type</option>
                 <option value="LECTURE_HALL">Lecture Hall</option>
                 <option value="LAB">Lab</option>
                 <option value="MEETING_ROOM">Meeting Room</option>
