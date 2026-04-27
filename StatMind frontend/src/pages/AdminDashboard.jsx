@@ -1,4 +1,4 @@
-import AdminNavbar from "../components/AdminNavbar";
+import AdminNavbar from "../components/adminnav";
 import { useNavigate } from "react-router-dom";
 
 function AdminDashboardPage() {

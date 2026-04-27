@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getAllResources, searchResources } from "../api/resourceApi";
-import UserNavbar from "../components/UserNavbar";
+import UserNavbar from "../components/usernav";
 
 function UserViewResource() {
   const [resources, setResources] = useState([]);

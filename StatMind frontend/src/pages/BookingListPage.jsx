@@ -6,7 +6,7 @@ import {
 } from "../api/bookingApi";
 
 import BookingCard from "../components/BookingCard";
-import AdminNavbar from "../components/AdminNavbar";
+import AdminNavbar from "../components/adminnav";
 
 function BookingListPage() {
   const [bookings, setBookings] = useState([]);
