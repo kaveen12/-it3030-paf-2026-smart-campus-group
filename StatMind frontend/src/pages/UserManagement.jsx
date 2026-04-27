@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import AdminNavBar from "../components/AdminNavBar";
 
 function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -16,156 +17,201 @@ function UserManagement() {
       const res = await axios.get("http://localhost:8081/api/users");
       setUsers(res.data);
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching users:", error);
     }
   };
 
   const createUser = async (e) => {
     e.preventDefault();
 
-    await axios.post("http://localhost:8081/api/users", {
-      name,
-      email,
-      role,
-    });
+    try {
+      await axios.post("http://localhost:8081/api/users", {
+        name,
+        email,
+        role,
+      });
 
-    setName("");
-    setEmail("");
-    setRole("USER");
-    fetchUsers();
+      setName("");
+      setEmail("");
+      setRole("USER");
+      fetchUsers();
+    } catch (error) {
+      console.error("Error creating user:", error);
+      alert("Failed to create user");
+    }
   };
 
   const updateRole = async (id, newRole) => {
-    await axios.put(
-      `http://localhost:8081/api/users/${id}/role?role=${newRole}&currentUserRole=ADMIN`
-    );
-    fetchUsers();
+    try {
+      await axios.put(
+        `http://localhost:8081/api/users/${id}/role?role=${newRole}`
+      );
+      fetchUsers();
+    } catch (error) {
+      console.error("Error updating role:", error);
+      alert("Failed to update role");
+    }
   };
 
   return (
-    <div className="p-6 pt-16 bg-slate-900 min-h-screen text-white">
+    <div className="flex bg-gray-100 min-h-screen text-gray-800">
+      <AdminNavBar />
 
-      {/* TITLE */}
-      <h1 className="text-3xl font-bold mb-6">
-        Manage Users & Roles
-      </h1>
+      <main className="ml-56 w-full p-6 pt-20">
+        <h1 className="text-3xl font-bold mb-6 text-gray-800">
+          Manage Users & Roles
+        </h1>
 
-      {/* STATS */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-slate-800 p-4 rounded-lg">
-          <p className="text-sm text-gray-400">Total Users</p>
-          <h2 className="text-2xl font-bold">{users.length}</h2>
+        {/* STATS */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white p-5 rounded-xl shadow border">
+            <p className="text-sm text-gray-500">Total Users</p>
+            <h2 className="text-3xl font-bold mt-2">{users.length}</h2>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl shadow border">
+            <p className="text-sm text-gray-500">Admins</p>
+            <h2 className="text-3xl font-bold mt-2">
+              {users.filter((u) => u.role === "ADMIN").length}
+            </h2>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl shadow border">
+            <p className="text-sm text-gray-500">Users</p>
+            <h2 className="text-3xl font-bold mt-2">
+              {users.filter((u) => u.role === "USER").length}
+            </h2>
+          </div>
         </div>
 
-        <div className="bg-slate-800 p-4 rounded-lg">
-          <p className="text-sm text-gray-400">Admins</p>
-          <h2 className="text-2xl font-bold">
-            {users.filter(u => u.role === "ADMIN").length}
-          </h2>
-        </div>
-
-        <div className="bg-slate-800 p-4 rounded-lg">
-          <p className="text-sm text-gray-400">Users</p>
-          <h2 className="text-2xl font-bold">
-            {users.filter(u => u.role === "USER").length}
-          </h2>
-        </div>
-      </div>
-
-      {/* CREATE USER */}
-      <form
-        onSubmit={createUser}
-        className="bg-slate-800 p-4 rounded-lg mb-6 flex gap-3"
-      >
-        <input
-          type="text"
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="bg-slate-700 p-2 rounded w-full"
-          required
-        />
-
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="bg-slate-700 p-2 rounded w-full"
-          required
-        />
-
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          className="bg-slate-700 p-2 rounded"
+        {/* CREATE USER */}
+        <form
+          onSubmit={createUser}
+          className="bg-white p-5 rounded-xl shadow mb-6 space-y-4"
         >
-          <option value="USER">USER</option>
-          <option value="ADMIN">ADMIN</option>
-          <option value="TECHNICIAN">TECHNICIAN</option>
-        </select>
+          <h2 className="text-lg font-semibold">Create New User</h2>
 
-        <button className="bg-green-500 px-4 rounded hover:bg-green-600">
-          + Add
-        </button>
-      </form>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <input
+              type="text"
+              placeholder="Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+              required
+            />
 
-      {/* TABLE */}
-      <div className="bg-slate-800 rounded-lg overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-700">
-            <tr>
-              <th className="p-3 text-left">Name</th>
-              <th className="p-3 text-left">Email</th>
-              <th className="p-3 text-left">Role</th>
-              <th className="p-3 text-left">Change Role</th>
-            </tr>
-          </thead>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+              required
+            />
 
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id} className="border-t border-slate-700">
-                <td className="p-3">{user.name}</td>
-                <td className="p-3 text-gray-400">{user.email}</td>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="border p-3 rounded-lg"
+            >
+              <option value="USER">USER</option>
+              <option value="ADMIN">ADMIN</option>
+              <option value="TECHNICIAN">TECHNICIAN</option>
+            </select>
 
-                {/* ROLE BADGE */}
-                <td className="p-3">
-                  <span
-                    className={`px-3 py-1 rounded text-xs ${
-                      user.role === "ADMIN"
-                        ? "bg-green-600"
-                        : user.role === "TECHNICIAN"
-                        ? "bg-yellow-600"
-                        : "bg-blue-600"
-                    }`}
-                  >
-                    {user.role}
-                  </span>
-                </td>
+            <button
+              type="submit"
+              className="bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition"
+            >
+              + Add User
+            </button>
+          </div>
+        </form>
 
-                {/* CHANGE ROLE */}
-                <td className="p-3">
-                  <select
-                    value={user.role}
-                    onChange={(e) =>
-                      updateRole(user.id, e.target.value)
-                    }
-                    className="bg-slate-700 p-2 rounded"
-                  >
-                    <option value="USER">USER</option>
-                    <option value="ADMIN">ADMIN</option>
-                    <option value="TECHNICIAN">TECHNICIAN</option>
-                  </select>
-                </td>
+        {/* TABLE */}
+        <div className="bg-white rounded-xl shadow overflow-hidden">
+          <div className="flex justify-between items-center p-5 border-b">
+            <div>
+              <h2 className="text-lg font-semibold">Registered Users</h2>
+              <p className="text-sm text-gray-500">
+                Manage users and roles
+              </p>
+            </div>
+
+            <button
+              onClick={fetchUsers}
+              className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300"
+            >
+              Refresh
+            </button>
+          </div>
+
+          <table className="w-full text-sm">
+            <thead className="bg-gray-200">
+              <tr>
+                <th className="p-4 text-left">User</th>
+                <th className="p-4 text-left">Email</th>
+                <th className="p-4 text-left">Role</th>
+                <th className="p-4 text-left">Change Role</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
 
-        {users.length === 0 && (
-          <p className="p-4 text-gray-400">No users found</p>
-        )}
-      </div>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user.id} className="border-t hover:bg-gray-50">
+                  <td className="p-4 flex items-center gap-3">
+                    <div className="w-9 h-9 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">
+                      {user.name?.charAt(0).toUpperCase()}
+                    </div>
+
+                    <div>
+                      <p className="font-semibold">{user.name}</p>
+                      <p className="text-xs text-gray-500">
+                        ID: {user.id}
+                      </p>
+                    </div>
+                  </td>
+
+                  <td className="p-4">{user.email}</td>
+
+                  <td className="p-4">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        user.role === "ADMIN"
+                          ? "bg-green-100 text-green-700"
+                          : user.role === "TECHNICIAN"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-blue-100 text-blue-700"
+                      }`}
+                    >
+                      {user.role}
+                    </span>
+                  </td>
+
+                  <td className="p-4">
+                    <select
+                      value={user.role}
+                      onChange={(e) =>
+                        updateRole(user.id, e.target.value)
+                      }
+                      className="border p-2 rounded"
+                    >
+                      <option value="USER">USER</option>
+                      <option value="ADMIN">ADMIN</option>
+                      <option value="TECHNICIAN">TECHNICIAN</option>
+                    </select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {users.length === 0 && (
+            <p className="p-6 text-gray-500">No users found</p>
+          )}
+        </div>
+      </main>
     </div>
   );
 }
