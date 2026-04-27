@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import UserNavbar from "../components/usernav";
+import { getSessionUser } from "../utils/sessionUser";
 
 function MyBookings() {
   const [bookings, setBookings] = useState([]);
@@ -12,18 +13,18 @@ function MyBookings() {
   const [confirmId, setConfirmId] = useState(null); // ID of booking pending confirmation
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser?._id) {
-      setUserId(storedUser._id);
-      setUserName(storedUser.name || "");
-      fetchBookings(storedUser._id);
+    const sessionUser = getSessionUser();
+    if (sessionUser.userId) {
+      setUserId(sessionUser.userId);
+      setUserName(sessionUser.userName || "");
+      fetchBookings(sessionUser.userId);
     }
   }, []);
 
   const fetchBookings = (uid) => {
     setLoading(true);
     axios
-      .get(`http://localhost:8081/api/bookings/users/${uid}`)
+      .get(`http://localhost:8081/api/bookings/user/${uid}`)
       .then((res) => {
         setBookings(res.data);
         setLoading(false);
@@ -147,8 +148,8 @@ function MyBookings() {
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider transition-all ${filter === f
-                    ? "bg-gray-900 text-white shadow"
-                    : "bg-white text-gray-500 border border-gray-200 hover:border-gray-400"
+                  ? "bg-gray-900 text-white shadow"
+                  : "bg-white text-gray-500 border border-gray-200 hover:border-gray-400"
                   }`}
               >
                 {f}
