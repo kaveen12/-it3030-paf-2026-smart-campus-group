@@ -16,79 +16,154 @@ function UserManagement() {
       const res = await axios.get("http://localhost:8081/api/users");
       setUsers(res.data);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error(error);
     }
   };
 
   const createUser = async (e) => {
     e.preventDefault();
-    try {
-      await axios.post("http://localhost:8081/api/users", {
-        name,
-        email,
-        role,
-      });
-      setName("");
-      setEmail("");
-      setRole("USER");
-      fetchUsers();
-    } catch (error) {
-      console.error("Error creating user:", error);
-    }
+
+    await axios.post("http://localhost:8081/api/users", {
+      name,
+      email,
+      role,
+    });
+
+    setName("");
+    setEmail("");
+    setRole("USER");
+    fetchUsers();
+  };
+
+  const updateRole = async (id, newRole) => {
+    await axios.put(
+      `http://localhost:8081/api/users/${id}/role?role=${newRole}&currentUserRole=ADMIN`
+    );
+    fetchUsers();
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">User Management</h1>
+    <div className="p-6 pt-16 bg-slate-900 min-h-screen text-white">
 
-      <form onSubmit={createUser} className="bg-white shadow rounded p-4 mb-6 space-y-4">
+      {/* TITLE */}
+      <h1 className="text-3xl font-bold mb-6">
+        Manage Users & Roles
+      </h1>
+
+      {/* STATS */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="bg-slate-800 p-4 rounded-lg">
+          <p className="text-sm text-gray-400">Total Users</p>
+          <h2 className="text-2xl font-bold">{users.length}</h2>
+        </div>
+
+        <div className="bg-slate-800 p-4 rounded-lg">
+          <p className="text-sm text-gray-400">Admins</p>
+          <h2 className="text-2xl font-bold">
+            {users.filter(u => u.role === "ADMIN").length}
+          </h2>
+        </div>
+
+        <div className="bg-slate-800 p-4 rounded-lg">
+          <p className="text-sm text-gray-400">Users</p>
+          <h2 className="text-2xl font-bold">
+            {users.filter(u => u.role === "USER").length}
+          </h2>
+        </div>
+      </div>
+
+      {/* CREATE USER */}
+      <form
+        onSubmit={createUser}
+        className="bg-slate-800 p-4 rounded-lg mb-6 flex gap-3"
+      >
         <input
           type="text"
-          placeholder="Enter name"
+          placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full border p-2 rounded"
+          className="bg-slate-700 p-2 rounded w-full"
           required
         />
 
         <input
           type="email"
-          placeholder="Enter email"
+          placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border p-2 rounded"
+          className="bg-slate-700 p-2 rounded w-full"
           required
         />
 
         <select
           value={role}
           onChange={(e) => setRole(e.target.value)}
-          className="w-full border p-2 rounded"
+          className="bg-slate-700 p-2 rounded"
         >
           <option value="USER">USER</option>
           <option value="ADMIN">ADMIN</option>
           <option value="TECHNICIAN">TECHNICIAN</option>
         </select>
 
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Add User
+        <button className="bg-green-500 px-4 rounded hover:bg-green-600">
+          + Add
         </button>
       </form>
 
-      <div className="space-y-4">
-        {users.length === 0 ? (
-          <p>No users found</p>
-        ) : (
-          users.map((user) => (
-            <div key={user.id} className="border rounded p-4 shadow bg-white">
-              <p><b>Name:</b> {user.name}</p>
-              <p><b>Email:</b> {user.email}</p>
-              <p><b>Role:</b> {user.role}</p>
-            </div>
-          ))
+      {/* TABLE */}
+      <div className="bg-slate-800 rounded-lg overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-slate-700">
+            <tr>
+              <th className="p-3 text-left">Name</th>
+              <th className="p-3 text-left">Email</th>
+              <th className="p-3 text-left">Role</th>
+              <th className="p-3 text-left">Change Role</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {users.map((user) => (
+              <tr key={user.id} className="border-t border-slate-700">
+                <td className="p-3">{user.name}</td>
+                <td className="p-3 text-gray-400">{user.email}</td>
+
+                {/* ROLE BADGE */}
+                <td className="p-3">
+                  <span
+                    className={`px-3 py-1 rounded text-xs ${
+                      user.role === "ADMIN"
+                        ? "bg-green-600"
+                        : user.role === "TECHNICIAN"
+                        ? "bg-yellow-600"
+                        : "bg-blue-600"
+                    }`}
+                  >
+                    {user.role}
+                  </span>
+                </td>
+
+                {/* CHANGE ROLE */}
+                <td className="p-3">
+                  <select
+                    value={user.role}
+                    onChange={(e) =>
+                      updateRole(user.id, e.target.value)
+                    }
+                    className="bg-slate-700 p-2 rounded"
+                  >
+                    <option value="USER">USER</option>
+                    <option value="ADMIN">ADMIN</option>
+                    <option value="TECHNICIAN">TECHNICIAN</option>
+                  </select>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {users.length === 0 && (
+          <p className="p-4 text-gray-400">No users found</p>
         )}
       </div>
     </div>
