@@ -49,14 +49,11 @@ function ViewResources() {
 
   // ✅ FIX lecture hall → LECTURE_HALL
   if (cleanFilters.type) {
-    cleanFilters.type = cleanFilters.type
-      .toUpperCase()
-      .replace(/ /g, "_");
-  }
+  cleanFilters.type = cleanFilters.type.trim();
+}
 
-  if (cleanFilters.capacity) {
-  cleanFilters.minCapacity = Number(cleanFilters.capacity);
-  delete cleanFilters.capacity;
+if (cleanFilters.capacity) {
+  cleanFilters.capacity = Number(cleanFilters.capacity);
 }
 
   try {
