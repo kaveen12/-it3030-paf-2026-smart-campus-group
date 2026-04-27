@@ -146,11 +146,10 @@ function MyBookings() {
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider transition-all ${
-                  filter === f
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider transition-all ${filter === f
                     ? "bg-gray-900 text-white shadow"
                     : "bg-white text-gray-500 border border-gray-200 hover:border-gray-400"
-                }`}
+                  }`}
               >
                 {f}
               </button>
