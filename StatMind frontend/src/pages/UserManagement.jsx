@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import AdminNavBar from "../components/AdminNavBar";
 
 function UserManagement() {
   const [users, setUsers] = useState([]);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState("USER");
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchUsers();
@@ -18,26 +17,6 @@ function UserManagement() {
       setUsers(res.data);
     } catch (error) {
       console.error("Error fetching users:", error);
-    }
-  };
-
-  const createUser = async (e) => {
-    e.preventDefault();
-
-    try {
-      await axios.post("http://localhost:8081/api/users", {
-        name,
-        email,
-        role,
-      });
-
-      setName("");
-      setEmail("");
-      setRole("USER");
-      fetchUsers();
-    } catch (error) {
-      console.error("Error creating user:", error);
-      alert("Failed to create user");
     }
   };
 
@@ -58,9 +37,20 @@ function UserManagement() {
       <AdminNavBar />
 
       <main className="ml-56 w-full p-6 pt-20">
-        <h1 className="text-3xl font-bold mb-6 text-gray-800">
-          Manage Users & Roles
-        </h1>
+        
+        {/* HEADER + BUTTON */}
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">
+            Manage Users & Roles
+          </h1>
+
+          <button
+            onClick={() => navigate("/add-user")}
+            className="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition"
+          >
+            + Add User
+          </button>
+        </div>
 
         {/* STATS */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -83,51 +73,6 @@ function UserManagement() {
             </h2>
           </div>
         </div>
-
-        {/* CREATE USER */}
-        <form
-          onSubmit={createUser}
-          className="bg-white p-5 rounded-xl shadow mb-6 space-y-4"
-        >
-          <h2 className="text-lg font-semibold">Create New User</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <input
-              type="text"
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
-              required
-            />
-
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
-              required
-            />
-
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="border p-3 rounded-lg"
-            >
-              <option value="USER">USER</option>
-              <option value="ADMIN">ADMIN</option>
-              <option value="TECHNICIAN">TECHNICIAN</option>
-            </select>
-
-            <button
-              type="submit"
-              className="bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition"
-            >
-              + Add User
-            </button>
-          </div>
-        </form>
 
         {/* TABLE */}
         <div className="bg-white rounded-xl shadow overflow-hidden">
@@ -162,7 +107,7 @@ function UserManagement() {
                 <tr key={user.id} className="border-t hover:bg-gray-50">
                   <td className="p-4 flex items-center gap-3">
                     <div className="w-9 h-9 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">
-                      {user.name?.charAt(0).toUpperCase()}
+                      {user.name?.charAt(0).toUpperCase() || "U"}
                     </div>
 
                     <div>

@@ -9,6 +9,7 @@ function AddUser() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("USER");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,6 +60,19 @@ function AddUser() {
               className="w-full border p-3 rounded-lg"
               required
             />
+          </div>
+
+                    <div>
+            <label className="block mb-1 font-medium">Email</label>
+           <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full border p-3 rounded-lg"
+                required
+            />
+            
           </div>
 
           <div>

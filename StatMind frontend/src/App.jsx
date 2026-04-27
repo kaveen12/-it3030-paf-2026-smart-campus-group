@@ -15,6 +15,7 @@ import UserDashboard from "./pages/UserDashboard";
 import CreateBooking from "./pages/CreateBooking";
 import BookingListPage  from "./pages/BookingListPage";
 import UserBookings from "./pages/UserBookings";
+import AddUser from "./pages/AddUser";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
       <Route path="/users" element={<UserManagement />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/add-user" element={<AddUser />} />
 
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="user/dashboard" element={<UserDashboard />} />
