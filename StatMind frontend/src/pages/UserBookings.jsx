@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import UserNavbar from "../components/UserNavBar";
+import UserNavbar from "../components/usernav";
 
 function MyBookings() {
   const [bookings, setBookings] = useState([]);

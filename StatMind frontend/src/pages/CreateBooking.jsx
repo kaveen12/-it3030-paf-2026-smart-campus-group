@@ -1,6 +1,6 @@
 import React from "react";
 import BookingForm from "../components/BookingForm";
-import UserNavbar from "../components/UserNavBar";
+import UserNavbar from "../components/usernav";
 import { useNavigate } from "react-router-dom";
 
 function CreateBooking() {
