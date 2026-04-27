@@ -69,7 +69,7 @@ function BookingListPage() {
 
         {/* Page Title */}
         <h2 className="text-3xl font-extrabold text-gray-900 mb-8 text-center tracking-tight">
-          All Bookings
+          All Booking
         </h2>
 
         {/* Stats Cards */}
