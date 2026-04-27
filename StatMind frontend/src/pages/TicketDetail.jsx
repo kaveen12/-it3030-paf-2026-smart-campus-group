@@ -213,17 +213,17 @@ export const TicketDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-8 py-6">
+      <div className="bg-white border-b border-slate-200 px-8 py-6 shadow-sm">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Ticket #{ticket.id?.substring(0, 8)}</h1>
-            <p className="text-gray-500 mt-1">Status: {ticket.status}</p>
+            <h1 className="text-3xl font-bold text-slate-900">🎫 Ticket #{ticket.id?.substring(0, 8)}</h1>
+            <p className="text-slate-600 mt-1">Incident ticket management</p>
           </div>
           <button
             onClick={() => navigate('/admin/tickets')}
-            className="text-gray-600 hover:text-gray-900 font-medium"
+            className="text-slate-600 hover:text-slate-900 font-medium transition"
           >
             ← Back
           </button>
@@ -239,193 +239,238 @@ export const TicketDetail = () => {
       {/* Content */}
       <div className="p-8">
         {/* Tabs */}
-        <div className="bg-white border-b border-gray-200 mb-6">
-          <div className="flex gap-4">
+        <div className="bg-white border-b border-slate-200 mb-6 rounded-t-2xl">
+          <div className="flex gap-4 px-6">
             {['details', 'comments', 'activity'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-6 py-3 font-medium transition border-b-2 ${
-                  activeTab === tab
+                className={`px-4 py-4 font-medium transition border-b-2 ${ activeTab === tab
                     ? 'text-blue-600 border-blue-600'
-                    : 'text-gray-600 border-transparent hover:text-gray-900'
+                    : 'text-slate-600 border-transparent hover:text-slate-900'
                 }`}
               >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab === 'details' && '📋'}
+                {tab === 'comments' && '💬'}
+                {tab === 'activity' && '📊'}
+                {' '}{tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="max-w-4xl">
+        <div className="max-w-5xl">
           {/* Details Tab */}
           {activeTab === 'details' && (
             <div className="space-y-6">
               {/* Ticket Information */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Ticket Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <p className="text-sm text-gray-600">Resource Name</p>
-                    <p className="font-medium text-gray-900">{ticket.resourceName || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Resource Code</p>
-                    <p className="font-medium text-gray-900">{ticket.resourceCode || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Location</p>
-                    <p className="font-medium text-gray-900">{ticket.location || ticket.resourceOrLocation || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Category</p>
-                    <p className="font-medium text-gray-900">{ticket.category}</p>
-                  </div>
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-2xl">📋</span>
+                <h3 className="text-lg font-semibold text-slate-900">Ticket Information</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-sm text-slate-500 font-medium">Resource Name</p>
+                  <p className="font-medium text-slate-900 mt-1">{ticket.resourceName || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500 font-medium">Resource Code</p>
+                  <p className="font-medium text-slate-900 mt-1">{ticket.resourceCode || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500 font-medium">Location</p>
+                  <p className="font-medium text-slate-900 mt-1">{ticket.location || ticket.resourceOrLocation || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500 font-medium">Category</p>
+                  <p className="font-medium text-slate-900 mt-1">{ticket.category}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-2xl">📝</span>
+                <h3 className="text-lg font-semibold text-slate-900">Description</h3>
+              </div>
+              <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">{ticket.description}</p>
+            </div>
+
+            {/* Status & Assignment */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-2xl">⚙️</span>
+                <h3 className="text-lg font-semibold text-slate-900">Status & Assignment</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <p className="text-sm text-slate-500 font-medium">Status</p>
+                  <p className="font-medium text-slate-900 mt-1">{ticket.status}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500 font-medium">Assigned Technician</p>
+                  <p className="font-medium text-slate-900 mt-1">{ticket.assignedTechnicianName || 'Unassigned'}</p>
                 </div>
               </div>
 
-              {/* Description */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Description</h3>
-                <p className="text-gray-700 whitespace-pre-wrap">{ticket.description}</p>
-              </div>
-
-              {/* Status & Assignment */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Status & Assignment</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <p className="text-sm text-gray-600">Status</p>
-                    <p className="font-medium text-gray-900 mt-1">{ticket.status}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Assigned Technician</p>
-                    <p className="font-medium text-gray-900 mt-1">{ticket.assignedTechnicianName || 'Unassigned'}</p>
-                  </div>
+              {ticket.rejectionReason && (
+                <div className="bg-red-50 p-4 rounded-lg border border-red-200 mb-4">
+                  <p className="text-sm text-red-600 font-medium">Rejection Reason</p>
+                  <p className="text-slate-900 mt-1">{ticket.rejectionReason}</p>
                 </div>
+              )}
 
-                {ticket.rejectionReason && (
-                  <div className="bg-red-50 p-4 rounded-lg mb-4">
-                    <p className="text-sm text-gray-600">Rejection Reason</p>
-                    <p className="text-gray-900 mt-1">{ticket.rejectionReason}</p>
-                  </div>
-                )}
+              {ticket.resolutionNotes && (
+                <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200 mb-4">
+                  <p className="text-sm text-emerald-600 font-medium">Resolution Notes</p>
+                  <p className="text-slate-900 mt-1">{ticket.resolutionNotes}</p>
+                </div>
+              )}
+            </div>
 
-                {ticket.resolutionNotes && (
-                  <div className="bg-green-50 p-4 rounded-lg mb-4">
-                    <p className="text-sm text-gray-600">Resolution Notes</p>
-                    <p className="text-gray-900 mt-1">{ticket.resolutionNotes}</p>
-                  </div>
-                )}
+            {/* Creator Information */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-2xl">👤</span>
+                <h3 className="text-lg font-semibold text-slate-900">Creator Information</h3>
               </div>
-
-              {/* Creator Information */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Creator Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <p className="text-sm text-gray-600">Name</p>
-                    <p className="font-medium text-gray-900">{ticket.createdByName}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Role</p>
-                    <p className="font-medium text-gray-900">{ticket.createdByRole}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Preferred Contact</p>
-                    <p className="font-medium text-gray-900">{ticket.preferredContact}</p>
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <p className="text-sm text-slate-500 font-medium">Name</p>
+                  <p className="font-medium text-slate-900 mt-1">{ticket.createdByName}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500 font-medium">Role</p>
+                  <p className="font-medium text-slate-900 mt-1">{ticket.createdByRole}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500 font-medium">Preferred Contact</p>
+                  <p className="font-medium text-slate-900 mt-1">{ticket.preferredContact}</p>
                 </div>
               </div>
+            </div>
 
-              {/* Attachments */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Attachments</h3>
+            {/* Attachments */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-2xl">📎</span>
+                  <h3 className="text-lg font-semibold text-slate-900">Attachments</h3>
+                </div>
                 {ticket.attachmentUrls && ticket.attachmentUrls.length > 0 ? (
-                  <ul className="space-y-2">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {ticket.attachmentUrls.map((url, idx) => (
-                      <li key={idx} className="text-blue-600 hover:underline">
-                        <a href={url} target="_blank" rel="noopener noreferrer">
-                          Attachment {idx + 1}
-                        </a>
-                      </li>
+                      <div key={idx} className="relative group rounded-lg overflow-hidden bg-slate-100 border border-slate-200 aspect-square hover:shadow-md transition">
+                        <img
+                          src={url}
+                          alt={`Attachment ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = "none";
+                            e.target.nextElementSibling.style.display = "flex";
+                          }}
+                        />
+                        <div
+                          style={{ display: "none" }}
+                          className="absolute inset-0 bg-slate-50 flex items-center justify-center text-center p-2"
+                        >
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-700 text-sm font-medium underline"
+                          >
+                            Open
+                          </a>
+                        </div>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 ) : (
-                  <p className="text-gray-500">No attachments</p>
+                  <p className="text-slate-500 text-sm">No attachments yet</p>
                 )}
-              </div>
+            </div>
 
-              {/* Timestamps */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Timestamps</h3>
+            {/* Timestamps */}
+            {/* Timestamps */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-2xl">🕐</span>
+                  <h3 className="text-lg font-semibold text-slate-900">Timeline</h3>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <p className="text-sm text-gray-600">Created At</p>
-                    <p className="font-medium text-gray-900">{formatDate(ticket.createdAt)}</p>
+                    <p className="text-sm text-slate-500 font-medium">Created At</p>
+                    <p className="font-medium text-slate-900 mt-1">{formatDate(ticket.createdAt)}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Updated At</p>
-                    <p className="font-medium text-gray-900">{formatDate(ticket.updatedAt)}</p>
+                    <p className="text-sm text-slate-500 font-medium">Updated At</p>
+                    <p className="font-medium text-slate-900 mt-1">{formatDate(ticket.updatedAt)}</p>
                   </div>
                 </div>
-              </div>
+            </div>
 
-              {/* Action Buttons */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Actions</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* Action Buttons */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-2xl">🎯</span>
+                  <h3 className="text-lg font-semibold text-slate-900">Admin Actions</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <button
                     onClick={() => setAssignModalOpen(true)}
-                    className="bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition font-medium"
+                    className="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition font-medium text-sm"
                   >
-                    Assign Technician
+                    👤 Assign Tech
                   </button>
                   <button
                     onClick={() => setStatusModalOpen(true)}
-                    className="bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition font-medium"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg transition font-medium text-sm"
                   >
-                    Update Status
+                    ⚙️ Update Status
                   </button>
                   <button
                     onClick={() => setRejectModalOpen(true)}
-                    className="bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition font-medium"
+                    className="bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition font-medium text-sm"
                   >
-                    Reject
+                    ❌ Reject
                   </button>
                   <button
                     onClick={() => setResolveModalOpen(true)}
-                    className="bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition font-medium"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg transition font-medium text-sm"
                   >
-                    Resolve
+                    ✓ Resolve
                   </button>
                   <button
                     onClick={() => setAttachmentsModalOpen(true)}
-                    className="bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition font-medium disabled:bg-gray-400"
+                    className="bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg transition font-medium text-sm disabled:bg-slate-400"
                     disabled={(ticket.attachmentUrls?.length || 0) >= 3}
                   >
-                    Add Attachment
+                    📎 Add Image
                   </button>
                   <button
                     onClick={handleDeleteTicket}
-                    className="bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 transition font-medium"
+                    className="bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-lg transition font-medium text-sm"
                   >
-                    Delete Ticket
+                    🗑️ Delete
                   </button>
                 </div>
-              </div>
+            </div>
             </div>
           )}
 
           {/* Comments Tab */}
           {activeTab === 'comments' && (
-  <CommentsSection
-    ticketId={ticketId}
-    comments={comments}
-    currentUserName="Admin"
-    currentUserRole="ADMIN"
-  />
-)}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200">
+              <CommentsSection
+                ticketId={ticketId}
+                comments={comments}
+                currentUserName="Admin"
+                currentUserRole="ADMIN"
+              />
+            </div>
+          )}
 
           {/* Activity Tab */}
           {activeTab === 'activity' && <ActivityLogTimeline logs={logs} />}
@@ -438,18 +483,18 @@ export const TicketDetail = () => {
       <Modal
         isOpen={assignModalOpen}
         onClose={() => setAssignModalOpen(false)}
-        title="Assign Technician"
+        title="👤 Assign Technician"
         footer={
           <>
             <button
               onClick={() => setAssignModalOpen(false)}
-              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+              className="px-4 py-2 bg-slate-300 text-slate-900 rounded-lg hover:bg-slate-400 transition font-medium"
             >
               Cancel
             </button>
             <button
               onClick={handleAssignTechnician}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
             >
               Assign
             </button>
@@ -458,23 +503,23 @@ export const TicketDetail = () => {
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Technician ID</label>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Technician ID</label>
             <input
               type="text"
               value={assignData.assignedTechnicianId}
               onChange={(e) => setAssignData({ ...assignData, assignedTechnicianId: e.target.value })}
               placeholder="Enter technician ID (optional)"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Technician Name</label>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Technician Name</label>
             <input
               type="text"
               value={assignData.assignedTechnicianName}
               onChange={(e) => setAssignData({ ...assignData, assignedTechnicianName: e.target.value })}
               placeholder="Enter technician name"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
             />
           </div>
         </div>
@@ -484,18 +529,18 @@ export const TicketDetail = () => {
       <Modal
         isOpen={statusModalOpen}
         onClose={() => setStatusModalOpen(false)}
-        title="Update Status"
+        title="⚙️ Update Status"
         footer={
           <>
             <button
               onClick={() => setStatusModalOpen(false)}
-              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+              className="px-4 py-2 bg-slate-300 text-slate-900 rounded-lg hover:bg-slate-400 transition font-medium"
             >
               Cancel
             </button>
             <button
               onClick={handleUpdateStatus}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
             >
               Update
             </button>
@@ -503,11 +548,11 @@ export const TicketDetail = () => {
         }
       >
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">New Status</label>
+          <label className="block text-sm font-medium text-slate-700 mb-2">New Status</label>
           <select
             value={statusData.status}
             onChange={(e) => setStatusData({ ...statusData, status: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 bg-white"
           >
             {statuses.map((status) => (
               <option key={status} value={status}>
@@ -522,18 +567,18 @@ export const TicketDetail = () => {
       <Modal
         isOpen={rejectModalOpen}
         onClose={() => setRejectModalOpen(false)}
-        title="Reject Ticket"
+        title="❌ Reject Ticket"
         footer={
           <>
             <button
               onClick={() => setRejectModalOpen(false)}
-              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+              className="px-4 py-2 bg-slate-300 text-slate-900 rounded-lg hover:bg-slate-400 transition font-medium"
             >
               Cancel
             </button>
             <button
               onClick={handleReject}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium"
             >
               Reject
             </button>
@@ -541,13 +586,13 @@ export const TicketDetail = () => {
         }
       >
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Rejection Reason</label>
+          <label className="block text-sm font-medium text-slate-700 mb-2">Rejection Reason</label>
           <textarea
             value={rejectData.rejectionReason}
             onChange={(e) => setRejectData({ ...rejectData, rejectionReason: e.target.value })}
             placeholder="Enter reason for rejection"
             rows="4"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
           />
         </div>
       </Modal>
@@ -556,18 +601,18 @@ export const TicketDetail = () => {
       <Modal
         isOpen={resolveModalOpen}
         onClose={() => setResolveModalOpen(false)}
-        title="Resolve Ticket"
+        title="✓ Resolve Ticket"
         footer={
           <>
             <button
               onClick={() => setResolveModalOpen(false)}
-              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+              className="px-4 py-2 bg-slate-300 text-slate-900 rounded-lg hover:bg-slate-400 transition font-medium"
             >
               Cancel
             </button>
             <button
               onClick={handleResolve}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+              className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium"
             >
               Resolve
             </button>
@@ -575,13 +620,13 @@ export const TicketDetail = () => {
         }
       >
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Resolution Notes</label>
+          <label className="block text-sm font-medium text-slate-700 mb-2">Resolution Notes</label>
           <textarea
             value={resolveData.resolutionNotes}
             onChange={(e) => setResolveData({ ...resolveData, resolutionNotes: e.target.value })}
             placeholder="Enter resolution details"
             rows="4"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
           />
         </div>
       </Modal>
@@ -590,18 +635,18 @@ export const TicketDetail = () => {
       <Modal
         isOpen={attachmentsModalOpen}
         onClose={() => setAttachmentsModalOpen(false)}
-        title="Add Attachment"
+        title="📎 Add Attachment"
         footer={
           <>
             <button
               onClick={() => setAttachmentsModalOpen(false)}
-              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+              className="px-4 py-2 bg-slate-300 text-slate-900 rounded-lg hover:bg-slate-400 transition font-medium"
             >
               Cancel
             </button>
             <button
               onClick={handleAddAttachment}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium"
             >
               Add
             </button>
@@ -609,7 +654,7 @@ export const TicketDetail = () => {
         }
       >
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-slate-700 mb-2">
             Attachment URL ({(ticket.attachmentUrls?.length || 0)}/3)
           </label>
           <input
@@ -617,9 +662,9 @@ export const TicketDetail = () => {
             value={attachmentUrl}
             onChange={(e) => setAttachmentUrl(e.target.value)}
             placeholder="Enter attachment URL"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
           />
-          <p className="text-xs text-gray-500 mt-2">Maximum 3 attachments per ticket</p>
+          <p className="text-xs text-slate-500 mt-2">Maximum 3 attachments per ticket</p>
         </div>
       </Modal>
     </div>

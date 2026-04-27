@@ -19,6 +19,8 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
 
   const [error, setError] = useState('');
   const [formError, setFormError] = useState({});
+  const [attachmentUrls, setAttachmentUrls] = useState(['', '', '']);
+  const [previewImages, setPreviewImages] = useState([null, null, null]);
 
   const categories = [
     'Equipment Failure',
@@ -80,10 +82,29 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
     if (!formData.createdByName.trim()) errors.createdByName = 'Your name is required';
     if (!formData.category.trim()) errors.category = 'Category is required';
     if (!formData.description.trim()) errors.description = 'Description is required';
-    if (!formData.preferredContact.trim()) errors.preferredContact = 'Preferred contact is required';
+    
+    if (!formData.preferredContact.trim()) {
+      errors.preferredContact = 'Preferred contact is required';
+    } else {
+      const phoneRegex = /^[0-9]{10}$/;
+      if (!phoneRegex.test(formData.preferredContact.trim())) {
+        errors.preferredContact = 'Phone number must be exactly 10 digits';
+      }
+    }
 
     if (!formData.resourceId && !formData.resourceOrLocation.trim()) {
       errors.resourceOrLocation = 'Please select a resource or enter location';
+    }
+
+    // Validate attachments
+    const filledUrls = attachmentUrls.filter(url => url.trim());
+    if (filledUrls.length > 0) {
+      const validExtensions = /\.(jpg|jpeg|png)$/i;
+      filledUrls.forEach((url, idx) => {
+        if (!validExtensions.test(url.trim())) {
+          errors[`attachment_${idx}`] = 'URL must end with .jpg, .jpeg, or .png';
+        }
+      });
     }
 
     setFormError(errors);
@@ -95,17 +116,13 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
     setError('');
 
     if (!validateForm()) {
-      setError('Please fill in all required fields');
+      setError('Please fill in all required fields correctly');
       return;
     }
-    const phoneRegex = /^[0-9]{10}$/;
 
-if (!formData.preferredContact.trim()) {
-  errors.preferredContact = 'Preferred contact is required';
-} else if (!phoneRegex.test(formData.preferredContact.trim())) {
-  errors.preferredContact = 'Phone number must be exactly 10 digits';
-}
     const selectedResource = resources.find((resource) => resource.id === formData.resourceId);
+    
+    const validAttachments = attachmentUrls.filter(url => url.trim());
 
     const payload = {
       resourceId: formData.resourceId || null,
@@ -119,6 +136,7 @@ if (!formData.preferredContact.trim()) {
       createdById: 'USER001',
       createdByName: formData.createdByName,
       createdByRole: formData.createdByRole || 'USER',
+      attachmentUrls: validAttachments,
     };
 
     console.log('Create ticket payload:', payload);
@@ -145,7 +163,7 @@ if (!formData.preferredContact.trim()) {
               name="resourceId"
               value={formData.resourceId}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">-- Choose a resource --</option>
               {resources.map((resource) => (
@@ -166,7 +184,7 @@ if (!formData.preferredContact.trim()) {
               value={formData.resourceOrLocation}
               onChange={handleChange}
               placeholder="e.g., Room 101, Lab A, etc."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
             {formError.resourceOrLocation && (
               <p className="text-red-500 text-sm mt-1">{formError.resourceOrLocation}</p>
@@ -183,7 +201,7 @@ if (!formData.preferredContact.trim()) {
               name="category"
               value={formData.category}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">-- Select category --</option>
               {categories.map((cat) => (
@@ -203,7 +221,7 @@ if (!formData.preferredContact.trim()) {
               name="priority"
               value={formData.priority}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               {priorities.map((pri) => (
                 <option key={pri} value={pri}>{pri}</option>
@@ -222,7 +240,7 @@ if (!formData.preferredContact.trim()) {
             onChange={handleChange}
             placeholder="Describe the issue in detail..."
             rows="5"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
           {formError.description && (
             <p className="text-red-500 text-sm mt-1">{formError.description}</p>
@@ -234,14 +252,14 @@ if (!formData.preferredContact.trim()) {
             Preferred Contact <span className="text-red-500">*</span>
           </label>
           <input
-  type="text"
-  name="preferredContact"
-  value={formData.preferredContact}
-  onChange={handleChange}
-  placeholder="Enter 10 digit phone number"
-  maxLength="10"
-  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-/>
+            type="text"
+            name="preferredContact"
+            value={formData.preferredContact}
+            onChange={handleChange}
+            placeholder="Enter 10 digit phone number"
+            maxLength="10"
+            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
           {formError.preferredContact && (
             <p className="text-red-500 text-sm mt-1">{formError.preferredContact}</p>
           )}
@@ -258,7 +276,7 @@ if (!formData.preferredContact.trim()) {
               value={formData.createdByName}
               onChange={handleChange}
               placeholder="Your full name"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
             {formError.createdByName && (
               <p className="text-red-500 text-sm mt-1">{formError.createdByName}</p>
@@ -273,12 +291,76 @@ if (!formData.preferredContact.trim()) {
               name="createdByRole"
               value={formData.createdByRole}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               {roles.map((role) => (
                 <option key={role} value={role}>{role}</option>
               ))}
             </select>
+          </div>
+        </div>
+
+        {/* Image Attachments Section */}
+        <div className="border-t border-slate-200 pt-6">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">📸 Evidence Photos (Optional)</h3>
+          <p className="text-sm text-slate-600 mb-4">Add up to 3 photos showing the issue (e.g., broken equipment, error screens)</p>
+          
+          <div className="space-y-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            {[0, 1, 2].map((index) => (
+              <div key={index} className="space-y-2">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={attachmentUrls[index]}
+                    onChange={(e) => {
+                      const newUrls = [...attachmentUrls];
+                      newUrls[index] = e.target.value;
+                      setAttachmentUrls(newUrls);
+                    }}
+                    placeholder={`Photo ${index + 1} URL (optional)${index === 0 ? ' - recommended' : ''}`}
+                    className="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {attachmentUrls[index] && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newUrls = [...attachmentUrls];
+                        newUrls[index] = '';
+                        setAttachmentUrls(newUrls);
+                        const newPreviews = [...previewImages];
+                        newPreviews[index] = null;
+                        setPreviewImages(newPreviews);
+                      }}
+                      className="px-3 py-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg text-sm font-medium transition"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                {formError[`attachment_${index}`] && (
+                  <p className="text-red-600 text-xs">{formError[`attachment_${index}`]}</p>
+                )}
+                {attachmentUrls[index] && (
+                  <div className="w-24 h-24 rounded-lg overflow-hidden border border-slate-300 bg-white">
+                    <img
+                      src={attachmentUrls[index]}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextElementSibling.style.display = 'flex';
+                      }}
+                    />
+                    <div
+                      style={{ display: 'none' }}
+                      className="w-full h-full bg-slate-100 flex items-center justify-center text-xs text-slate-500"
+                    >
+                      Invalid
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
 

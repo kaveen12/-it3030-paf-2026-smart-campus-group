@@ -21,7 +21,11 @@ export const UserTicketDetail = () => {
     description: "",
     priority: "",
     preferredContact: "",
+    attachmentUrls: [],
   });
+
+  const [previewImages, setPreviewImages] = useState([]);
+  const [newImageUrls, setNewImageUrls] = useState(["", "", ""]);
 
   const categories = [
     "Equipment Failure",
@@ -53,6 +57,7 @@ export const UserTicketDetail = () => {
         description: ticketData.description || "",
         priority: ticketData.priority || "MEDIUM",
         preferredContact: ticketData.preferredContact || "",
+        attachmentUrls: ticketData.attachmentUrls || [],
       });
 
       try {
@@ -206,7 +211,7 @@ export const UserTicketDetail = () => {
                         resourceOrLocation: e.target.value,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
 
@@ -220,7 +225,7 @@ export const UserTicketDetail = () => {
                       onChange={(e) =>
                         setEditData({ ...editData, category: e.target.value })
                       }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       {categories.map((category) => (
                         <option key={category} value={category}>
@@ -239,7 +244,7 @@ export const UserTicketDetail = () => {
                       onChange={(e) =>
                         setEditData({ ...editData, priority: e.target.value })
                       }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       {priorities.map((priority) => (
                         <option key={priority} value={priority}>
@@ -263,7 +268,7 @@ export const UserTicketDetail = () => {
                       })
                     }
                     rows="4"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
 
@@ -280,10 +285,50 @@ export const UserTicketDetail = () => {
                         preferredContact: e.target.value,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
+            )}
+          </div>
+
+          {/* Attachments Section */}
+          <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              📎 Attachments
+            </h2>
+
+            {ticket.attachmentUrls && ticket.attachmentUrls.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {ticket.attachmentUrls.map((url, idx) => (
+                  <div key={idx} className="relative group rounded-lg overflow-hidden bg-gray-100 border border-gray-200 aspect-square">
+                    <img
+                      src={url}
+                      alt={`Attachment ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                        e.target.nextElementSibling.style.display = "flex";
+                      }}
+                    />
+                    <div
+                      style={{ display: "none" }}
+                      className="absolute inset-0 bg-gray-50 flex items-center justify-center text-center p-2"
+                    >
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-700 text-sm font-medium underline"
+                      >
+                        Open Image
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-sm">No attachments yet</p>
             )}
           </div>
 
@@ -344,7 +389,7 @@ export const UserTicketDetail = () => {
               <button
                 disabled={!canEditOrDelete}
                 onClick={() => setEditMode(true)}
-                className="w-full bg-[#2563eb] hover:bg-[#1e3a5f] disabled:bg-gray-400 text-white py-2 rounded-lg mb-3 font-medium"
+                className="w-full bg-[#2563eb] hover:bg-[#1e40af] disabled:bg-gray-400 text-white py-2 rounded-lg mb-3 font-medium transition"
               >
                 Edit Ticket
               </button>

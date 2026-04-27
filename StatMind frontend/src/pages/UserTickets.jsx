@@ -52,16 +52,12 @@ export const UserTickets = () => {
         </p>
 
         <select
-  value={sortBy}
-  onChange={(e) => setSortBy(e.target.value)}
-  className="bg-[#0f172a] text-white border border-[#1e3a5f] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
->
-          <option className="bg-white text-gray-900" value="updatedAt">
-  Sort by last modified
-</option>
-<option className="bg-white text-gray-900" value="createdAt">
-  Sort by created date
-</option>
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="bg-white text-gray-900 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+        >
+          <option value="updatedAt">Sort by last modified</option>
+          <option value="createdAt">Sort by created date</option>
         </select>
       </div>
 
