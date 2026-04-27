@@ -31,6 +31,26 @@ function UserManagement() {
       alert("Failed to update role");
     }
   };
+  const [editingUser, setEditingUser] = useState(null);
+
+  const deleteUser = async (id) => {
+  if (!window.confirm("Are you sure to delete?")) return;
+
+  await axios.delete(`http://localhost:8081/api/users/${id}`);
+  fetchUsers();
+};
+const updateUser = async () => {
+  await axios.put(
+    `http://localhost:8081/api/users/${editingUser.id}`,
+    {
+      name: editingUser.name,
+      email: editingUser.email,
+    }
+  );
+
+  setEditingUser(null);
+  fetchUsers();
+};
 
   return (
     <div className="flex bg-gray-100 min-h-screen text-gray-800">
@@ -53,7 +73,7 @@ function UserManagement() {
         </div>
 
         {/* STATS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white p-5 rounded-xl shadow border">
             <p className="text-sm text-gray-500">Total Users</p>
             <h2 className="text-3xl font-bold mt-2">{users.length}</h2>
@@ -72,6 +92,13 @@ function UserManagement() {
               {users.filter((u) => u.role === "USER").length}
             </h2>
           </div>
+
+          <div className="bg-white p-5 rounded-xl shadow border">
+  <p className="text-sm text-gray-500">Technicians</p>
+  <h2 className="text-3xl font-bold mt-2">
+    {users.filter((u) => u.role === "TECHNICIAN").length}
+  </h2>
+</div>
         </div>
 
         {/* TABLE */}
@@ -99,6 +126,7 @@ function UserManagement() {
                 <th className="p-4 text-left">Email</th>
                 <th className="p-4 text-left">Role</th>
                 <th className="p-4 text-left">Change Role</th>
+                <th className="p-4 text-left">Actions</th>
               </tr>
             </thead>
 
@@ -147,10 +175,67 @@ function UserManagement() {
                       <option value="TECHNICIAN">TECHNICIAN</option>
                     </select>
                   </td>
+
+                  <td className="p-4 flex gap-2">
+                  <button
+                   onClick={() => setEditingUser(user)}
+                     className="bg-yellow-400 px-3 py-1 rounded text-white hover:bg-yellow-500"
+                   >
+                    Edit
+                  </button>
+
+                  <button
+                    onClick={() => deleteUser(user.id)}
+                    className="bg-red-500 px-3 py-1 rounded text-white hover:bg-red-600"
+                  >
+                    Delete
+                  </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          {editingUser && (
+  <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+    <div className="bg-white p-6 rounded-xl w-96">
+      <h2 className="text-lg font-bold mb-4">Edit User</h2>
+
+      <input
+        type="text"
+        value={editingUser.name}
+        onChange={(e) =>
+          setEditingUser({ ...editingUser, name: e.target.value })
+        }
+        className="w-full border p-2 mb-3 rounded"
+      />
+
+      <input
+        type="email"
+        value={editingUser.email}
+        onChange={(e) =>
+          setEditingUser({ ...editingUser, email: e.target.value })
+        }
+        className="w-full border p-2 mb-3 rounded"
+      />
+
+      <div className="flex gap-2">
+        <button
+          onClick={updateUser}
+          className="bg-green-500 text-white px-4 py-2 rounded"
+        >
+          Save
+        </button>
+
+        <button
+          onClick={() => setEditingUser(null)}
+          className="bg-gray-400 px-4 py-2 rounded"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
           {users.length === 0 && (
             <p className="p-6 text-gray-500">No users found</p>
