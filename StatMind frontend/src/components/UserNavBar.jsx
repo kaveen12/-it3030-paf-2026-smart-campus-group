@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import logo from "../assets/logo-UniCore.png";
-
 const navItems = [
   {
     to: "/my-dashboard",
@@ -141,11 +142,7 @@ function UserNavbar() {
         </nav>
 
         {/* SIDEBAR LOGOUT */}
-        <div className="mt-auto pt-4 border-t border-gray-700">
-          <button className="w-full text-left px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-red-400 rounded">
-            Logout
-          </button>
-        </div>
+        
       </aside>
 
       {/* TOP NAVBAR */}
@@ -157,7 +154,7 @@ function UserNavbar() {
         </h1>
 
         {/* RIGHT */}
-        <div className="flex items-center gap-4 relative">
+     <div className="flex items-center gap-4 relative">
   {/* Bell */}
   <button
     onClick={() => setOpen(!open)}
