@@ -9,13 +9,25 @@ export const CreateTicket = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (formData) => {
+  const handleSubmit = async (formData, files) => {
     setLoading(true);
     setError('');
     setSuccess(false);
 
     try {
+      // Step 1: Create ticket with form data
       const createdTicket = await ticketAPI.createTicket(formData);
+      
+      // Step 2: Upload images if any files selected
+      if (files && files.length > 0) {
+        try {
+          await ticketAPI.uploadTicketImages(createdTicket.id, files);
+        } catch (uploadError) {
+          console.warn('Image upload failed, but ticket was created:', uploadError);
+          // Don't fail the whole process, images are optional
+        }
+      }
+
       setSuccess(true);
 
       setTimeout(() => {

@@ -10,9 +10,17 @@ import com.statmind.paf.model.Resource;
 import com.statmind.paf.repository.IncidentTicketRepository;
 import com.statmind.paf.repository.ResourceRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class IncidentTicketService {
@@ -292,6 +300,93 @@ public class IncidentTicketService {
         );
 
         return saved;
+    }
+
+    public IncidentTicket uploadAttachments(String id, MultipartFile[] files) throws IOException {
+        IncidentTicket existing = repository.findById(id).orElse(null);
+
+        if (existing == null) {
+            return null;
+        }
+
+        // Validate file count
+        if (files.length > 3) {
+            throw new IllegalArgumentException("Maximum 3 files allowed");
+        }
+
+        // Get current attachments
+        List<String> currentAttachments = existing.getAttachmentUrls();
+        if (currentAttachments == null) {
+            currentAttachments = new ArrayList<>();
+        }
+
+        // Check total count
+        if (currentAttachments.size() + files.length > 3) {
+            throw new IllegalStateException("A ticket can have a maximum of 3 attachments total");
+        }
+
+        // Create directory for ticket uploads
+        String uploadDir = "uploads/tickets/" + id;
+        Path dirPath = Paths.get(uploadDir);
+        
+        if (!Files.exists(dirPath)) {
+            Files.createDirectories(dirPath);
+        }
+
+        List<String> newUrls = new ArrayList<>();
+
+        // Process each file
+        for (MultipartFile file : files) {
+            // Validate file type
+            String contentType = file.getContentType();
+            if (!isAllowedImageType(contentType)) {
+                throw new IllegalArgumentException("Only JPG/JPEG and PNG images are allowed");
+            }
+
+            // Generate unique filename
+            String originalFilename = file.getOriginalFilename();
+            String fileExtension = getFileExtension(originalFilename);
+            String uniqueFilename = UUID.randomUUID().toString() + "." + fileExtension;
+
+            // Save file
+            Path filePath = dirPath.resolve(uniqueFilename);
+            Files.write(filePath, file.getBytes());
+
+            // Generate accessible URL
+            String fileUrl = "/uploads/tickets/" + id + "/" + uniqueFilename;
+            newUrls.add(fileUrl);
+        }
+
+        // Update ticket
+        currentAttachments.addAll(newUrls);
+        existing.setAttachmentUrls(currentAttachments);
+        existing.setUpdatedAt(LocalDateTime.now());
+
+        IncidentTicket saved = repository.save(existing);
+
+        activityLogService.createLog(
+                saved.getId(),
+                "ATTACHMENTS_UPLOADED",
+                "SYSTEM",
+                "USER",
+                files.length + " file(s) uploaded"
+        );
+
+        return saved;
+    }
+
+    private boolean isAllowedImageType(String contentType) {
+        return contentType != null && (
+            contentType.equals("image/jpeg") || 
+            contentType.equals("image/png")
+        );
+    }
+
+    private String getFileExtension(String filename) {
+        if (filename == null || !filename.contains(".")) {
+            return "jpg";
+        }
+        return filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
     }
 
     public boolean deleteTicket(String id) {

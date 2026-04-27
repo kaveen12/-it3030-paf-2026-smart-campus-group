@@ -6,21 +6,17 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
   const [formData, setFormData] = useState(
     initialData || {
       resourceId: '',
-      resourceOrLocation: '',
       category: '',
       description: '',
       priority: 'MEDIUM',
       preferredContact: '',
-      createdById: 'USER001',
-      createdByName: '',
-      createdByRole: 'USER',
     }
   );
 
   const [error, setError] = useState('');
   const [formError, setFormError] = useState({});
-  const [attachmentUrls, setAttachmentUrls] = useState(['', '', '']);
-  const [previewImages, setPreviewImages] = useState([null, null, null]);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [fileErrors, setFileErrors] = useState('');
 
   const categories = [
     'Equipment Failure',
@@ -33,7 +29,6 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
   ];
 
   const priorities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
-  const roles = ['USER', 'TECHNICIAN', 'ADMIN'];
 
   useEffect(() => {
     fetchResources();
@@ -48,18 +43,22 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
     }
   };
 
+  const getLoggedUser = () => {
+    try {
+      const loggedUser = JSON.parse(localStorage.getItem('user'));
+      return loggedUser || { id: 'USER001', name: 'User', role: 'USER' };
+    } catch {
+      return { id: 'USER001', name: 'User', role: 'USER' };
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     if (name === 'resourceId') {
-      const selectedResource = resources.find((resource) => resource.id === value);
-
       setFormData((prev) => ({
         ...prev,
         resourceId: value,
-        resourceOrLocation: selectedResource
-          ? `${selectedResource.name} - ${selectedResource.location}`
-          : prev.resourceOrLocation,
       }));
     } else {
       setFormData((prev) => ({
@@ -76,12 +75,47 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
     }
   };
 
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    setFileErrors('');
+
+    // Validate file count
+    if (files.length > 3) {
+      setFileErrors('Maximum 3 images allowed');
+      setSelectedFiles([]);
+      return;
+    }
+
+    // Validate file types
+    const validTypes = ['image/jpeg', 'image/png'];
+    const invalidFiles = files.filter(file => !validTypes.includes(file.type));
+    
+    if (invalidFiles.length > 0) {
+      setFileErrors('Only JPG/JPEG and PNG files are allowed');
+      setSelectedFiles([]);
+      return;
+    }
+
+    setSelectedFiles(files);
+  };
+
+  const removeFile = (index) => {
+    const newFiles = selectedFiles.filter((_, i) => i !== index);
+    setSelectedFiles(newFiles);
+  };
+
   const validateForm = () => {
     const errors = {};
 
-    if (!formData.createdByName.trim()) errors.createdByName = 'Your name is required';
-    if (!formData.category.trim()) errors.category = 'Category is required';
-    if (!formData.description.trim()) errors.description = 'Description is required';
+    if (!formData.resourceId.trim()) {
+      errors.resourceId = 'Resource selection is required';
+    }
+    if (!formData.category.trim()) {
+      errors.category = 'Category is required';
+    }
+    if (!formData.description.trim()) {
+      errors.description = 'Description is required';
+    }
     
     if (!formData.preferredContact.trim()) {
       errors.preferredContact = 'Preferred contact is required';
@@ -90,21 +124,6 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
       if (!phoneRegex.test(formData.preferredContact.trim())) {
         errors.preferredContact = 'Phone number must be exactly 10 digits';
       }
-    }
-
-    if (!formData.resourceId && !formData.resourceOrLocation.trim()) {
-      errors.resourceOrLocation = 'Please select a resource or enter location';
-    }
-
-    // Validate attachments
-    const filledUrls = attachmentUrls.filter(url => url.trim());
-    if (filledUrls.length > 0) {
-      const validExtensions = /\.(jpg|jpeg|png)$/i;
-      filledUrls.forEach((url, idx) => {
-        if (!validExtensions.test(url.trim())) {
-          errors[`attachment_${idx}`] = 'URL must end with .jpg, .jpeg, or .png';
-        }
-      });
     }
 
     setFormError(errors);
@@ -121,26 +140,25 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
     }
 
     const selectedResource = resources.find((resource) => resource.id === formData.resourceId);
-    
-    const validAttachments = attachmentUrls.filter(url => url.trim());
+    const loggedUser = getLoggedUser();
 
     const payload = {
-      resourceId: formData.resourceId || null,
-      resourceOrLocation:
-        formData.resourceOrLocation ||
-        (selectedResource ? `${selectedResource.name} - ${selectedResource.location}` : 'Manual Entry'),
+      resourceId: formData.resourceId,
+      resourceName: selectedResource?.name || '',
+      resourceCode: selectedResource?.resourceCode || '',
+      location: selectedResource?.location || '',
+      resourceOrLocation: selectedResource ? `${selectedResource.name} - ${selectedResource.location}` : '',
       category: formData.category,
       description: formData.description,
       priority: formData.priority,
       preferredContact: formData.preferredContact,
-      createdById: 'USER001',
-      createdByName: formData.createdByName,
-      createdByRole: formData.createdByRole || 'USER',
-      attachmentUrls: validAttachments,
+      createdById: loggedUser.id,
+      createdByName: loggedUser.name,
+      createdByRole: loggedUser.role,
     };
 
     console.log('Create ticket payload:', payload);
-    onSubmit(payload);
+    onSubmit(payload, selectedFiles);
   };
 
   return (
@@ -154,42 +172,27 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
       )}
 
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Resource
-            </label>
-            <select
-              name="resourceId"
-              value={formData.resourceId}
-              onChange={handleChange}
-              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">-- Choose a resource --</option>
-              {resources.map((resource) => (
-                <option key={resource.id} value={resource.id}>
-                  {resource.name} ({resource.resourceCode}) - {resource.location}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Or Enter Location <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="resourceOrLocation"
-              value={formData.resourceOrLocation}
-              onChange={handleChange}
-              placeholder="e.g., Room 101, Lab A, etc."
-              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-            {formError.resourceOrLocation && (
-              <p className="text-red-500 text-sm mt-1">{formError.resourceOrLocation}</p>
-            )}
-          </div>
+        {/* Resource Selection - REQUIRED */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Select Resource <span className="text-red-500">*</span>
+          </label>
+          <select
+            name="resourceId"
+            value={formData.resourceId}
+            onChange={handleChange}
+            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="">-- Choose a resource --</option>
+            {resources.map((resource) => (
+              <option key={resource.id} value={resource.id}>
+                {resource.name} ({resource.resourceCode}) - {resource.location}
+              </option>
+            ))}
+          </select>
+          {formError.resourceId && (
+            <p className="text-red-500 text-sm mt-1">{formError.resourceId}</p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -201,7 +204,7 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
               name="category"
               value={formData.category}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">-- Select category --</option>
               {categories.map((cat) => (
@@ -221,7 +224,7 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
               name="priority"
               value={formData.priority}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               {priorities.map((pri) => (
                 <option key={pri} value={pri}>{pri}</option>
@@ -240,7 +243,7 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
             onChange={handleChange}
             placeholder="Describe the issue in detail..."
             rows="5"
-            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
           {formError.description && (
             <p className="text-red-500 text-sm mt-1">{formError.description}</p>
@@ -258,116 +261,68 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
             onChange={handleChange}
             placeholder="Enter 10 digit phone number"
             maxLength="10"
-            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
           {formError.preferredContact && (
             <p className="text-red-500 text-sm mt-1">{formError.preferredContact}</p>
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Your Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="createdByName"
-              value={formData.createdByName}
-              onChange={handleChange}
-              placeholder="Your full name"
-              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-            {formError.createdByName && (
-              <p className="text-red-500 text-sm mt-1">{formError.createdByName}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Your Role <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="createdByRole"
-              value={formData.createdByRole}
-              onChange={handleChange}
-              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              {roles.map((role) => (
-                <option key={role} value={role}>{role}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
         {/* Image Attachments Section */}
         <div className="border-t border-slate-200 pt-6">
           <h3 className="text-lg font-semibold text-slate-900 mb-4">📸 Evidence Photos (Optional)</h3>
-          <p className="text-sm text-slate-600 mb-4">Add up to 3 photos showing the issue (e.g., broken equipment, error screens)</p>
+          <p className="text-sm text-slate-600 mb-4">Add up to 3 JPG or PNG images showing the issue</p>
           
           <div className="space-y-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            {[0, 1, 2].map((index) => (
-              <div key={index} className="space-y-2">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={attachmentUrls[index]}
-                    onChange={(e) => {
-                      const newUrls = [...attachmentUrls];
-                      newUrls[index] = e.target.value;
-                      setAttachmentUrls(newUrls);
-                    }}
-                    placeholder={`Photo ${index + 1} URL (optional)${index === 0 ? ' - recommended' : ''}`}
-                    className="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  {attachmentUrls[index] && (
+            <label className="block">
+              <input
+                type="file"
+                multiple
+                accept="image/png,image/jpeg"
+                onChange={handleFileChange}
+                disabled={selectedFiles.length >= 3}
+                className="block w-full text-sm text-slate-600 border border-slate-300 rounded-lg px-3 py-2 bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+              <p className="text-xs text-slate-500 mt-2">
+                Selected: {selectedFiles.length} file{selectedFiles.length !== 1 ? 's' : ''} (max 3)
+              </p>
+            </label>
+
+            {fileErrors && (
+              <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded px-3 py-2">{fileErrors}</p>
+            )}
+
+            {selectedFiles.length > 0 && (
+              <div className="grid grid-cols-3 gap-3">
+                {selectedFiles.map((file, index) => (
+                  <div key={index} className="relative">
+                    <div className="w-full h-24 bg-slate-100 rounded-lg overflow-hidden border border-slate-300 flex items-center justify-center">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                     <button
                       type="button"
-                      onClick={() => {
-                        const newUrls = [...attachmentUrls];
-                        newUrls[index] = '';
-                        setAttachmentUrls(newUrls);
-                        const newPreviews = [...previewImages];
-                        newPreviews[index] = null;
-                        setPreviewImages(newPreviews);
-                      }}
-                      className="px-3 py-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg text-sm font-medium transition"
+                      onClick={() => removeFile(index)}
+                      className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold transition"
+                      title="Remove image"
                     >
-                      Clear
+                      ×
                     </button>
-                  )}
-                </div>
-                {formError[`attachment_${index}`] && (
-                  <p className="text-red-600 text-xs">{formError[`attachment_${index}`]}</p>
-                )}
-                {attachmentUrls[index] && (
-                  <div className="w-24 h-24 rounded-lg overflow-hidden border border-slate-300 bg-white">
-                    <img
-                      src={attachmentUrls[index]}
-                      alt={`Preview ${index + 1}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                        e.target.nextElementSibling.style.display = 'flex';
-                      }}
-                    />
-                    <div
-                      style={{ display: 'none' }}
-                      className="w-full h-full bg-slate-100 flex items-center justify-center text-xs text-slate-500"
-                    >
-                      Invalid
-                    </div>
+                    <p className="text-xs text-slate-600 mt-1 truncate">{file.name}</p>
                   </div>
-                )}
+                ))}
               </div>
-            ))}
+            )}
           </div>
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium disabled:bg-gray-400"
+          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           {loading ? 'Creating Ticket...' : 'Create Ticket'}
         </button>

@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import com.statmind.paf.dto.AssignTechnicianRequest;
 import com.statmind.paf.dto.UpdateStatusRequest;
 import com.statmind.paf.dto.RejectTicketRequest;
@@ -145,6 +146,31 @@ public ResponseEntity<?> closeTicket(@PathVariable String id) {
     } catch (IllegalStateException e) {
         return ResponseEntity.badRequest().body(e.getMessage());
     }
+    }
+
+    @PostMapping("/{id}/attachments/upload")
+    public ResponseEntity<?> uploadAttachments(@PathVariable String id,
+                                               @RequestParam("files") MultipartFile[] files) {
+        try {
+            if (files == null || files.length == 0) {
+                return ResponseEntity.badRequest().body("No files provided");
+            }
+
+            IncidentTicket ticket = service.uploadAttachments(id, files);
+
+            if (ticket == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
+            }
+
+            return ResponseEntity.ok(ticket);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("File upload failed: " + e.getMessage());
+        }
     }
     
     @DeleteMapping("/{id}")

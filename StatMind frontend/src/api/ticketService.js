@@ -119,6 +119,27 @@ export const ticketAPI = {
       throw handleApiError(error);
     }
   },
+
+  // Upload ticket images
+  uploadTicketImages: async (ticketId, files) => {
+    try {
+      const formData = new FormData();
+      
+      // Add each file to FormData
+      files.forEach((file) => {
+        formData.append('files', file);
+      });
+
+      const response = await apiClient.post(`/tickets/${ticketId}/attachments/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
 };
 
 // Comment endpoints

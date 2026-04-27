@@ -355,40 +355,41 @@ export const TicketDetail = () => {
             {/* Attachments */}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="text-2xl">📎</span>
-                  <h3 className="text-lg font-semibold text-slate-900">Attachments</h3>
+                  <span className="text-2xl">�</span>
+                  <h3 className="text-lg font-semibold text-slate-900">Evidence Photos</h3>
                 </div>
                 {ticket.attachmentUrls && ticket.attachmentUrls.length > 0 ? (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {ticket.attachmentUrls.map((url, idx) => (
-                      <div key={idx} className="relative group rounded-lg overflow-hidden bg-slate-100 border border-slate-200 aspect-square hover:shadow-md transition">
-                        <img
-                          src={url}
-                          alt={`Attachment ${idx + 1}`}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.style.display = "none";
-                            e.target.nextElementSibling.style.display = "flex";
-                          }}
-                        />
-                        <div
-                          style={{ display: "none" }}
-                          className="absolute inset-0 bg-slate-50 flex items-center justify-center text-center p-2"
-                        >
-                          <a
-                            href={url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-700 text-sm font-medium underline"
-                          >
-                            Open
+                    {ticket.attachmentUrls.map((url, idx) => {
+                      const imageUrl = url.startsWith('http') 
+                        ? url 
+                        : `http://localhost:8081${url}`;
+
+                      return (
+                        <div key={idx} className="relative group rounded-lg overflow-hidden bg-slate-100 border border-slate-200 aspect-square hover:shadow-md transition cursor-pointer">
+                          <a href={imageUrl} target="_blank" rel="noopener noreferrer">
+                            <img
+                              src={imageUrl}
+                              alt={`Evidence ${idx + 1}`}
+                              className="w-full h-full object-cover group-hover:opacity-80 transition"
+                              onError={(e) => {
+                                e.target.style.display = "none";
+                                e.target.nextElementSibling.style.display = "flex";
+                              }}
+                            />
+                            <div
+                              style={{ display: "none" }}
+                              className="absolute inset-0 bg-slate-50 flex items-center justify-center text-center p-2"
+                            >
+                              <span className="text-blue-600 text-sm font-medium">View</span>
+                            </div>
                           </a>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
-                  <p className="text-slate-500 text-sm">No attachments yet</p>
+                  <p className="text-slate-500 text-sm">No photos attached</p>
                 )}
             </div>
 
