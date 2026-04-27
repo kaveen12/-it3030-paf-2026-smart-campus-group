@@ -234,8 +234,6 @@ function UserNavbar() {
     </div>
   </div>
 
-  <span className="text-sm text-gray-600">{role}</span>
-
   <button
     onClick={logout}
     className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm"

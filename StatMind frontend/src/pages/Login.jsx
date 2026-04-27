@@ -32,21 +32,24 @@ function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleAuthSuccess = (data) => {
+  const handleAuthSuccess = async (data) => {
     localStorage.setItem('flexitUser', JSON.stringify(data));
+  localStorage.setItem('userId', data.userId || data.id);
+  localStorage.setItem('name', data.userName || data.fullName || data.name);
+  localStorage.setItem('email', data.email);
+  localStorage.setItem('role', data.role);
 
     const resolvedRole = String(data.role || '').toUpperCase();
     const resolvedUserId = data.userId || data.id;
     const resolvedName = data.userName || data.fullName || data.name || 'User';
 
     if (resolvedRole === 'USER' && resolvedUserId) {
-      addNotification({
-        userId: resolvedUserId,
-        title: `Welcome back, ${resolvedName}!`,
-        message: 'You have successfully logged in to your UniCore workspace.',
-        type: 'greeting',
-        actionUrl: '/user/dashboard',
-      });
+  await addNotification({
+  userId: resolvedUserId,
+  title: `👋Welcome back, ${resolvedName}!`,
+  message: `You have successfully logged in to your UniCore workspace.`,
+  type: "LOGIN",
+});
     }
 
     if (resolvedRole === 'ADMIN') {

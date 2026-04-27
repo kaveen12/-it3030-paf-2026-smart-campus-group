@@ -65,7 +65,10 @@ function AdminNavBar() {
   const { pathname } = useLocation();
 
   const userId = localStorage.getItem("userId");
-  const userName = localStorage.getItem("name") || "Admin";
+  const userName =
+  localStorage.getItem("name") ||
+  localStorage.getItem("email")?.split("@")[0] ||
+  "User";
   const userEmail = localStorage.getItem("email") || "";
   const role = localStorage.getItem("role") || "ADMIN";
 
@@ -137,15 +140,6 @@ function AdminNavBar() {
             );
           })}
         </nav>
-
-        <div className="mt-auto pt-4 border-t border-gray-700">
-          <button
-            onClick={logout}
-            className="w-full text-left px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-red-400 rounded"
-          >
-            Logout
-          </button>
-        </div>
       </aside>
 
       <header className="fixed top-0 left-56 right-0 h-14 bg-white border-b flex items-center justify-between px-6 z-40 shadow-sm">
@@ -213,16 +207,28 @@ function AdminNavBar() {
           )}
 
           <div className="flex items-center gap-3 bg-white border rounded-full px-4 py-2 shadow-sm">
-            <div className="w-9 h-9 rounded-full bg-[#0f172a] text-white flex items-center justify-center font-bold">
-              {userName.charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-gray-800">{userName}</p>
-              <p className="text-xs text-gray-500">{userEmail}</p>
-            </div>
-          </div>
+  
+  {/* Avatar */}
+  <div className="relative">
+  <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
+    {userName.charAt(0).toUpperCase()}
+  </div>
 
-          <span className="text-sm text-gray-600">{role}</span>
+  <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+</div>
+
+  {/* User Info */}
+  <div>
+    <p className="text-sm font-semibold text-gray-800">
+      {userName}
+    </p>
+    <p className="text-xs text-gray-500">
+      {userEmail}
+    </p>
+  </div>
+  
+
+</div>
 
           <button
             onClick={logout}
