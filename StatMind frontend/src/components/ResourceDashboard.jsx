@@ -19,19 +19,13 @@ export default function ResourceDashboard({ resources }) {
   const data = Array.isArray(resources) ? resources : [];
   const [selectedType, setSelectedType] = useState("ALL");
 
-  /* FILTERED DATA */
   const filteredData =
     selectedType === "ALL"
       ? data
       : data.filter((r) => r?.type === selectedType);
 
-  /* KPI BASED ON FILTER */
   const total = filteredData.length;
-
-  const active = filteredData.filter(
-    (r) => r?.status === "ACTIVE"
-  ).length;
-
+  const active = filteredData.filter((r) => r?.status === "ACTIVE").length;
   const inactive = total - active;
 
   const capacity = filteredData.reduce(
@@ -39,19 +33,13 @@ export default function ResourceDashboard({ resources }) {
     0
   );
 
-  /* TYPES */
-  const types = [
-    "ALL",
-    ...new Set(data.map((r) => r?.type || "Unknown")),
-  ];
+  const types = ["ALL", ...new Set(data.map((r) => r?.type || "Unknown"))];
 
-  /* PIE */
   const statusData = [
     { name: "Active", value: active },
     { name: "Inactive", value: inactive },
   ];
 
-  /* BAR */
   const barData =
     selectedType === "ALL"
       ? Object.values(
@@ -67,7 +55,6 @@ export default function ResourceDashboard({ resources }) {
           count: Number(r?.capacity || 0),
         }));
 
-  /* LINE */
   const lineData = filteredData.map((r) => ({
     name: r?.name || "N/A",
     capacity: Number(r?.capacity || 0),
@@ -76,26 +63,25 @@ export default function ResourceDashboard({ resources }) {
   const COLORS = ["#22c55e", "#ef4444"];
 
   return (
-    <div className="fixed top-14 left-56 right-0 bottom-0 bg-slate-100 p-4 overflow-hidden">
-      <div className="w-full h-full bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 flex flex-col gap-5 overflow-hidden">
+    <div className="fixed top-14 left-56 right-0 bottom-0 bg-slate-100 overflow-y-auto">
+
+      <div className="p-6 space-y-6">
 
         {/* HEADER */}
-        <div className="flex justify-between items-center shrink-0">
+        <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">
-              Resource Management Dashboard
+            <h1 className="text-2xl font-semibold text-gray-800">
+              Resource Dashboard
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Smart analytics overview
+            <p className="text-sm text-gray-500">
+              Overview of all campus resources
             </p>
           </div>
 
           <select
             value={selectedType}
-            onChange={(e) =>
-              setSelectedType(e.target.value)
-            }
-            className="border px-4 py-2 rounded-lg shadow text-sm"
+            onChange={(e) => setSelectedType(e.target.value)}
+            className="border px-4 py-2 rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-blue-400"
           >
             {types.map((type, i) => (
               <option key={i}>{type}</option>
@@ -103,26 +89,26 @@ export default function ResourceDashboard({ resources }) {
           </select>
         </div>
 
-        {/* KPI CARDS NOW CHANGE */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 shrink-0">
-          <Kpi title="TOTAL" value={total} color="text-blue-400" />
-          <Kpi title="ACTIVE" value={active} color="text-green-400" />
-          <Kpi title="INACTIVE" value={inactive} color="text-red-400" />
-          <Kpi title="CAPACITY" value={capacity} color="text-yellow-400" />
+        {/* KPI CARDS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+          <Kpi title="Total" value={total} color="border-blue-500" />
+          <Kpi title="Active" value={active} color="border-green-500" />
+          <Kpi title="Inactive" value={inactive} color="border-red-500" />
+          <Kpi title="Capacity" value={capacity} color="border-yellow-500" />
         </div>
 
         {/* CHARTS */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 flex-1 min-h-0">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
 
           {/* BAR */}
           <Card title={selectedType === "ALL"
             ? "Resource Types"
             : `${selectedType} Resources`}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={260}>
               <BarChart data={barData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="name" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" />
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
                 <Tooltip />
                 <Bar dataKey="count" fill="#3b82f6" radius={[6,6,0,0]} />
               </BarChart>
@@ -131,36 +117,33 @@ export default function ResourceDashboard({ resources }) {
 
           {/* PIE */}
           <Card title={`Status (${selectedType})`}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={260}>
               <PieChart>
-                <Pie
-                  data={statusData}
-                  dataKey="value"
-                  outerRadius="70%"
-                  label
-                >
+                <Pie data={statusData} dataKey="value" outerRadius={90}>
                   {statusData.map((_, i) => (
                     <Cell key={i} fill={COLORS[i]} />
                   ))}
                 </Pie>
                 <Legend />
+                <Tooltip />
               </PieChart>
             </ResponsiveContainer>
           </Card>
 
           {/* LINE */}
           <Card title={`Capacity (${selectedType})`}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={260}>
               <LineChart data={lineData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="name" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" />
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
                 <Tooltip />
                 <Line
                   type="monotone"
                   dataKey="capacity"
                   stroke="#f59e0b"
                   strokeWidth={3}
+                  dot={{ r: 4 }}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -172,24 +155,24 @@ export default function ResourceDashboard({ resources }) {
   );
 }
 
+/* KPI */
 function Kpi({ title, value, color }) {
   return (
-    <div className="bg-[#0f172a] rounded-xl p-5 shadow-lg text-white">
-      <p className="text-sm text-gray-400">{title}</p>
-      <h2 className={`text-3xl font-bold mt-2 ${color}`}>
+    <div className={`bg-white p-5 rounded-xl shadow-sm border-l-4 ${color}`}>
+      <p className="text-sm text-gray-500">{title}</p>
+      <h2 className="text-2xl font-bold text-gray-800 mt-1">
         {value}
       </h2>
     </div>
   );
 }
 
+/* CARD */
 function Card({ title, children }) {
   return (
-    <div className="bg-[#1e293b] rounded-xl p-4 flex flex-col shadow-xl min-h-0">
-      <h2 className="text-gray-200 text-lg font-semibold mb-3">
-        {title}
-      </h2>
-      <div className="flex-1 min-h-0">{children}</div>
+    <div className="bg-white rounded-xl shadow-sm p-4">
+      <h2 className="text-gray-700 font-semibold mb-3">{title}</h2>
+      {children}
     </div>
   );
 }
