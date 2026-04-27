@@ -1,6 +1,7 @@
 package com.statmind.paf.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "resources")
@@ -9,15 +10,20 @@ public class Resource {
     @Id
     private String id;
 
+    @Indexed(unique = true)   // 🔥 Duplicate codes prevent
     private String resourceCode;
+
     private String name;
     private String type;
-    private Integer capacity;
+    private int capacity;
     private String location;
+
     private String startDate;
     private String startTime;
+
     private String endDate;
     private String endTime;
+
     private String status;
     private String description;
 
@@ -26,6 +32,10 @@ public class Resource {
 
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getResourceCode() {
@@ -52,11 +62,11 @@ public class Resource {
         this.type = type;
     }
 
-    public Integer getCapacity() {
+    public int getCapacity() {
         return capacity;
     }
 
-    public void setCapacity(Integer capacity) {
+    public void setCapacity(int capacity) {
         this.capacity = capacity;
     }
 
