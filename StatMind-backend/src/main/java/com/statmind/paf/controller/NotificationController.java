@@ -3,9 +3,13 @@ package com.statmind.paf.controller;
 import com.statmind.paf.exception.ResourceNotFoundException;
 import com.statmind.paf.model.Notification;
 import com.statmind.paf.repository.NotificationRepository;
+import com.statmind.paf.repository.UserRepository;
 import com.statmind.paf.exception.ResourceNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import com.statmind.paf.service.NotificationService;
+import com.statmind.paf.model.User;
+import com.statmind.paf.repository.UserRepository;
+import java.util.Map;
 
 import java.util.List;
 
@@ -16,10 +20,12 @@ public class NotificationController {
 
     private final NotificationRepository notificationRepository;
     private final NotificationService notificationService;
+    private final UserRepository userRepository;
 
-    public NotificationController(NotificationRepository notificationRepository, NotificationService notificationService) {
+    public NotificationController(NotificationRepository notificationRepository, NotificationService notificationService ,UserRepository userRepository) {
     this.notificationRepository = notificationRepository;
     this.notificationService = notificationService;
+    this.userRepository = userRepository;
 }
 
     @GetMapping
@@ -100,6 +106,47 @@ public class NotificationController {
         return notificationRepository.saveAll(notifications);
     }
 
+    @PostMapping("/send-to-role")
+public String sendNotificationToRole(@RequestBody Map<String, String> request) {
+
+    String role = request.get("role");
+    String message = request.get("message");
+    String type = request.getOrDefault("type", "ADMIN_MESSAGE");
+
+    List<User> users = userRepository.findAll();
+
+    for (User user : users) {
+
+        // 🔥 handle ALL USERS
+        if (role.equalsIgnoreCase("ALL")) {
+
+            Notification notification = new Notification();
+            notification.setUserId(user.getId());
+            notification.setMessage(message);
+            notification.setType(type);
+            notification.setRead(false);
+            notification.setCreatedAt(java.time.LocalDateTime.now().toString());
+
+            notificationRepository.save(notification);
+        }
+
+        // 🔥 handle specific role
+        else if (user.getRole() != null &&
+                user.getRole().name().equalsIgnoreCase(role)) {
+
+            Notification notification = new Notification();
+            notification.setUserId(user.getId());
+            notification.setMessage(message);
+            notification.setType(type);
+            notification.setRead(false);
+            notification.setCreatedAt(java.time.LocalDateTime.now().toString());
+
+            notificationRepository.save(notification);
+        }
+    }
+
+    return "Notification sent successfully";
+}
 
 
 }
