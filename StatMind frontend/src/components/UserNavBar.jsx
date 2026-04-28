@@ -172,7 +172,7 @@ function UserNavbar() {
 
   {/* Dropdown */}
   {open && (
-    <div className="absolute right-40 top-12 w-96 bg-white rounded-2xl shadow-xl border p-4 z-50 max-h-[500px] overflow-y-auto">
+   <div className="absolute right-4 top-14 w-72 max-h-72 overflow-y-auto bg-white rounded-2xl shadow-xl p-3 z-50">
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-bold text-gray-800">Notifications</h2>
         <span className="text-sm text-gray-500">{unreadCount} unread</span>
@@ -181,10 +181,10 @@ function UserNavbar() {
       {notifications.length === 0 ? (
         <p className="text-center text-gray-500 py-4">No notifications</p>
       ) : (
-        notifications.map((n) => (
+        notifications.slice(0, 2).map((n) => (
           <div
             key={n.id}
-            className={`p-4 mb-3 rounded-xl border ${
+            className={`p-3 mb-2 rounded-lg border ${
               n.read
                 ? "bg-white border-gray-200"
                 : "bg-green-50 border-green-300"
@@ -192,7 +192,7 @@ function UserNavbar() {
           >
             <div className="flex justify-between gap-3">
               <div>
-                <p className="font-semibold text-gray-800">
+                <p className="text-sm font-semibold text-gray-800">
                   👋 {n.message}
                 </p>
                 <p className="text-sm text-gray-600 mt-1">
