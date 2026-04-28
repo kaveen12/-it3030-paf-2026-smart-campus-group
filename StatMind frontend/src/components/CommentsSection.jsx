@@ -18,19 +18,37 @@ export const CommentsSection = ({
     setComments(initialComments);
   }, [initialComments]);
 
+  const formatDate = (date) => {
+    if (!date) return "Just now";
+
+    return new Date(date).toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   const handleAdd = async () => {
     if (!message.trim()) return;
+
+    if (!currentUserName || !currentUserRole) {
+      alert("User details missing. Please login again.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const newComment = {
         authorName: currentUserName,
         authorRole: currentUserRole,
-        message,
+        message: message.trim(),
       };
 
       const saved = await commentAPI.createComment(ticketId, newComment);
-      setComments([...comments, saved]);
+      setComments((prev) => [...prev, saved]);
       setMessage("");
       if (onRefresh) onRefresh();
     } catch (err) {
@@ -42,11 +60,17 @@ export const CommentsSection = ({
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this comment?")) return;
+
+    if (!currentUserName) {
+      alert("User details missing. Please login again.");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await commentAPI.deleteComment(ticketId, id);
-      setComments(comments.filter((c) => c.id !== id));
+      await commentAPI.deleteComment(ticketId, id, currentUserName);
+      setComments((prev) => prev.filter((c) => c.id !== id));
       if (onRefresh) onRefresh();
     } catch (err) {
       alert("Failed to delete comment: " + err.message);
@@ -60,15 +84,23 @@ export const CommentsSection = ({
       alert("Comment cannot be empty");
       return;
     }
+
+    if (!currentUserName) {
+      alert("User details missing. Please login again.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const updated = await commentAPI.updateComment(ticketId, id, {
-        message: editText,
+        authorName: currentUserName,
+        message: editText.trim(),
       });
 
-      setComments(comments.map((c) => (c.id === id ? updated : c)));
+      setComments((prev) => prev.map((c) => (c.id === id ? updated : c)));
       setEditingId(null);
+      setEditText("");
       if (onRefresh) onRefresh();
     } catch (err) {
       alert("Failed to update comment: " + err.message);
@@ -84,7 +116,6 @@ export const CommentsSection = ({
   };
 
   const getRoleIcon = (role) => {
-    if (role === "ADMIN") return "👤";
     if (role === "TECHNICIAN") return "🔧";
     return "👤";
   };
@@ -96,11 +127,10 @@ export const CommentsSection = ({
         <h2 className="text-lg font-semibold text-slate-900">Comments & Notes</h2>
       </div>
 
-      {/* ADD COMMENT */}
       <div className="mb-6 pb-6 border-b border-slate-200">
         <div className="flex gap-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white flex items-center justify-center font-semibold text-sm flex-shrink-0">
-            {currentUserName?.[0]?.toUpperCase()}
+            {currentUserName?.[0]?.toUpperCase() || "U"}
           </div>
 
           <div className="flex-1">
@@ -126,7 +156,6 @@ export const CommentsSection = ({
         </div>
       </div>
 
-      {/* COMMENTS LIST */}
       <div className="space-y-4">
         {comments.length === 0 ? (
           <div className="text-center py-8">
@@ -139,14 +168,15 @@ export const CommentsSection = ({
               c.authorRole === currentUserRole;
 
             return (
-              <div key={c.id} className="flex gap-3 p-4 rounded-lg bg-slate-50 hover:bg-slate-100 transition">
-                {/* Avatar */}
+              <div
+                key={c.id}
+                className="flex gap-3 p-4 rounded-lg bg-slate-50 hover:bg-slate-100 transition"
+              >
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0">
-                  {c.authorName?.[0]?.toUpperCase()}
+                  {c.authorName?.[0]?.toUpperCase() || "U"}
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  {/* Name + Role */}
                   <div className="flex items-center gap-2 mb-2">
                     <span className="font-semibold text-sm text-slate-900">
                       {c.authorName}
@@ -157,7 +187,6 @@ export const CommentsSection = ({
                     </span>
                   </div>
 
-                  {/* Message */}
                   {editingId === c.id ? (
                     <div className="space-y-2">
                       <textarea
@@ -167,6 +196,7 @@ export const CommentsSection = ({
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50"
                         rows="3"
                       />
+
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleUpdate(c.id)}
@@ -175,8 +205,12 @@ export const CommentsSection = ({
                         >
                           {loading ? "Saving..." : "Save"}
                         </button>
+
                         <button
-                          onClick={() => setEditingId(null)}
+                          onClick={() => {
+                            setEditingId(null);
+                            setEditText("");
+                          }}
                           disabled={loading}
                           className="text-slate-500 hover:text-slate-700 text-sm font-medium disabled:text-slate-400"
                         >
@@ -188,17 +222,8 @@ export const CommentsSection = ({
                     <p className="text-sm text-slate-700 break-words">{c.message}</p>
                   )}
 
-                  {/* Actions */}
                   <div className="text-xs text-slate-500 mt-2 flex gap-3">
-                    <span>
-                      {new Date(c.createdAt).toLocaleString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
+                    <span>{formatDate(c.createdAt)}</span>
 
                     {isOwner && editingId !== c.id && (
                       <>
@@ -212,6 +237,7 @@ export const CommentsSection = ({
                         >
                           Edit
                         </button>
+
                         <button
                           onClick={() => handleDelete(c.id)}
                           disabled={loading}

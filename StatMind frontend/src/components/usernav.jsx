@@ -1,7 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
+<<<<<<< HEAD
 import { useEffect, useState } from "react";
 import axios from "axios";
 import logo from "../assets/logo-UniCore.png";
+=======
+import logo from "../assets/logo-UniCore.png";
+
+>>>>>>> c60b22795405ea4083d9dc73851f820aecb0373d
 const navItems = [
   {
     path: "/user/dashboard",
@@ -26,7 +31,31 @@ const navItems = [
       </svg>
     ),
   },
+<<<<<<< HEAD
  
+=======
+  {
+    path: "/notifications",
+    name: "Notifications",
+    icon: (
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M12 3a7 7 0 00-7 7v4l-1.5 2.5A1 1 0 004.5 18h15a1 1 0 00.86-1.5L19 14V10a7 7 0 00-7-7z"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M10 21a2 2 0 004 0"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
+>>>>>>> c60b22795405ea4083d9dc73851f820aecb0373d
   {
     path: "/create-booking",
     name: "Bookings",
@@ -55,6 +84,7 @@ const navItems = [
   },
 ];
 
+<<<<<<< HEAD
 function UserNavbar() {
   const { pathname } = useLocation();
 
@@ -98,6 +128,10 @@ function UserNavbar() {
     localStorage.clear();
     window.location.href = "/";
   };
+=======
+function UserNav() {
+  const location = useLocation();
+>>>>>>> c60b22795405ea4083d9dc73851f820aecb0373d
 
   return (
     <>
@@ -132,8 +166,17 @@ function UserNavbar() {
           })}
         </nav>
 
+<<<<<<< HEAD
         {/* SIDEBAR LOGOUT */}
         
+=======
+        {/* LOGOUT */}
+        <div className="mt-auto pt-4 border-t border-gray-700">
+          <button className="w-full text-left px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-red-400 rounded">
+            Logout
+          </button>
+        </div>
+>>>>>>> c60b22795405ea4083d9dc73851f820aecb0373d
       </aside>
 
       {/* TOP NAVBAR */}
@@ -143,6 +186,7 @@ function UserNavbar() {
           UniCore
         </h1>
 
+<<<<<<< HEAD
         {/* RIGHT */}
      <div className="flex items-center gap-4 relative">
   {/* Bell */}
@@ -231,9 +275,21 @@ function UserNavbar() {
     Logout
   </button>
 </div>
+=======
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-600">User</span>
+          <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm">
+            Logout
+          </button>
+        </div>
+>>>>>>> c60b22795405ea4083d9dc73851f820aecb0373d
       </header>
     </>
   );
 }
 
+<<<<<<< HEAD
 export default UserNavbar;
+=======
+export default UserNav;
+>>>>>>> c60b22795405ea4083d9dc73851f820aecb0373d

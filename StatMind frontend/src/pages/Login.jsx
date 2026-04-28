@@ -65,9 +65,12 @@ function Login() {
 
     if (resolvedRole === 'ADMIN') {
       navigate('/admin');
+    } else if (resolvedRole === 'TECHNICIAN') {
+      navigate('/technician/tickets');
     } else {
       navigate('/user/dashboard');
-    }
+      }
+    
   };
 
   const handleChange = (e) => {

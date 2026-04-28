@@ -3,16 +3,18 @@ import { ticketAPI } from "../api/ticketService";
 import { Link } from "react-router-dom";
 import { StatusBadge } from "../components/StatusBadge";
 import { PriorityBadge } from "../components/PriorityBadge";
-
-const TECH_ID = "TECH001";
+import { getSessionUser } from "../utils/sessionUser";
 
 export const TechnicianTickets = () => {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const sessionUser = getSessionUser();
+  const technicianId = sessionUser?.userId || sessionUser?.id || "TECH001";
+
   useEffect(() => {
     loadTickets();
-  }, []);
+  }, [technicianId]);
 
   const loadTickets = async () => {
     setLoading(true);
@@ -22,8 +24,11 @@ export const TechnicianTickets = () => {
 
       const filtered = Array.isArray(data)
         ? data
-          .filter((t) => t.assignedTechnicianId === TECH_ID)
-          .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+            .filter((t) => String(t.assignedTechnicianId) === String(technicianId))
+            .sort(
+              (a, b) =>
+                new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0)
+            )
         : [];
 
       setTickets(filtered);
@@ -79,12 +84,8 @@ export const TechnicianTickets = () => {
 
       <div className="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-900">
-            My Assigned Work
-          </h2>
-          <p className="text-sm text-gray-600">
-            Showing {tickets.length} ticket(s)
-          </p>
+          <h2 className="text-lg font-semibold text-gray-900">My Assigned Work</h2>
+          <p className="text-sm text-gray-600">Showing {tickets.length} ticket(s)</p>
         </div>
 
         {loading ? (
@@ -96,6 +97,9 @@ export const TechnicianTickets = () => {
             </h3>
             <p className="text-gray-600 mt-2">
               Assigned tickets will appear here after admin assigns them to you.
+            </p>
+            <p className="text-xs text-gray-400 mt-2">
+              Logged technician ID: {technicianId}
             </p>
           </div>
         ) : (

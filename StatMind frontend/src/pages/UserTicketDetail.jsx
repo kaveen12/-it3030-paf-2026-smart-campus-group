@@ -295,40 +295,43 @@ export const UserTicketDetail = () => {
           {/* Attachments Section */}
           <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              📎 Attachments
+              � Evidence Photos
             </h2>
 
             {ticket.attachmentUrls && ticket.attachmentUrls.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {ticket.attachmentUrls.map((url, idx) => (
-                  <div key={idx} className="relative group rounded-lg overflow-hidden bg-gray-100 border border-gray-200 aspect-square">
-                    <img
-                      src={url}
-                      alt={`Attachment ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.style.display = "none";
-                        e.target.nextElementSibling.style.display = "flex";
-                      }}
-                    />
-                    <div
-                      style={{ display: "none" }}
-                      className="absolute inset-0 bg-gray-50 flex items-center justify-center text-center p-2"
-                    >
-                      <a
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-700 text-sm font-medium underline"
-                      >
-                        Open Image
+                {ticket.attachmentUrls.map((url, idx) => {
+                  const imageUrl = url.startsWith('http') 
+                    ? url 
+                    : `http://localhost:8081${url}`;
+
+                  return (
+                    <div key={idx} className="relative group rounded-lg overflow-hidden bg-gray-100 border border-gray-200 aspect-square cursor-pointer">
+                      <a href={imageUrl} target="_blank" rel="noopener noreferrer">
+                        <img
+                          src={imageUrl}
+                          alt={`Evidence ${idx + 1}`}
+                          className="w-full h-full object-cover group-hover:opacity-80 transition"
+                          onError={(e) => {
+                            e.target.style.display = "none";
+                            e.target.nextElementSibling.style.display = "flex";
+                          }}
+                        />
+                        <div
+                          style={{ display: "none" }}
+                          className="absolute inset-0 bg-gray-50 flex items-center justify-center text-center p-2"
+                        >
+                          <span className="text-blue-600 text-sm font-medium">
+                            View Image
+                          </span>
+                        </div>
                       </a>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
-              <p className="text-gray-500 text-sm">No attachments yet</p>
+              <p className="text-gray-500 text-sm">No photos attached</p>
             )}
           </div>
 
