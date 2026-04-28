@@ -16,7 +16,7 @@ import CreateBooking from "./pages/CreateBooking";
 import BookingListPage  from "./pages/BookingListPage";
 import UserBookings from "./pages/UserBookings";
 import UniversityHomePage from "./pages/Home";
-
+import AdminSendNotification from "./pages/AdminSendNotification";
 import AddUser from "./pages/AddUser";
 function App() {
   return (
@@ -30,7 +30,7 @@ function App() {
       <Route path="/add-user" element={<AddUser />} />
 
         <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="user/dashboard" element={<UserDashboard />} />
+        <Route path="/user/dashboard" element={<UserDashboard />} />
          <Route path="/resources" element={<UserViewResource />} />
         <Route path="/resourceDashboard" element={<ResourceDashboardPage />} />
 
@@ -38,6 +38,7 @@ function App() {
         <Route path="/viewResource" element={<ViewResources />} />
         <Route path="/editResource/:id" element={<EditResource />} />
         <Route path="/bulk-insert" element={<BulkInsert />} />
+        <Route path="/send-notification" element={<AdminSendNotification />} />
 
         <Route path="/Bookings" element={<BookingListPage  />} />
             <Route path="/create-booking" element={<CreateBooking />} />
