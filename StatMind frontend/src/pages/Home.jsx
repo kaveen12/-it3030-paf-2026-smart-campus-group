@@ -96,7 +96,7 @@ function UniversityHomePage() {
 
             <ProgramCard
               title="Engineering"
-              img="https://images.unsplash.com/photo-1581090700227-1e37b190418e"
+             img="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789"
             />
 
             <ProgramCard
