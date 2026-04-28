@@ -30,7 +30,7 @@ export default function UserDashboard() {
       return;
     }
 
-    fetch(`http://localhost:8080/api/bookings/user/${userId}`)
+    fetch(`http://localhost:8081/api/bookings/user/${userId}`)
       .then((res) => res.json())
       .then((data) => {
         setBookings(data);
