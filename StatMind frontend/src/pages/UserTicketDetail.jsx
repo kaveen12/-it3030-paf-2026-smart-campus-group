@@ -5,7 +5,7 @@ import { StatusBadge } from "../components/StatusBadge";
 import { PriorityBadge } from "../components/PriorityBadge";
 import { CommentsSection } from "../components/CommentsSection";
 
-export const UserTicketDetail = () => {
+const UserTicketDetail = () => {
   const { ticketId } = useParams();
   const navigate = useNavigate();
 
@@ -426,5 +426,4 @@ export const UserTicketDetail = () => {
     </div>
   );
 };
-
 export default UserTicketDetail;
