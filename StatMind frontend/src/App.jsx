@@ -17,6 +17,7 @@ import BookingListPage  from "./pages/BookingListPage";
 import UserBookings from "./pages/UserBookings";
 import AddUser from "./pages/AddUser";
 import AdminSendNotification from "./pages/AdminSendNotification";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/add-user" element={<AddUser />} />
       <Route path="/send-notification" element={<AdminSendNotification />} />
+      <Route path="/profile" element={<Profile />} />
 
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="user/dashboard" element={<UserDashboard />} />
