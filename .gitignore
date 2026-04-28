@@ -1,0 +1,9 @@
+node_modules/
+StatMind frontend/node_modules/
+StatMind-backend/target/
+
+.env
+dist/
+build/
+coverage/
+*.log
