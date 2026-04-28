@@ -15,12 +15,12 @@ import UserDashboard from "./pages/UserDashboard";
 import CreateBooking from "./pages/CreateBooking";
 import BookingListPage  from "./pages/BookingListPage";
 import UserBookings from "./pages/UserBookings";
-
+import UniversityHomePage from "./pages/Home";
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<UniversityHomePage />} />
       <Route path="/notifications" element={<Notifications />} />
       <Route path="/users" element={<UserManagement />} />
       <Route path="/login" element={<Login />} />
