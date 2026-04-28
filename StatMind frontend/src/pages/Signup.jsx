@@ -544,7 +544,7 @@ function Signup() {
   const [loading, setLoading] = useState(false);
 
   const handleAuthSuccess = (data) => {
-    localStorage.setItem('flexitUser', JSON.stringify(data));
+    localStorage.setItem('UniCoreUser', JSON.stringify(data));
     if (data.role === 'ADMIN') {
       navigate('/admin-dashboard');
     } else {
@@ -631,7 +631,7 @@ function Signup() {
         {/* Left Side - Signup Form */}
         <div className="auth-card glass-form">
           <h2>Create Account</h2>
-          <p className="auth-subtitle">Join Flexit and manage resources efficiently</p>
+          <p className="auth-subtitle">Join UniCore and manage resources efficiently</p>
 
           {error && <div className="error-message">{error}</div>}
 
@@ -642,7 +642,7 @@ function Signup() {
                 type="text"
                 id="fullName"
                 name="fullName"
-                placeholder="John Doe"
+                placeholder="Nimantha Senarathne"
                 value={formData.fullName}
                 onChange={handleChange}
                 required
@@ -742,11 +742,11 @@ function Signup() {
         {/* Right Side - Content */}
         <div className="auth-info-section">
           <div className="logo-section">
-            <img src="/images/flexit_logo_Darkbg1.png" alt="Flexit Logo" className="flexit-logo" />
+            <img src="/assets/logo-UniCore.png" alt="UniCore Logo" className="UniCore-logo" />
           </div>
           <h1 className="info-title">Join the Community</h1>
           <p className="info-desc">
-            Start your journey with us today. Create an account to unlock premium features and tools.
+            Start your journey with us. Create an account here.
           </p>
           
           <div className="mini-cards-container">

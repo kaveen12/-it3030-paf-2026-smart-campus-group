@@ -43,7 +43,7 @@ function Login() {
     const resolvedUserId = data.userId || data.id;
     const resolvedName = data.userName || data.fullName || data.name || 'User';
 
-<<<<<<< HEAD
+
    if (resolvedUserId) {
   await addNotification({
     userId: resolvedUserId,
@@ -52,7 +52,7 @@ function Login() {
     type: "LOGIN",
   });
 }
-=======
+
     if (resolvedRole === 'USER' && resolvedUserId) {
   await addNotification({
   userId: resolvedUserId,
@@ -61,7 +61,6 @@ function Login() {
   type: "LOGIN",
 });
     }
->>>>>>> a0e571de522aa5be10f5715abaebe055279e040e
 
     if (resolvedRole === 'ADMIN') {
       navigate('/admin');
