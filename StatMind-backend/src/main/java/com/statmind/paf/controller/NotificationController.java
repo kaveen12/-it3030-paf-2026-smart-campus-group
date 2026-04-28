@@ -106,42 +106,28 @@ public class NotificationController {
         return notificationRepository.saveAll(notifications);
     }
 
-    @PostMapping("/send-to-role")
+@PostMapping("/send-to-role")
 public String sendNotificationToRole(@RequestBody Map<String, String> request) {
 
     String role = request.get("role");
     String message = request.get("message");
     String type = request.getOrDefault("type", "ADMIN_MESSAGE");
 
+    if (role == null || message == null || message.isBlank()) {
+        throw new RuntimeException("Role and message are required");
+    }
+
     List<User> users = userRepository.findAll();
 
     for (User user : users) {
+        if (role.equalsIgnoreCase("ALL") ||
+            (user.getRole() != null && user.getRole().name().equalsIgnoreCase(role))) {
 
-        // 🔥 handle ALL USERS
-        if (role.equalsIgnoreCase("ALL")) {
-
-            Notification notification = new Notification();
-            notification.setUserId(user.getId());
-            notification.setMessage(message);
-            notification.setType(type);
-            notification.setRead(false);
-            notification.setCreatedAt(java.time.LocalDateTime.now().toString());
-
-            notificationRepository.save(notification);
-        }
-
-        // 🔥 handle specific role
-        else if (user.getRole() != null &&
-                user.getRole().name().equalsIgnoreCase(role)) {
-
-            Notification notification = new Notification();
-            notification.setUserId(user.getId());
-            notification.setMessage(message);
-            notification.setType(type);
-            notification.setRead(false);
-            notification.setCreatedAt(java.time.LocalDateTime.now().toString());
-
-            notificationRepository.save(notification);
+            notificationService.createNotification(
+                user.getId(),
+                message,
+                type
+            );
         }
     }
 

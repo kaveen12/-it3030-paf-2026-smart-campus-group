@@ -7,33 +7,26 @@ function AdminSendNotification() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const sendMessage = async (e) => {
-    e.preventDefault();
+const sendMessage = async (e) => {
+  e.preventDefault();
 
-    if (!message.trim()) {
-      alert("Please enter a message");
-      return;
-    }
+  console.log("Role:", role);   // ✅ FIX
+  console.log("Message:", message);
 
-    try {
-      setLoading(true);
+  try {
+    await axios.post("http://localhost:8081/api/notifications/send-to-role", {
+      role: role,              // ✅ FIX
+      message: message,
+      type: "ADMIN_MESSAGE",
+    });
 
-      await axios.post("http://localhost:8081/api/notifications/send-to-role", {
-        role,
-        message,
-        type: "ADMIN_MESSAGE",
-      });
+    alert("Message sent successfully");
 
-      alert(`Message sent to all ${role}s`);
-      setMessage("");
-      setRole("USER");
-    } catch (error) {
-      console.error(error);
-      alert("Failed to send message");
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (error) {
+    console.error(error);
+    alert("Failed to send message");
+  }
+};
 
   return (
     <div className="flex bg-gray-100 min-h-screen text-gray-800">
@@ -71,14 +64,15 @@ function AdminSendNotification() {
                 </label>
 
                 <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="w-full border border-gray-300 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="USER">All Users</option>
-                  <option value="TECHNICIAN">All Technicians</option>
-                  <option value="ADMIN">All Admins</option>
-                </select>
+  value={role}
+  onChange={(e) => setRole(e.target.value)}
+  className="w-full border border-gray-300 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
+>
+  <option value="ALL">All Users</option>        {/* ✅ IMPORTANT */}
+  <option value="USER">Users</option>
+  <option value="TECHNICIAN">Technicians</option>
+  <option value="ADMIN">Admins</option>
+</select>
               </div>
 
               <div>
