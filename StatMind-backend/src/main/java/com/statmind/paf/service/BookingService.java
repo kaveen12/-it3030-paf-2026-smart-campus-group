@@ -81,6 +81,14 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
+    // Delete Booking
+    public void deleteBooking(String id) {
+        if (!bookingRepository.existsById(id)) {
+            throw new RuntimeException("Booking not found");
+        }
+        bookingRepository.deleteById(id);
+    }
+
     public List<Booking> getAllBookings() {
         return bookingRepository.findAll();
     }

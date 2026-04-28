@@ -37,7 +37,7 @@ function downloadBookingAsText(booking) {
     ``,
     `USER INFO`,
     `---------`,
-    `User         : ${booking.userId}`,
+    `User         : ${booking.userName}`,
     `Attendees    : ${booking.attendees}`,
     ``,
     `SCHEDULE`,
@@ -147,7 +147,7 @@ function BookingCard({ booking, onStatusChange }) {
       {/* Grid */}
       <div className="grid grid-cols-2 gap-3 p-5">
         {[
-          ["User", booking.userId],
+          ["User", booking.userName],
           ["Attendees", booking.attendees],
           ["Date", booking.date],
           ["Time", `${booking.startTime} – ${booking.endTime}`],

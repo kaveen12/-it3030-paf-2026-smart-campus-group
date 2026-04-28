@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { createBooking } from "../api/bookingApi";
+import { getSessionUser } from "../utils/sessionUser";
 
 function BookingForm() {
   const [resources, setResources] = useState([]);
@@ -22,13 +23,14 @@ function BookingForm() {
     attendees: ""
   });
 
+  // ✅ Use getSessionUser() — same source as MyBookings
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser) {
+    const sessionUser = getSessionUser();
+    if (sessionUser.userId) {
       setForm(prev => ({
         ...prev,
-        userId: storedUser.userId,
-        userName: storedUser.userName
+        userId: sessionUser.userId,
+        userName: sessionUser.userName || ""
       }));
     }
   }, []);
@@ -43,9 +45,6 @@ function BookingForm() {
 
   const validate = () => {
     const errors = {};
-
-    if (!form.userId.trim())
-      errors.userId = "User ID is required.";
 
     if (!form.userName.trim())
       errors.userName = "User Name is required.";
@@ -83,7 +82,6 @@ function BookingForm() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
-    // Clear validation error on change
     if (validationErrors[name]) {
       setValidationErrors(prev => ({ ...prev, [name]: "" }));
     }
@@ -120,6 +118,7 @@ function BookingForm() {
     const payload = {
       resourceCode: form.resourceCode,
       userId: form.userId,
+      userName: form.userName,  
       date: form.date,
       startTime: formatTime(form.startTime),
       endTime: formatTime(form.endTime),
@@ -131,13 +130,17 @@ function BookingForm() {
       await createBooking(payload);
       setSuccess(true);
       setValidationErrors({});
+
+      // ✅ Re-read from same session source so userId is never lost after reset
+      const sessionUser = getSessionUser();
+
       setForm({
         resourceCode: "",
         resourceName: "",
         type: "",
         location: "",
-        userId: "",
-        userName: "",
+        userId: sessionUser?.userId || "",
+        userName: sessionUser?.userName || "",
         date: "",
         startTime: "",
         endTime: "",
@@ -208,35 +211,20 @@ function BookingForm() {
             {/* USER INFORMATION */}
             <div>
               <p className={sectionLabel}>User Information</p>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={labelBase}>User ID</label>
-                  <input
-                    type="text"
-                    name="userId"
-                    placeholder="e.g. USR-001"
-                    value={form.userId}
-                    onChange={handleChange}
-                    className={fieldClass("userId")}
-                  />
-                  {validationErrors.userId && (
-                    <p className="text-red-400 text-[11px] mt-1">{validationErrors.userId}</p>
-                  )}
-                </div>
-                <div>
-                  <label className={labelBase}>User Name</label>
-                  <input
-                    type="text"
-                    name="userName"
-                    placeholder="Full name"
-                    value={form.userName}
-                    onChange={handleChange}
-                    className={fieldClass("userName")}
-                  />
-                  {validationErrors.userName && (
-                    <p className="text-red-400 text-[11px] mt-1">{validationErrors.userName}</p>
-                  )}
-                </div>
+              {/* userId is sourced silently from session — only userName shown */}
+              <div>
+                <label className={labelBase}>User Name</label>
+                <input
+                  type="text"
+                  name="userName"
+                  placeholder="Full name"
+                  value={form.userName}
+                  onChange={handleChange}
+                  className={fieldClass("userName")}
+                />
+                {validationErrors.userName && (
+                  <p className="text-red-400 text-[11px] mt-1">{validationErrors.userName}</p>
+                )}
               </div>
             </div>
 

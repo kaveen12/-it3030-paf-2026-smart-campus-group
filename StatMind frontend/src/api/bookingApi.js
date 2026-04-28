@@ -68,4 +68,5 @@ export const cancelBooking = async (id) => {
     console.error('Error cancelling booking:', error);
     throw error;
   }
+
 };

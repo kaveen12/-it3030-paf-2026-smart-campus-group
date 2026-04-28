@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import UserNavbar from "../components/usernav";
+import { getSessionUser } from "../utils/sessionUser";
 
 function MyBookings() {
   const [bookings, setBookings] = useState([]);
@@ -9,21 +10,21 @@ function MyBookings() {
   const [userId, setUserId] = useState("");
   const [userName, setUserName] = useState("");
   const [cancellingId, setCancellingId] = useState(null);
-  const [confirmId, setConfirmId] = useState(null); // ID of booking pending confirmation
+  const [confirmId, setConfirmId] = useState(null);
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser?._id) {
-      setUserId(storedUser._id);
-      setUserName(storedUser.name || "");
-      fetchBookings(storedUser._id);
+    const sessionUser = getSessionUser();
+    if (sessionUser.userId) {
+      setUserId(sessionUser.userId);
+      setUserName(sessionUser.userName || "");
+      fetchBookings(sessionUser.userId);
     }
   }, []);
 
   const fetchBookings = (uid) => {
     setLoading(true);
     axios
-      .get(`http://localhost:8081/api/bookings/users/${uid}`)
+      .get(`http://localhost:8081/api/bookings/user/${uid}`)
       .then((res) => {
         setBookings(res.data);
         setLoading(false);
@@ -39,7 +40,6 @@ function MyBookings() {
     axios
       .put(`http://localhost:8081/api/bookings/${bookingId}/cancel`)
       .then(() => {
-        // Update status locally without refetching
         setBookings((prev) =>
           prev.map((b) =>
             (b._id || b.id) === bookingId ? { ...b, status: "CANCELLED" } : b
@@ -53,6 +53,19 @@ function MyBookings() {
         setCancellingId(null);
         setConfirmId(null);
         alert("Failed to cancel booking. Please try again.");
+      });
+  };
+
+  const handleDeleteBooking = (bookingId) => {
+    // Optimistic cache update
+    setBookings((prev) => prev.filter((b) => (b._id || b.id) !== bookingId));
+
+    axios
+      .delete(`http://localhost:8081/api/bookings/${bookingId}`)
+      .catch((err) => {
+        console.error(err);
+        alert("Failed to delete booking. It might be already removed.");
+        if (userId) fetchBookings(userId);
       });
   };
 
@@ -103,10 +116,8 @@ function MyBookings() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar Navbar */}
       <UserNavbar />
 
-      {/* Main Content */}
       <main className="ml-56 mt-14 flex-1 py-10 px-6">
         <div className="max-w-5xl mx-auto">
 
@@ -183,6 +194,9 @@ function MyBookings() {
                 const bookingId = b._id || b.id;
                 const { badge, dot } = statusStyle(b.status);
                 const isApproved = b.status?.toUpperCase() === "APPROVED";
+                const isPending  = b.status?.toUpperCase() === "PENDING";
+                const isRejected = b.status?.toUpperCase() === "REJECTED";
+                const isCancelled = b.status?.toUpperCase() === "CANCELLED";
                 const isCancelling = cancellingId === bookingId;
                 const isConfirming = confirmId === bookingId;
 
@@ -195,12 +209,14 @@ function MyBookings() {
                     <div className="px-5 pt-5 pb-3 flex items-start justify-between gap-2">
                       <div>
                         <p className="text-[10px] text-gray-400 font-medium tracking-wider">
-                          #{b.bookingCode || `Booking-${bookingId}`}
+                          #{b.bookingId }
                         </p>
                         <p className="text-base font-bold text-gray-800 mt-0.5">
                           {b.purpose || "—"}
                         </p>
                       </div>
+
+                      {/* ✅ Status badge — no delete button in header anymore */}
                       <span
                         className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shrink-0 ${badge}`}
                       >
@@ -222,7 +238,7 @@ function MyBookings() {
                     <div className="px-5 py-4 grid grid-cols-2 gap-y-3">
                       <div>
                         <p className="text-[9px] uppercase tracking-widest text-gray-400 mb-0.5">User</p>
-                        <p className="text-xs font-semibold text-gray-700">{userName || "—"}</p>
+                        <p className="text-xs font-semibold text-gray-700">{b.userName || "—"}</p>
                       </div>
                       <div>
                         <p className="text-[9px] uppercase tracking-widest text-gray-400 mb-0.5">Attendees</p>
@@ -242,14 +258,13 @@ function MyBookings() {
                       </div>
                     </div>
 
-                    {/* ── APPROVED: show message + cancel button ── */}
+                    {/* ── APPROVED: cancel button with inline confirm ── */}
                     {isApproved && (
                       <div className="px-5 pb-5">
                         <p className="text-xs text-green-500 font-medium mb-3">
                           ✓ This booking has been approved
                         </p>
 
-                        {/* Confirm dialog inline */}
                         {isConfirming ? (
                           <div className="bg-red-50 border border-red-100 rounded-xl px-3 py-3">
                             <p className="text-xs text-red-600 font-medium mb-2">
@@ -284,7 +299,7 @@ function MyBookings() {
                     )}
 
                     {/* Rejection reason */}
-                    {b.status?.toUpperCase() === "REJECTED" && b.rejectionReason && (
+                    {isRejected && b.rejectionReason && (
                       <div className="mx-5 mb-4 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
                         <p className="text-[9px] uppercase tracking-widest text-red-400 mb-1">
                           Rejection Reason
@@ -293,23 +308,67 @@ function MyBookings() {
                       </div>
                     )}
 
-                    {/* Pending notice */}
-                    {b.status?.toUpperCase() === "PENDING" && (
-                      <div className="px-5 pb-4">
-                        <p className="text-xs text-amber-500 font-medium">
-                          ⏳ Awaiting admin approval
-                        </p>
-                      </div>
-                    )}
+                    {/* Footer area for non-approved statuses */}
+                    <div className="px-5 pb-5">
 
-                    {/* Cancelled notice */}
-                    {b.status?.toUpperCase() === "CANCELLED" && (
-                      <div className="px-5 pb-4">
-                        <p className="text-xs text-gray-400 font-medium">
-                          ✕ This booking has been cancelled
-                        </p>
-                      </div>
-                    )}
+                      {/* Pending notice + delete */}
+                      {isPending && (
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-amber-500 font-medium">
+                            ⏳ Awaiting admin approval
+                          </p>
+                          {/* ✅ Delete only for PENDING */}
+                          <button
+                            onClick={() => handleDeleteBooking(bookingId)}
+                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
+                            title="Delete Booking"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Rejected notice + delete */}
+                      {isRejected && (
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-red-400 font-medium">
+                            ✕ This booking was rejected
+                          </p>
+                          {/* ✅ Delete only for REJECTED */}
+                          <button
+                            onClick={() => handleDeleteBooking(bookingId)}
+                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
+                            title="Delete Booking"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Cancelled notice + delete */}
+                      {isCancelled && (
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-gray-400 font-medium">
+                            ✕ This booking has been cancelled
+                          </p>
+                          {/* ✅ Delete only for CANCELLED */}
+                          <button
+                            onClick={() => handleDeleteBooking(bookingId)}
+                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
+                            title="Delete Booking"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
+
+                    </div>
                   </div>
                 );
               })}
