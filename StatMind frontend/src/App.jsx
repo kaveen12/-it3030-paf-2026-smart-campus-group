@@ -25,6 +25,7 @@ function App() {
       <Route path="/users" element={<UserManagement />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/add-user" element={<AddUser />} />
 
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="user/dashboard" element={<UserDashboard />} />

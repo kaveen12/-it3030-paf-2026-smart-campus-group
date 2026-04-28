@@ -1,4 +1,5 @@
 const STORAGE_KEY = "flexitNotifications";
+const API_URL = "http://localhost:8081/api/notifications";
 
 function safeParse(value) {
   if (!value) return [];
@@ -23,20 +24,50 @@ function writeAllNotifications(notifications) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications));
 }
 
-export function addNotification({ userId, title, message, type = "info", actionUrl = "/user/notifications" }) {
+// ✅ Add notification to backend + localStorage
+export async function addNotification({
+  userId,
+  title,
+  message,
+  type = "info",
+  actionUrl = "/notifications",
+}) {
   if (!userId) return;
 
+  const notification = {
+    userId,
+    title,
+    message: message || title,
+    type,
+    actionUrl,
+    isRead: false,
+    createdAt: new Date().toISOString(),
+  };
+
+  // Save to backend
+  try {
+    await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: notification.userId,
+        message: notification.message,
+        type: notification.type,
+      }),
+    });
+  } catch (error) {
+    console.error("Backend notification save failed:", error);
+  }
+
+  // Also save to localStorage fallback
   const current = readAllNotifications();
+
   const next = [
     {
       id: nextId(),
-      userId,
-      title,
-      message,
-      type,
-      isRead: false,
-      actionUrl,
-      createdAt: new Date().toISOString(),
+      ...notification,
     },
     ...current,
   ].slice(0, 200);
@@ -44,6 +75,7 @@ export function addNotification({ userId, title, message, type = "info", actionU
   writeAllNotifications(next);
 }
 
+// ✅ Mark read in localStorage
 export function markNotificationAsRead(notificationId, userId) {
   if (!notificationId || !userId) return;
 
@@ -61,12 +93,16 @@ export function markNotificationAsRead(notificationId, userId) {
   writeAllNotifications(next);
 }
 
+// ✅ Get localStorage notifications
 export function getNotificationsForUser(userId) {
   if (!userId) return [];
 
   return readAllNotifications()
     .filter((item) => item.userId === userId)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
 }
 
 export function getNotificationCount(userId) {

@@ -32,21 +32,24 @@ function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleAuthSuccess = (data) => {
+  const handleAuthSuccess = async (data) => {
     localStorage.setItem('flexitUser', JSON.stringify(data));
+  localStorage.setItem('userId', data.userId || data.id);
+  localStorage.setItem('name', data.userName || data.fullName || data.name);
+  localStorage.setItem('email', data.email);
+  localStorage.setItem('role', data.role);
 
     const resolvedRole = String(data.role || '').toUpperCase();
     const resolvedUserId = data.userId || data.id;
     const resolvedName = data.userName || data.fullName || data.name || 'User';
 
     if (resolvedRole === 'USER' && resolvedUserId) {
-      addNotification({
-        userId: resolvedUserId,
-        title: `Welcome back, ${resolvedName}!`,
-        message: 'You have successfully logged in to your FlexIT workspace.',
-        type: 'greeting',
-        actionUrl: '/user/dashboard',
-      });
+  await addNotification({
+  userId: resolvedUserId,
+  title: `👋Welcome back, ${resolvedName}!`,
+  message: `You have successfully logged in to your UniCore workspace.`,
+  type: "LOGIN",
+});
     }
 
     if (resolvedRole === 'ADMIN') {
@@ -111,16 +114,16 @@ function Login() {
   return (
     <div className="auth-page login-page">
       <div className="auth-container login-layout">
-        <section className="auth-info-section" aria-label="Flexit overview">
-          <div className="brand-lockup" aria-label="Flexit">
+        <section className="auth-info-section" aria-label="UniCore overview">
+          <div className="brand-lockup" aria-label="UniCore">
             <span className="brand-mark">
               <img src="/favicon.svg" alt="" />
             </span>
-            <span className="brand-name">Flexit</span>
+            <span className="brand-name">UniCore</span>
           </div>
 
           <div className="auth-copy">
-            <p className="eyebrow">Smart campus workspace</p>
+            <p className="eyebrow">Smart Campus Workspace</p>
             <h1 className="info-title">Welcome back to your campus command center.</h1>
             <p className="info-desc">
               Sign in to manage resources, view updates, and keep daily campus work moving from one simple dashboard.
@@ -214,7 +217,7 @@ function Login() {
           </div>
 
           <p className="auth-footer">
-            New to Flexit?{' '}
+            New to UniCore?{' '}
             <a
               href="#signup"
               onClick={(e) => {

@@ -716,9 +716,6 @@ function Signup() {
                 width="320"
               />
             </div>
-            <button className="btn-social github">
-              <span>💻</span> GitHub
-            </button>
           </div>
 
           <p className="auth-footer">

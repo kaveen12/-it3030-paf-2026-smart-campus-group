@@ -45,4 +45,25 @@ public class UserController {
     user.setRole(role);
         return userRepository.save(user);
     }
+
+ @DeleteMapping("/{id}")
+public String deleteUser(@PathVariable String id) {
+    User user = userRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+    userRepository.delete(user);
+    return "User deleted successfully";
+}
+
+@PutMapping("/{id}")
+public User updateUser(@PathVariable String id, @RequestBody User updatedUser) {
+
+    User user = userRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    user.setName(updatedUser.getName());
+    user.setEmail(updatedUser.getEmail());
+
+    return userRepository.save(user);
+}
 }
