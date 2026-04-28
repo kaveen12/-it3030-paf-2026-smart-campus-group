@@ -24,9 +24,6 @@ const UserTicketDetail = () => {
     attachmentUrls: [],
   });
 
-  const [previewImages, setPreviewImages] = useState([]);
-  const [newImageUrls, setNewImageUrls] = useState(["", "", ""]);
-
   const categories = [
     "Equipment Failure",
     "Network Issue",
@@ -105,9 +102,12 @@ const UserTicketDetail = () => {
     }
   };
 
-  if (loading) {
-    return <div className="p-8 text-gray-700">Loading ticket...</div>;
-  }
+  const formatImageUrl = (url) => {
+    if (!url) return "";
+    return url.startsWith("http") ? url : `http://localhost:8081${url}`;
+  };
+
+  if (loading) return <div className="p-8 text-gray-700">Loading ticket...</div>;
 
   if (error || !ticket) {
     return (
@@ -127,303 +127,256 @@ const UserTicketDetail = () => {
 
   const canEditOrDelete = ticket.status === "OPEN";
 
+  const InfoCard = ({ label, value }) => (
+    <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-center">
+      <p className="text-xs text-gray-500">{label}</p>
+      <p className="text-sm font-semibold text-gray-900">{value || "N/A"}</p>
+    </div>
+  );
+
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
-      <div className="bg-white rounded-xl shadow p-6 mb-6 border border-gray-100">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Ticket #{ticket.id?.substring(0, 8)}
-            </h1>
-            <p className="text-gray-600 mt-1">
-              Track your submitted incident ticket
-            </p>
-          </div>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 px-8 py-6 mb-8">
+  <div className="flex justify-between items-center">
 
-          <button
-            onClick={() => navigate("/user/tickets/list")}
-            className="text-[#1e3a5f] font-medium hover:underline"
-          >
-            ← Back
-          </button>
-        </div>
+    {/* LEFT SIDE */}
+    <div>
+      <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-2">
+        My Tickets
+      </h1>
 
-        <div className="flex gap-2 mt-4">
-          <StatusBadge status={ticket.status} />
-          <PriorityBadge priority={ticket.priority} />
-        </div>
+      <p className="text-slate-500 mt-1 text-sm">
+        Track and manage your submitted incident request
+      </p>
+
+      <div className="flex gap-2 mt-4">
+        <StatusBadge status={ticket.status} />
+        <PriorityBadge priority={ticket.priority} />
       </div>
+    </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 space-y-6">
-          <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+    {/* RIGHT SIDE */}
+    <button
+      onClick={() => navigate("/user/tickets/list")}
+      className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-slate-700 hover:bg-gray-100 transition font-medium"
+    >
+      ← Back
+    </button>
+
+  </div>
+</div>
+
+      <div className="bg-white rounded-2xl shadow border border-gray-200 overflow-hidden">
+        <div className="bg-gradient-to-r from-slate-900 to-slate-700 px-6 py-4">
+          <h2 className="text-lg font-semibold text-white">Ticket Overview</h2>
+          <p className="text-xs text-gray-300 mt-1">
+            View all ticket details, status, evidence, and actions
+          </p>
+        </div>
+
+        <div className="p-6 space-y-8">
+          <div>
+            <h3 className="text-xs font-semibold text-blue-600 uppercase mb-3 text-center">
               Ticket Details
-            </h2>
+            </h3>
 
             {!editMode ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                  <p className="text-sm text-gray-600">Resource</p>
-                  <p className="font-medium text-gray-900">
-                    {ticket.resourceName || ticket.resourceOrLocation || "N/A"}
-                  </p>
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <InfoCard label="Resource" value={ticket.resourceName || ticket.resourceOrLocation} />
+                  <InfoCard label="Location" value={ticket.location || ticket.resourceOrLocation} />
+                  <InfoCard label="Category" value={ticket.category} />
+                  <InfoCard label="Contact" value={ticket.preferredContact} />
                 </div>
 
-                <div>
-                  <p className="text-sm text-gray-600">Location</p>
-                  <p className="font-medium text-gray-900">
-                    {ticket.location || ticket.resourceOrLocation || "N/A"}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-sm text-gray-600">Category</p>
-                  <p className="font-medium text-gray-900">{ticket.category}</p>
-                </div>
-
-                <div>
-                  <p className="text-sm text-gray-600">Preferred Contact</p>
-                  <p className="font-medium text-gray-900">
-                    {ticket.preferredContact}
-                  </p>
-                </div>
-
-                <div className="md:col-span-2">
-                  <p className="text-sm text-gray-600">Description</p>
-                  <p className="font-medium text-gray-900 whitespace-pre-wrap">
+                <div className="mt-4 text-center">
+                  <p className="text-xs text-gray-500 mb-1">Description</p>
+                  <div className="bg-gray-50 p-4 rounded-lg text-sm text-gray-800">
                     {ticket.description}
-                  </p>
+                  </div>
                 </div>
-              </div>
+              </>
             ) : (
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Location / Resource
-                  </label>
-                  <input
-                    type="text"
-                    value={editData.resourceOrLocation}
-                    onChange={(e) =>
-                      setEditData({
-                        ...editData,
-                        resourceOrLocation: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={editData.resourceOrLocation}
+                  onChange={(e) =>
+                    setEditData({ ...editData, resourceOrLocation: e.target.value })
+                  }
+                  className="w-full px-4 py-3 border rounded-lg"
+                  placeholder="Location / Resource"
+                />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Category
-                    </label>
-                    <select
-                      value={editData.category}
-                      onChange={(e) =>
-                        setEditData({ ...editData, category: e.target.value })
-                      }
-                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      {categories.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Priority
-                    </label>
-                    <select
-                      value={editData.priority}
-                      onChange={(e) =>
-                        setEditData({ ...editData, priority: e.target.value })
-                      }
-                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      {priorities.map((priority) => (
-                        <option key={priority} value={priority}>
-                          {priority}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    value={editData.description}
+                  <select
+                    value={editData.category}
                     onChange={(e) =>
-                      setEditData({
-                        ...editData,
-                        description: e.target.value,
-                      })
+                      setEditData({ ...editData, category: e.target.value })
                     }
-                    rows="4"
-                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
+                    className="w-full px-4 py-3 border rounded-lg"
+                  >
+                    {categories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={editData.priority}
+                    onChange={(e) =>
+                      setEditData({ ...editData, priority: e.target.value })
+                    }
+                    className="w-full px-4 py-3 border rounded-lg"
+                  >
+                    {priorities.map((priority) => (
+                      <option key={priority} value={priority}>
+                        {priority}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Preferred Contact
-                  </label>
-                  <input
-                    type="text"
-                    value={editData.preferredContact}
-                    onChange={(e) =>
-                      setEditData({
-                        ...editData,
-                        preferredContact: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                <textarea
+                  value={editData.description}
+                  onChange={(e) =>
+                    setEditData({ ...editData, description: e.target.value })
+                  }
+                  rows="4"
+                  className="w-full px-4 py-3 border rounded-lg"
+                  placeholder="Description"
+                />
+
+                <input
+                  type="text"
+                  value={editData.preferredContact}
+                  onChange={(e) =>
+                    setEditData({ ...editData, preferredContact: e.target.value })
+                  }
+                  className="w-full px-4 py-3 border rounded-lg"
+                  placeholder="Preferred Contact"
+                />
               </div>
             )}
           </div>
 
-          {/* Attachments Section */}
-          <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              � Evidence Photos
-            </h2>
+          <div>
+            <h3 className="text-xs font-semibold text-blue-600 uppercase mb-3 text-center">
+              Status
+            </h3>
 
-            {ticket.attachmentUrls && ticket.attachmentUrls.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {ticket.attachmentUrls.map((url, idx) => {
-                  const imageUrl = url.startsWith('http') 
-                    ? url 
-                    : `http://localhost:8081${url}`;
+            <div className="bg-gray-50 p-5 rounded-lg text-sm max-w-xl mx-auto">
+              <div className="grid grid-cols-2 items-center gap-y-4">
+                <span className="text-gray-500">Current</span>
+                <div className="flex justify-center">
+                  <StatusBadge status={ticket.status} />
+                </div>
 
-                  return (
-                    <div key={idx} className="relative group rounded-lg overflow-hidden bg-gray-100 border border-gray-200 aspect-square cursor-pointer">
-                      <a href={imageUrl} target="_blank" rel="noopener noreferrer">
-                        <img
-                          src={imageUrl}
-                          alt={`Evidence ${idx + 1}`}
-                          className="w-full h-full object-cover group-hover:opacity-80 transition"
-                          onError={(e) => {
-                            e.target.style.display = "none";
-                            e.target.nextElementSibling.style.display = "flex";
-                          }}
-                        />
-                        <div
-                          style={{ display: "none" }}
-                          className="absolute inset-0 bg-gray-50 flex items-center justify-center text-center p-2"
-                        >
-                          <span className="text-blue-600 text-sm font-medium">
-                            View Image
-                          </span>
-                        </div>
-                      </a>
-                    </div>
-                  );
-                })}
+                <span className="text-gray-500">Priority</span>
+                <div className="flex justify-center">
+                  <PriorityBadge priority={ticket.priority} />
+                </div>
+
+                <span className="text-gray-500">Technician</span>
+                <div className="text-center font-medium text-gray-700">
+                  {ticket.assignedTechnicianName || "Not assigned"}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-xs font-semibold text-blue-600 uppercase mb-3 text-center">
+              Evidence Photos
+            </h3>
+
+            {ticket.attachmentUrls?.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {ticket.attachmentUrls.map((url, i) => (
+                  <a
+                    href={formatImageUrl(url)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    key={i}
+                  >
+                    <img
+                      src={formatImageUrl(url)}
+                      className="rounded-lg object-cover h-28 w-full border"
+                      alt={`Evidence ${i + 1}`}
+                    />
+                  </a>
+                ))}
               </div>
             ) : (
-              <p className="text-gray-500 text-sm">No photos attached</p>
+              <p className="text-sm text-gray-500 text-center">No images</p>
             )}
           </div>
 
-          <CommentsSection
-            ticketId={ticketId}
-            comments={comments}
-            currentUserName="User"
-            currentUserRole="USER"
-          />
-        </div>
+          <div>
+            <h3 className="text-xs font-semibold text-blue-600 uppercase mb-3 text-center">
+              Comments & Notes
+            </h3>
 
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Status
-            </h2>
-
-            <p className="text-sm text-gray-600">Current Status</p>
-            <p className="font-semibold text-gray-900 mb-4">{ticket.status}</p>
-
-            <p className="text-sm text-gray-600">Assigned Technician</p>
-            <p className="font-semibold text-gray-900 mb-4">
-              {ticket.assignedTechnicianName || "Not assigned yet"}
-            </p>
-
-            {ticket.rejectionReason && (
-              <>
-                <p className="text-sm text-gray-600">Rejection Reason</p>
-                <p className="font-semibold text-red-600 mb-4">
-                  {ticket.rejectionReason}
-                </p>
-              </>
-            )}
-
-            {ticket.resolutionNotes && (
-              <>
-                <p className="text-sm text-gray-600">Resolution Notes</p>
-                <p className="font-semibold text-green-600">
-                  {ticket.resolutionNotes}
-                </p>
-              </>
-            )}
+            <CommentsSection
+              ticketId={ticketId}
+              comments={comments}
+              currentUserName="User"
+              currentUserRole="USER"
+            />
           </div>
 
-          <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <div>
+            <h3 className="text-xs font-semibold text-blue-600 uppercase mb-3 text-center">
               User Actions
-            </h2>
+            </h3>
 
             {!canEditOrDelete && (
-              <p className="text-sm text-gray-600 mb-4">
-                This ticket can no longer be edited or deleted because its
-                status is {ticket.status}.
+              <p className="text-sm text-gray-500 text-center mb-3">
+                This ticket can no longer be edited or deleted because its status is {ticket.status}.
               </p>
             )}
 
             {!editMode ? (
-              <button
-                disabled={!canEditOrDelete}
-                onClick={() => setEditMode(true)}
-                className="w-full bg-[#2563eb] hover:bg-[#1e40af] disabled:bg-gray-400 text-white py-2 rounded-lg mb-3 font-medium transition"
-              >
-                Edit Ticket
-              </button>
+              <div className="grid md:grid-cols-2 gap-3 max-w-xl mx-auto">
+                <button
+                  disabled={!canEditOrDelete}
+                  onClick={() => setEditMode(true)}
+                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white py-2 rounded-lg text-sm"
+                >
+                  Edit Ticket
+                </button>
+
+                <button
+                  disabled={!canEditOrDelete}
+                  onClick={handleDeleteTicket}
+                  className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white py-2 rounded-lg text-sm"
+                >
+                  Delete Ticket
+                </button>
+              </div>
             ) : (
-              <div className="space-y-3">
+              <div className="grid md:grid-cols-2 gap-3 max-w-xl mx-auto">
                 <button
                   onClick={handleUpdateTicket}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-medium"
+                  className="bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg text-sm"
                 >
                   Save Changes
                 </button>
+
                 <button
                   onClick={() => setEditMode(false)}
-                  className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg font-medium"
+                  className="bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg text-sm"
                 >
                   Cancel
                 </button>
               </div>
             )}
-
-            <button
-              disabled={!canEditOrDelete}
-              onClick={handleDeleteTicket}
-              className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white py-2 rounded-lg mt-3 font-medium"
-            >
-              Delete Ticket
-            </button>
           </div>
         </div>
       </div>
     </div>
   );
 };
+
 export default UserTicketDetail;
