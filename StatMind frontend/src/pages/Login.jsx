@@ -43,6 +43,16 @@ function Login() {
     const resolvedUserId = data.userId || data.id;
     const resolvedName = data.userName || data.fullName || data.name || 'User';
 
+<<<<<<< HEAD
+   if (resolvedUserId) {
+  await addNotification({
+    userId: resolvedUserId,
+    title: `👋 Welcome back, ${resolvedName}!`,
+    message: `You have successfully logged in to your UniCore workspace.`,
+    type: "LOGIN",
+  });
+}
+=======
     if (resolvedRole === 'USER' && resolvedUserId) {
   await addNotification({
   userId: resolvedUserId,
@@ -51,6 +61,7 @@ function Login() {
   type: "LOGIN",
 });
     }
+>>>>>>> a0e571de522aa5be10f5715abaebe055279e040e
 
     if (resolvedRole === 'ADMIN') {
       navigate('/admin');
@@ -84,7 +95,7 @@ function Login() {
         password: formData.password,
       });
 
-      handleAuthSuccess(data);
+     await handleAuthSuccess(data);
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
@@ -93,23 +104,27 @@ function Login() {
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
-    if (!credentialResponse?.credential) {
-      setError('Google authentication failed. Please try again.');
-      return;
-    }
+  if (!credentialResponse?.credential) {
+    setError("Google authentication failed");
+    return;
+  }
 
-    setLoading(true);
-    setError('');
+  try {
+    // 🔥 decode JWT token
+    const payload = JSON.parse(atob(credentialResponse.credential.split(".")[1]));
 
-    try {
-      const data = await googleLogin({ idToken: credentialResponse.credential });
-      handleAuthSuccess(data);
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  };
+    const data = await googleLogin({
+      email: payload.email,
+      name: payload.name,
+    });
+
+    await handleAuthSuccess(data);
+
+  } catch (err) {
+    console.error(err);
+    setError("Google login failed");
+  }
+};
 
   return (
     <div className="auth-page login-page">

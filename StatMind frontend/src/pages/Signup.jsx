@@ -581,11 +581,12 @@ function Signup() {
         return;
       }
 
-      await registerUser({
-        fullName: formData.fullName,
-        email: formData.email,
-        password: formData.password,
-      });
+  await registerUser({
+  name: formData.fullName,
+  email: formData.email,
+  password: formData.password,
+  role: "USER",
+});
 
       navigate('/login');
     } catch (err) {
@@ -596,23 +597,32 @@ function Signup() {
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
-    if (!credentialResponse?.credential) {
-      setError('Google authentication failed. Please try again.');
-      return;
-    }
+  if (!credentialResponse?.credential) {
+    setError("Google authentication failed");
+    return;
+  }
 
-    setLoading(true);
-    setError('');
+  setLoading(true);
+  setError("");
 
-    try {
-      const data = await googleLogin({ idToken: credentialResponse.credential });
-      handleAuthSuccess(data);
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const payload = JSON.parse(
+      atob(credentialResponse.credential.split(".")[1])
+    );
+
+    await googleLogin({
+      email: payload.email,
+      name: payload.name,
+    });
+
+    navigate("/login");
+  } catch (err) {
+    console.error(err);
+    setError("Google signup failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="auth-page signup-page">
