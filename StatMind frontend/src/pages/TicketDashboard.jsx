@@ -212,8 +212,8 @@ export const TicketDashboard = () => {
             <TicketTable
               tickets={filteredTickets}
               onView={handleViewTicket}
-              onEdit={() => {}}
-              onDelete={() => {}}
+              onEdit={() => { }}
+              onDelete={() => { }}
             />
           </>
         )}
@@ -221,3 +221,5 @@ export const TicketDashboard = () => {
     </div>
   );
 };
+
+export default TicketDashboard;

@@ -22,8 +22,8 @@ export const TechnicianTickets = () => {
 
       const filtered = Array.isArray(data)
         ? data
-            .filter((t) => t.assignedTechnicianId === TECH_ID)
-            .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+          .filter((t) => t.assignedTechnicianId === TECH_ID)
+          .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
         : [];
 
       setTickets(filtered);
@@ -62,9 +62,9 @@ export const TechnicianTickets = () => {
         </div>
 
         <div className="bg-white rounded-xl shadow border border-gray-100 p-5">
-  <p className="text-gray-600 text-sm">Resolved</p>
-  <p className="text-3xl font-bold text-green-600 mt-2">{resolvedCount}</p>
-</div>
+          <p className="text-gray-600 text-sm">Resolved</p>
+          <p className="text-3xl font-bold text-green-600 mt-2">{resolvedCount}</p>
+        </div>
 
         <div className="bg-white rounded-xl shadow border border-gray-100 p-5">
           <p className="text-gray-600 text-sm">In Progress</p>
@@ -157,3 +157,5 @@ export const TechnicianTickets = () => {
     </div>
   );
 };
+
+export default TechnicianTickets;

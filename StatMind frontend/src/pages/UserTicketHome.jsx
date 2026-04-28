@@ -44,3 +44,5 @@ export const UserTicketHome = () => {
     </div>
   );
 };
+
+export default UserTicketHome;

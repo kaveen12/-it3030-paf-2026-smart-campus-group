@@ -1,4 +1,4 @@
-import AdminNavbar from "./AdminNavBar";
+import AdminNavbar from "./adminnav";
 
 export const AdminLayout = ({ children }) => {
   return (
@@ -10,3 +10,5 @@ export const AdminLayout = ({ children }) => {
     </div>
   );
 };
+
+export default AdminLayout;

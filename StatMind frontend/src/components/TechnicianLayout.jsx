@@ -8,3 +8,5 @@ export const TechnicianLayout = ({ children }) => {
     </div>
   );
 };
+
+export default TechnicianLayout;

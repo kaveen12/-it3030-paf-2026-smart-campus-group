@@ -63,3 +63,5 @@ export const CreateTicket = () => {
     </div>
   );
 };
+
+export default CreateTicket;

@@ -18,8 +18,8 @@ export const UserTickets = () => {
 
     const userTickets = Array.isArray(data)
       ? data
-          .filter((t) => t.createdByRole === "USER")
-          .sort((a, b) => new Date(b[sortBy]) - new Date(a[sortBy]))
+        .filter((t) => t.createdByRole === "USER")
+        .sort((a, b) => new Date(b[sortBy]) - new Date(a[sortBy]))
       : [];
 
     setTickets(userTickets);
@@ -125,3 +125,5 @@ export const UserTickets = () => {
     </div>
   );
 };
+
+export default UserTickets;

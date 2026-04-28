@@ -356,3 +356,5 @@ export const TechnicianTicketDetail = () => {
     </div>
   );
 };
+
+export default TechnicianTicketDetail;

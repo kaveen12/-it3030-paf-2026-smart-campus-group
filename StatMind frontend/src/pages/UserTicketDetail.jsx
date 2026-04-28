@@ -423,3 +423,5 @@ export const UserTicketDetail = () => {
     </div>
   );
 };
+
+export default UserTicketDetail;

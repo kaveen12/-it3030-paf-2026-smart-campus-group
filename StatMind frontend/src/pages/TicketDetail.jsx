@@ -38,39 +38,39 @@ export const TicketDetail = () => {
   }, [ticketId]);
 
   const fetchTicketDetails = async () => {
-  setLoading(true);
-  setError('');
+    setLoading(true);
+    setError('');
 
-  try {
-    // 1. Get ticket (MAIN)
-    const ticketData = await ticketAPI.getTicketById(ticketId);
-    setTicket(ticketData);
-    setStatusData({ status: ticketData?.status || '' });
-
-    // 2. Try comments (optional)
     try {
-      const commentsData = await commentAPI.getComments(ticketId);
-      setComments(Array.isArray(commentsData) ? commentsData : []);
-    } catch (e) {
-      console.log("Comments not available yet");
-      setComments([]);
-    }
+      // 1. Get ticket (MAIN)
+      const ticketData = await ticketAPI.getTicketById(ticketId);
+      setTicket(ticketData);
+      setStatusData({ status: ticketData?.status || '' });
 
-    // 3. Try logs (optional)
-    try {
-      const logsData = await activityLogAPI.getActivityLogs(ticketId);
-      setLogs(Array.isArray(logsData) ? logsData : []);
-    } catch (e) {
-      console.log("Logs not available yet");
-      setLogs([]);
-    }
+      // 2. Try comments (optional)
+      try {
+        const commentsData = await commentAPI.getComments(ticketId);
+        setComments(Array.isArray(commentsData) ? commentsData : []);
+      } catch (e) {
+        console.log("Comments not available yet");
+        setComments([]);
+      }
 
-  } catch (err) {
-    setError("Failed to load ticket");
-  } finally {
-    setLoading(false);
-  }
-};
+      // 3. Try logs (optional)
+      try {
+        const logsData = await activityLogAPI.getActivityLogs(ticketId);
+        setLogs(Array.isArray(logsData) ? logsData : []);
+      } catch (e) {
+        console.log("Logs not available yet");
+        setLogs([]);
+      }
+
+    } catch (err) {
+      setError("Failed to load ticket");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAssignTechnician = async () => {
     if (!assignData.assignedTechnicianName.trim()) {
@@ -245,10 +245,10 @@ export const TicketDetail = () => {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-4 font-medium transition border-b-2 ${ activeTab === tab
-                    ? 'text-blue-600 border-blue-600'
-                    : 'text-slate-600 border-transparent hover:text-slate-900'
-                }`}
+                className={`px-4 py-4 font-medium transition border-b-2 ${activeTab === tab
+                  ? 'text-blue-600 border-blue-600'
+                  : 'text-slate-600 border-transparent hover:text-slate-900'
+                  }`}
               >
                 {tab === 'details' && '📋'}
                 {tab === 'comments' && '💬'}
@@ -264,96 +264,96 @@ export const TicketDetail = () => {
           {activeTab === 'details' && (
             <div className="space-y-6">
               {/* Ticket Information */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">📋</span>
-                <h3 className="text-lg font-semibold text-slate-900">Ticket Information</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">Resource Name</p>
-                  <p className="font-medium text-slate-900 mt-1">{ticket.resourceName || 'N/A'}</p>
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-2xl">📋</span>
+                  <h3 className="text-lg font-semibold text-slate-900">Ticket Information</h3>
                 </div>
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">Resource Code</p>
-                  <p className="font-medium text-slate-900 mt-1">{ticket.resourceCode || 'N/A'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">Location</p>
-                  <p className="font-medium text-slate-900 mt-1">{ticket.location || ticket.resourceOrLocation || 'N/A'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">Category</p>
-                  <p className="font-medium text-slate-900 mt-1">{ticket.category}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Description */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">📝</span>
-                <h3 className="text-lg font-semibold text-slate-900">Description</h3>
-              </div>
-              <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">{ticket.description}</p>
-            </div>
-
-            {/* Status & Assignment */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">⚙️</span>
-                <h3 className="text-lg font-semibold text-slate-900">Status & Assignment</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">Status</p>
-                  <p className="font-medium text-slate-900 mt-1">{ticket.status}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">Assigned Technician</p>
-                  <p className="font-medium text-slate-900 mt-1">{ticket.assignedTechnicianName || 'Unassigned'}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <p className="text-sm text-slate-500 font-medium">Resource Name</p>
+                    <p className="font-medium text-slate-900 mt-1">{ticket.resourceName || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500 font-medium">Resource Code</p>
+                    <p className="font-medium text-slate-900 mt-1">{ticket.resourceCode || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500 font-medium">Location</p>
+                    <p className="font-medium text-slate-900 mt-1">{ticket.location || ticket.resourceOrLocation || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500 font-medium">Category</p>
+                    <p className="font-medium text-slate-900 mt-1">{ticket.category}</p>
+                  </div>
                 </div>
               </div>
 
-              {ticket.rejectionReason && (
-                <div className="bg-red-50 p-4 rounded-lg border border-red-200 mb-4">
-                  <p className="text-sm text-red-600 font-medium">Rejection Reason</p>
-                  <p className="text-slate-900 mt-1">{ticket.rejectionReason}</p>
+              {/* Description */}
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-2xl">📝</span>
+                  <h3 className="text-lg font-semibold text-slate-900">Description</h3>
                 </div>
-              )}
-
-              {ticket.resolutionNotes && (
-                <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200 mb-4">
-                  <p className="text-sm text-emerald-600 font-medium">Resolution Notes</p>
-                  <p className="text-slate-900 mt-1">{ticket.resolutionNotes}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Creator Information */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">👤</span>
-                <h3 className="text-lg font-semibold text-slate-900">Creator Information</h3>
+                <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">{ticket.description}</p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">Name</p>
-                  <p className="font-medium text-slate-900 mt-1">{ticket.createdByName}</p>
+
+              {/* Status & Assignment */}
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-2xl">⚙️</span>
+                  <h3 className="text-lg font-semibold text-slate-900">Status & Assignment</h3>
                 </div>
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">Role</p>
-                  <p className="font-medium text-slate-900 mt-1">{ticket.createdByRole}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <p className="text-sm text-slate-500 font-medium">Status</p>
+                    <p className="font-medium text-slate-900 mt-1">{ticket.status}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500 font-medium">Assigned Technician</p>
+                    <p className="font-medium text-slate-900 mt-1">{ticket.assignedTechnicianName || 'Unassigned'}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">Preferred Contact</p>
-                  <p className="font-medium text-slate-900 mt-1">{ticket.preferredContact}</p>
+
+                {ticket.rejectionReason && (
+                  <div className="bg-red-50 p-4 rounded-lg border border-red-200 mb-4">
+                    <p className="text-sm text-red-600 font-medium">Rejection Reason</p>
+                    <p className="text-slate-900 mt-1">{ticket.rejectionReason}</p>
+                  </div>
+                )}
+
+                {ticket.resolutionNotes && (
+                  <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200 mb-4">
+                    <p className="text-sm text-emerald-600 font-medium">Resolution Notes</p>
+                    <p className="text-slate-900 mt-1">{ticket.resolutionNotes}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Creator Information */}
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-2xl">👤</span>
+                  <h3 className="text-lg font-semibold text-slate-900">Creator Information</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <p className="text-sm text-slate-500 font-medium">Name</p>
+                    <p className="font-medium text-slate-900 mt-1">{ticket.createdByName}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500 font-medium">Role</p>
+                    <p className="font-medium text-slate-900 mt-1">{ticket.createdByRole}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500 font-medium">Preferred Contact</p>
+                    <p className="font-medium text-slate-900 mt-1">{ticket.preferredContact}</p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Attachments */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+              {/* Attachments */}
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-2xl">📎</span>
                   <h3 className="text-lg font-semibold text-slate-900">Attachments</h3>
@@ -390,11 +390,11 @@ export const TicketDetail = () => {
                 ) : (
                   <p className="text-slate-500 text-sm">No attachments yet</p>
                 )}
-            </div>
+              </div>
 
-            {/* Timestamps */}
-            {/* Timestamps */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+              {/* Timestamps */}
+              {/* Timestamps */}
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-2xl">🕐</span>
                   <h3 className="text-lg font-semibold text-slate-900">Timeline</h3>
@@ -409,10 +409,10 @@ export const TicketDetail = () => {
                     <p className="font-medium text-slate-900 mt-1">{formatDate(ticket.updatedAt)}</p>
                   </div>
                 </div>
-            </div>
+              </div>
 
-            {/* Action Buttons */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+              {/* Action Buttons */}
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-2xl">🎯</span>
                   <h3 className="text-lg font-semibold text-slate-900">Admin Actions</h3>
@@ -456,7 +456,7 @@ export const TicketDetail = () => {
                     🗑️ Delete
                   </button>
                 </div>
-            </div>
+              </div>
             </div>
           )}
 
@@ -670,3 +670,5 @@ export const TicketDetail = () => {
     </div>
   );
 };
+
+export default TicketDetail;
