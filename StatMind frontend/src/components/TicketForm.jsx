@@ -1,8 +1,20 @@
 import { useState, useEffect } from 'react';
 import { resourceAPI } from '../api/ticketService';
+import { getSessionUser } from '../utils/sessionUser';
+
+const getLoggedTicketUser = () => {
+  const sessionUser = getSessionUser();
+
+  return {
+    id: sessionUser.userId || 'USER001',
+    name: sessionUser.userName || 'User',
+    role: sessionUser.role || 'USER',
+  };
+};
 
 export const TicketForm = ({ initialData, onSubmit, loading }) => {
   const [resources, setResources] = useState([]);
+  const [loggedUser, setLoggedUser] = useState(getLoggedTicketUser);
   const [formData, setFormData] = useState(
     initialData || {
       resourceId: '',
@@ -31,6 +43,7 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
   const priorities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
 
   useEffect(() => {
+    setLoggedUser(getLoggedTicketUser());
     fetchResources();
   }, []);
 
@@ -40,15 +53,6 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
       setResources(Array.isArray(data) ? data : []);
     } catch {
       setResources([]);
-    }
-  };
-
-  const getLoggedUser = () => {
-    try {
-      const loggedUser = JSON.parse(localStorage.getItem('user'));
-      return loggedUser || { id: 'USER001', name: 'User', role: 'USER' };
-    } catch {
-      return { id: 'USER001', name: 'User', role: 'USER' };
     }
   };
 
@@ -76,32 +80,39 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
   };
 
   const handleFileChange = (e) => {
-    const files = Array.from(e.target.files || []);
+    const newFiles = Array.from(e.target.files || []);
     setFileErrors('');
 
-    // Validate file count
-    if (files.length > 3) {
-      setFileErrors('Maximum 3 images allowed');
-      setSelectedFiles([]);
+    if (newFiles.length === 0) return;
+
+    // Calculate total files (existing + new)
+    const totalFiles = selectedFiles.length + newFiles.length;
+
+    if (totalFiles > 3) {
+      setFileErrors(`Cannot add ${newFiles.length} file(s). You can upload maximum 3 images total. Currently selected: ${selectedFiles.length}`);
       return;
     }
 
     // Validate file types
     const validTypes = ['image/jpeg', 'image/png'];
-    const invalidFiles = files.filter(file => !validTypes.includes(file.type));
+    const invalidFiles = newFiles.filter(file => !validTypes.includes(file.type));
     
     if (invalidFiles.length > 0) {
       setFileErrors('Only JPG/JPEG and PNG files are allowed');
-      setSelectedFiles([]);
       return;
     }
 
-    setSelectedFiles(files);
+    // APPEND new files to existing ones instead of replacing
+    setSelectedFiles((prev) => [...prev, ...newFiles]);
+    
+    // Reset file input so user can select more files
+    e.target.value = '';
   };
 
   const removeFile = (index) => {
     const newFiles = selectedFiles.filter((_, i) => i !== index);
     setSelectedFiles(newFiles);
+    setFileErrors('');
   };
 
   const validateForm = () => {
@@ -120,9 +131,9 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
     if (!formData.preferredContact.trim()) {
       errors.preferredContact = 'Preferred contact is required';
     } else {
-      const phoneRegex = /^[0-9]{10}$/;
+      const phoneRegex = /^07\d{8}$/;
       if (!phoneRegex.test(formData.preferredContact.trim())) {
-        errors.preferredContact = 'Phone number must be exactly 10 digits';
+        errors.preferredContact = 'Phone number must start with 07 and be exactly 10 digits';
       }
     }
 
@@ -140,7 +151,6 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
     }
 
     const selectedResource = resources.find((resource) => resource.id === formData.resourceId);
-    const loggedUser = getLoggedUser();
 
     const payload = {
       resourceId: formData.resourceId,
@@ -172,6 +182,34 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
       )}
 
       <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Full Name
+            </label>
+            <input
+              type="text"
+              name="createdByName"
+              value={loggedUser.name}
+              readOnly
+              className="w-full px-4 py-3 bg-gray-50 border border-slate-300 rounded-lg text-gray-700 cursor-not-allowed focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Role
+            </label>
+            <input
+              type="text"
+              name="createdByRole"
+              value={loggedUser.role}
+              readOnly
+              className="w-full px-4 py-3 bg-gray-50 border border-slate-300 rounded-lg text-gray-700 cursor-not-allowed focus:outline-none"
+            />
+          </div>
+        </div>
+
         {/* Resource Selection - REQUIRED */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -259,8 +297,10 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
             name="preferredContact"
             value={formData.preferredContact}
             onChange={handleChange}
-            placeholder="Enter 10 digit phone number"
+            placeholder="07XXXXXXXX"
             maxLength="10"
+            inputMode="numeric"
+            pattern="07[0-9]{8}"
             className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
           {formError.preferredContact && (
@@ -293,7 +333,7 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
             )}
 
             {selectedFiles.length > 0 && (
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {selectedFiles.map((file, index) => (
                   <div key={index} className="relative">
                     <div className="w-full h-24 bg-slate-100 rounded-lg overflow-hidden border border-slate-300 flex items-center justify-center">
@@ -308,6 +348,7 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
                       onClick={() => removeFile(index)}
                       className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold transition"
                       title="Remove image"
+                      aria-label={`Remove ${file.name}`}
                     >
                       ×
                     </button>

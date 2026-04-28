@@ -15,9 +15,10 @@ import com.statmind.paf.dto.AddAttachmentsRequest;
 
 import java.util.List;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/tickets")
-@CrossOrigin(origins = "*")
+
 public class IncidentTicketController {
 
     private final IncidentTicketService service;

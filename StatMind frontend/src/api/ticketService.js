@@ -175,16 +175,20 @@ export const commentAPI = {
   },
 
   // Delete comment
-  deleteComment: async (ticketId, commentId) => {
-    try {
-      const response = await apiClient.delete(`/tickets/${ticketId}/comments/${commentId}`);
-      return response.data;
-    } catch (error) {
-      throw handleApiError(error);
-    }
-  },
+  deleteComment: async (ticketId, commentId, authorName) => {
+  try {
+    const response = await apiClient.delete(
+      `/tickets/${ticketId}/comments/${commentId}`,
+      {
+        data: { authorName },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error);
+  }
+},
 };
-
 // Activity log endpoints
 export const activityLogAPI = {
   getActivityLogs: async (ticketId) => {

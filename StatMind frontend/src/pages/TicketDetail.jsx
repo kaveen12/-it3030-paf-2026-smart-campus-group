@@ -23,7 +23,7 @@ export const TicketDetail = () => {
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [resolveModalOpen, setResolveModalOpen] = useState(false);
   const [attachmentsModalOpen, setAttachmentsModalOpen] = useState(false);
-
+  const [technicians, setTechnicians] = useState([]);
   // Form data
   const [assignData, setAssignData] = useState({ assignedTechnicianId: '', assignedTechnicianName: '' });
   const [statusData, setStatusData] = useState({ status: '' });
@@ -33,8 +33,21 @@ export const TicketDetail = () => {
 
   const statuses = ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED', 'REJECTED'];
 
+  const fetchTechnicians = async () => {
+  try {
+    const res = await fetch("http://localhost:8081/api/users"); // change if needed
+    const data = await res.json();
+
+    const techs = data.filter(user => user.role === "TECHNICIAN");
+    setTechnicians(techs);
+  } catch (err) {
+    console.log("Failed to load technicians");
+  }
+};
+
   useEffect(() => {
     fetchTicketDetails();
+    fetchTechnicians();
   }, [ticketId]);
 
   const fetchTicketDetails = async () => {
@@ -73,21 +86,28 @@ export const TicketDetail = () => {
 };
 
   const handleAssignTechnician = async () => {
-    if (!assignData.assignedTechnicianName.trim()) {
-      alert('Please enter technician name');
-      return;
-    }
+  if (!assignData.assignedTechnicianId || !assignData.assignedTechnicianName) {
+    alert("Please select a technician");
+    return;
+  }
 
-    try {
-      const updated = await ticketAPI.assignTechnician(ticketId, assignData);
-      setTicket(updated);
-      setAssignModalOpen(false);
-      setAssignData({ assignedTechnicianId: '', assignedTechnicianName: '' });
-      fetchTicketDetails();
-    } catch (err) {
-      alert(err.message || 'Failed to assign technician');
-    }
-  };
+  console.log("Assign technician payload:", assignData);
+
+  try {
+    const updated = await ticketAPI.assignTechnician(ticketId, {
+      assignedTechnicianId: assignData.assignedTechnicianId,
+      assignedTechnicianName: assignData.assignedTechnicianName,
+    });
+
+    setTicket(updated);
+    setAssignModalOpen(false);
+    setAssignData({ assignedTechnicianId: "", assignedTechnicianName: "" });
+    fetchTicketDetails();
+  } catch (err) {
+    console.error("Assign technician error:", err);
+    alert(err.message || "Failed to assign technician");
+  }
+};
 
   const handleUpdateStatus = async () => {
     if (!statusData.status) {
@@ -502,28 +522,27 @@ export const TicketDetail = () => {
           </>
         }
       >
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Technician ID</label>
-            <input
-              type="text"
-              value={assignData.assignedTechnicianId}
-              onChange={(e) => setAssignData({ ...assignData, assignedTechnicianId: e.target.value })}
-              placeholder="Enter technician ID (optional)"
-              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Technician Name</label>
-            <input
-              type="text"
-              value={assignData.assignedTechnicianName}
-              onChange={(e) => setAssignData({ ...assignData, assignedTechnicianName: e.target.value })}
-              placeholder="Enter technician name"
-              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
-            />
-          </div>
-        </div>
+        
+          <select
+  value={assignData.assignedTechnicianId}
+  onChange={(e) => {
+    const selected = technicians.find(t => t.id === e.target.value);
+
+    setAssignData({
+      assignedTechnicianId: selected?.id || '',
+      assignedTechnicianName: selected?.name || '',
+    });
+  }}
+  className="w-full px-4 py-3 border border-slate-300 rounded-lg"
+>
+  <option value="">-- Select Technician --</option>
+
+  {technicians.map((tech) => (
+    <option key={tech.id} value={tech.id}>
+      {tech.name}
+    </option>
+  ))}
+</select>
       </Modal>
 
       {/* Update Status Modal */}
@@ -670,4 +689,4 @@ export const TicketDetail = () => {
       </Modal>
     </div>
   );
-};
+}
