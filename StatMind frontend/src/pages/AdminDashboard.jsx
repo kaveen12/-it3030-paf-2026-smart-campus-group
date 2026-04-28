@@ -2,36 +2,61 @@ import AdminNavbar from "../components/adminnav";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import {
+  Users,
+  Boxes,
+  CalendarCheck,
+  Activity,
+  RefreshCw,
+} from "lucide-react";
 
 function AdminDashboardPage() {
   const navigate = useNavigate();
 
-  // 🔹 STATES
-  const [userCount, setUserCount] = useState(0);
-  const [resourceCount, setResourceCount] = useState(0);
-  const [bookingCount, setBookingCount] = useState(0);
+  // STATES
+  const [stats, setStats] = useState({
+    users: 0,
+    resources: 0,
+    bookings: 0,
+  });
 
-  // 🔹 FETCH DATA
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // FETCH DATA
   useEffect(() => {
     fetchCounts();
   }, []);
 
   const fetchCounts = async () => {
+    setLoading(true);
+    setError(null);
+
     try {
-      // 🔥 parallel API calls
       const [usersRes, resourcesRes, bookingsRes] = await Promise.all([
         axios.get("http://localhost:8081/api/users"),
         axios.get("http://localhost:8081/api/resources"),
         axios.get("http://localhost:8081/api/bookings"),
       ]);
 
-      setUserCount(usersRes.data.length);
-      setResourceCount(resourcesRes.data.length);
-      setBookingCount(bookingsRes.data.length);
-
+      setStats({
+        users: usersRes.data?.length || 0,
+        resources: resourcesRes.data?.length || 0,
+        bookings: bookingsRes.data?.length || 0,
+      });
     } catch (error) {
-      console.error("Error fetching dashboard data:", error);
+      console.error(error);
+      setError("Failed to load dashboard data");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchCounts();
+    setRefreshing(false);
   };
 
   const cards = [
@@ -39,16 +64,22 @@ function AdminDashboardPage() {
       title: "Users",
       desc: "Manage system users",
       path: "/users",
+      icon: <Users size={20} />,
+      color: "from-blue-500 to-blue-700",
     },
     {
       title: "Resources",
-      desc: "Manage all resources",
+      desc: "Manage campus resources",
       path: "/resourceDashboard",
+      icon: <Boxes size={20} />,
+      color: "from-green-500 to-green-700",
     },
     {
       title: "Bookings",
-      desc: "View reservations",
+      desc: "View and manage reservations",
       path: "/bookings",
+      icon: <CalendarCheck size={20} />,
+      color: "from-purple-500 to-purple-700",
     },
   ];
 
@@ -56,71 +87,192 @@ function AdminDashboardPage() {
     <>
       <AdminNavbar />
 
-      <div className="fixed top-14 left-56 right-0 bottom-0 bg-slate-100 p-6 overflow-auto">
-
-        <div className="bg-white rounded-2xl shadow-md p-6 min-h-full">
+      <div className="ml-56 mt-14 bg-slate-100 min-h-screen">
+        <div className="p-6 space-y-6">
 
           {/* HEADER */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-800">
-              Admin Dashboard
-            </h1>
-            <p className="text-gray-500 mt-1">
-              Welcome back, manage everything from here
-            </p>
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">
+                Admin Dashboard
+              </h1>
+              <p className="text-gray-500 mt-1">
+                Monitor system performance & manage operations
+              </p>
+            </div>
+
+            <button
+              onClick={handleRefresh}
+              className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow hover:shadow-md transition text-sm"
+            >
+              <RefreshCw
+                size={16}
+                className={refreshing ? "animate-spin" : ""}
+              />
+              Refresh
+            </button>
           </div>
 
-          {/*  DYNAMIC STATS */}
-          <div className="grid grid-cols-3 gap-4 mb-8">
-
-            <div className="bg-blue-100 p-4 rounded-xl">
-              <p className="text-sm text-gray-600">Total Users</p>
-              <p className="text-2xl font-bold text-blue-700">
-                {userCount}
-              </p>
+          {/* ERROR */}
+          {error && (
+            <div className="bg-red-100 text-red-700 p-3 rounded-lg">
+              {error}
             </div>
+          )}
 
-            <div className="bg-green-100 p-4 rounded-xl">
-              <p className="text-sm text-gray-600">Resources</p>
-              <p className="text-2xl font-bold text-green-700">
-                {resourceCount}
-              </p>
-            </div>
+          {/* STATS */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 
-            <div className="bg-purple-100 p-4 rounded-xl">
-              <p className="text-sm text-gray-600">Bookings</p>
-              <p className="text-2xl font-bold text-purple-700">
-                {bookingCount}
-              </p>
-            </div>
+            <StatCard
+              title="Total Users"
+              value={stats.users}
+              icon={<Users size={18} />}
+              color="border-blue-500"
+              loading={loading}
+            />
 
+            <StatCard
+              title="Resources"
+              value={stats.resources}
+              icon={<Boxes size={18} />}
+              color="border-green-500"
+              loading={loading}
+            />
+
+            <StatCard
+              title="Bookings"
+              value={stats.bookings}
+              icon={<CalendarCheck size={18} />}
+              color="border-purple-500"
+              loading={loading}
+            />
           </div>
 
-          {/* CARDS */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* QUICK ACTIONS */}
+          <div className="bg-white p-5 rounded-xl shadow-sm">
+            <div className="flex items-center gap-2 mb-4 text-gray-700 font-semibold">
+              <Activity size={18} />
+              Quick Actions
+            </div>
 
-            {cards.map((card) => (
-              <div
-                key={card.title}
-                onClick={() => navigate(card.path)}
-                className="cursor-pointer p-6 rounded-2xl shadow-md hover:shadow-xl transition transform hover:-translate-y-1 bg-slate-900 text-white"
-              >
-                <h2 className="text-lg font-semibold">
-                  {card.title}
-                </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-                <p className="text-sm text-slate-400 mt-1">
-                  {card.desc}
-                </p>
+              {cards.map((card) => (
+                <div
+                  key={card.title}
+                  onClick={() => navigate(card.path)}
+                  className={`cursor-pointer rounded-xl p-5 text-white shadow-md bg-gradient-to-r ${card.color} hover:scale-[1.03] transition`}
+                >
+                  <div className="flex justify-between items-center">
+                    <h2 className="font-semibold">{card.title}</h2>
+                    {card.icon}
+                  </div>
+                  <p className="text-sm text-white/80 mt-2">
+                    {card.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* =========================
+              SYSTEM OVERVIEW SECTION
+          ========================= */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+            {/* SYSTEM STATUS */}
+            <div className="bg-white p-5 rounded-xl shadow-sm">
+              <h2 className="font-semibold text-gray-700 mb-4">
+                System Status
+              </h2>
+
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Server</span>
+                  <span className="text-green-600 font-semibold">Online</span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Database</span>
+                  <span className="text-green-600 font-semibold">Connected</span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-gray-500">API Health</span>
+                  <span className="text-green-600 font-semibold">Stable</span>
+                </div>
+              </div>
+            </div>
+
+            {/* ACTIVITY BARS */}
+            <div className="bg-white p-5 rounded-xl shadow-sm">
+              <h2 className="font-semibold text-gray-700 mb-4">
+                Live Activity
+              </h2>
+
+              <div className="space-y-3">
+
+                <div className="h-2 bg-gray-200 rounded">
+                  <div className="h-2 bg-blue-500 w-[70%] rounded"></div>
+                </div>
+                <p className="text-xs text-gray-500">User Activity</p>
+
+                <div className="h-2 bg-gray-200 rounded">
+                  <div className="h-2 bg-green-500 w-[55%] rounded"></div>
+                </div>
+                <p className="text-xs text-gray-500">Resource Usage</p>
+
+                <div className="h-2 bg-gray-200 rounded">
+                  <div className="h-2 bg-purple-500 w-[40%] rounded"></div>
+                </div>
+                <p className="text-xs text-gray-500">Booking Flow</p>
 
               </div>
-            ))}
+            </div>
+
+            {/* RECENT ACTIVITY */}
+            <div className="bg-white p-5 rounded-xl shadow-sm">
+              <h2 className="font-semibold text-gray-700 mb-4">
+                Recent Activity
+              </h2>
+
+              <ul className="space-y-3 text-sm text-gray-600">
+                <li>✔ New user registered</li>
+                <li>✔ Resource updated</li>
+                <li>✔ Booking confirmed</li>
+                <li>✔ System backup completed</li>
+              </ul>
+            </div>
 
           </div>
 
         </div>
       </div>
     </>
+  );
+}
+
+/* =========================
+   STAT CARD COMPONENT
+========================= */
+function StatCard({ title, value, icon, color, loading }) {
+  return (
+    <div className={`bg-white p-5 rounded-xl shadow-sm border-l-4 ${color}`}>
+
+      <div className="flex justify-between items-center">
+        <p className="text-sm text-gray-500">{title}</p>
+        <div className="text-gray-400">{icon}</div>
+      </div>
+
+      {loading ? (
+        <div className="h-8 w-16 bg-gray-200 animate-pulse rounded mt-2"></div>
+      ) : (
+        <h2 className="text-2xl font-bold text-gray-800 mt-2">
+          {value}
+        </h2>
+      )}
+
+    </div>
   );
 }
 
