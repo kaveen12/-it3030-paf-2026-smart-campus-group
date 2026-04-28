@@ -128,7 +128,7 @@ if (cleanFilters.capacity) {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-semibold text-gray-800">
-                Resource Management
+               View Resources
               </h1>
               <p className="text-sm text-gray-500">
                 Manage, search and export resources
