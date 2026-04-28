@@ -16,7 +16,7 @@
 // //   }
 
 // //   if (err.message === 'Network Error') {
-// //     return 'Cannot reach backend server. Please start Spring Boot backend on port 8080.';
+// //     return 'Cannot reach backend server. Please start Spring Boot backend on port 8081.';
 // //   }
 
 // //   return 'Signup failed. Please try again.';
@@ -255,7 +255,7 @@
 //   }
 
 //   if (err.message === 'Network Error') {
-//     return 'Cannot reach backend server. Please start Spring Boot backend on port 8080.';
+//     return 'Cannot reach backend server. Please start Spring Boot backend on port 8081.';
 //   }
 
 //   return 'Signup failed. Please try again.';
@@ -305,7 +305,7 @@
 //         setError('Please accept the terms and conditions');
 //         return;
 //       }
-      
+
 //       if (!formData.fullName || !formData.email || !formData.password) {
 //         setError('Please fill in all fields');
 //         return;
@@ -347,7 +347,7 @@
 //   return (
 //     <div className="auth-page">
 //       <div className="auth-container signup-layout">
-        
+
 //         {/* Left Side - Signup Form */}
 //         <div className="auth-card glass-form">
 //           <h2>Create Account</h2>
@@ -463,7 +463,7 @@
 //           <p className="info-desc">
 //             Start your journey with us today. Create an account to unlock premium features and tools.
 //           </p>
-          
+
 //           <div className="mini-cards-container">
 //             <div className="mini-card glass-panel">
 //               <div className="mini-card-icon">✨</div>
@@ -472,7 +472,7 @@
 //                 <p>Get started in just a few minutes.</p>
 //               </div>
 //             </div>
-            
+
 //             <div className="mini-card glass-panel">
 //               <div className="mini-card-icon">🤝</div>
 //               <div className="mini-card-text">
@@ -525,7 +525,7 @@ const getErrorMessage = (err) => {
   }
 
   if (err.message === 'Network Error') {
-    return 'Cannot reach backend server. Please start Spring Boot backend on port 8080.';
+    return 'Cannot reach backend server. Please start Spring Boot backend on port 8081.';
   }
 
   return 'Signup failed. Please try again.';
@@ -575,7 +575,7 @@ function Signup() {
         setError('Please accept the terms and conditions');
         return;
       }
-      
+
       if (!formData.fullName || !formData.email || !formData.password) {
         setError('Please fill in all fields');
         return;
@@ -617,7 +617,7 @@ function Signup() {
   return (
     <div className="auth-page signup-page">
       <div className="auth-container signup-layout">
-        
+
         {/* Left Side - Signup Form */}
         <div className="auth-card glass-form">
           <h2>Create Account</h2>
@@ -738,7 +738,7 @@ function Signup() {
           <p className="info-desc">
             Start your journey with us today. Create an account to unlock premium features and tools.
           </p>
-          
+
           <div className="mini-cards-container">
             <div className="mini-card glass-panel">
               <div className="mini-card-icon">✨</div>
@@ -747,7 +747,7 @@ function Signup() {
                 <p>Get started in just a few minutes.</p>
               </div>
             </div>
-            
+
             <div className="mini-card glass-panel">
               <div className="mini-card-icon">🤝</div>
               <div className="mini-card-text">

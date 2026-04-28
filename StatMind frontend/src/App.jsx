@@ -15,7 +15,7 @@ import UserViewResource from "./pages/UserViewResource";
 import UserDashboard from "./pages/UserDashboard";
 import CreateBooking from "./pages/CreateBooking";
 import BookingListPage from "./pages/BookingListPage";
-import BookingListPage from "./pages/BookingListPage";
+
 import UserBookings from "./pages/UserBookings";
 import UniversityHomePage from "./pages/Home";
 import AdminSendNotification from "./pages/AdminSendNotification";

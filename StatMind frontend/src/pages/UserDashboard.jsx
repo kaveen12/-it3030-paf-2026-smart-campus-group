@@ -30,7 +30,7 @@ export default function UserDashboard() {
       return;
     }
 
-    fetch(`http://localhost:8080/api/bookings/user/${userId}`)
+    fetch(`http://localhost:8081/api/bookings/user/${userId}`)
       .then((res) => res.json())
       .then((data) => {
         setBookings(data);
@@ -155,10 +155,10 @@ export default function UserDashboard() {
 
                     <span
                       className={`text-xs px-3 py-1 rounded-full font-semibold ${b.status === "APPROVED"
-                          ? "bg-green-100 text-green-600"
-                          : b.status === "PENDING"
-                            ? "bg-yellow-100 text-yellow-600"
-                            : "bg-red-100 text-red-500"
+                        ? "bg-green-100 text-green-600"
+                        : b.status === "PENDING"
+                          ? "bg-yellow-100 text-yellow-600"
+                          : "bg-red-100 text-red-500"
                         }`}
                     >
                       {b.status}
