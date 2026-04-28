@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import AdminNavBar from "../components/AdminNavBar";
+import AdminNavBar from "../components/adminnav";
 
 function UserManagement() {
   const [users, setUsers] = useState([]);

@@ -16,6 +16,8 @@ import CreateBooking from "./pages/CreateBooking";
 import BookingListPage  from "./pages/BookingListPage";
 import UserBookings from "./pages/UserBookings";
 import UniversityHomePage from "./pages/Home";
+
+import AddUser from "./pages/AddUser";
 function App() {
   return (
     <Router>

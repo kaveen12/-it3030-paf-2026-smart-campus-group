@@ -17,8 +17,8 @@ const navItems = [
     ),
   },
   {
-    path: "/users",
-    name: "User Management",
+    to: "/users",
+    label: "User Management",
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
         <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8" />
@@ -26,6 +26,16 @@ const navItems = [
       </svg>
     ),
   },
+  {
+  to: "/send-notification",
+  label: "Send Notifications",
+  icon: (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+      <path d="M12 3a7 7 0 00-7 7v4l-1.5 2.5A1 1 0 004.5 18h15a1 1 0 00.86-1.5L19 14v-4a7 7 0 00-7-7z" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M10 21h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  ),
+},
   {
     to: "/resourceDashboard",
     label: "Resource Management",
@@ -50,15 +60,11 @@ const navItems = [
     ),
   },
   {
-    path: "/tickets",
-    name: "Ticket Management",
+    to: "/tickets",
+    label: "Ticket Management",
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-        <path
-          d="M2 9a2 2 0 012-2h16a2 2 0 012 2v1.5a2.5 2.5 0 000 5V17a2 2 0 01-2 2H4a2 2 0 01-2-2v-1.5a2.5 2.5 0 000-5V9z"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
+        <path d="M2 9a2 2 0 012-2h16a2 2 0 012 2v1.5a2.5 2.5 0 000 5V17a2 2 0 01-2 2H4a2 2 0 01-2-2v-1.5a2.5 2.5 0 000-5V9z" stroke="currentColor" strokeWidth="1.8" />
         <path d="M9 2v3M9 19v3M15 2v3M15 19v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     ),
@@ -125,21 +131,21 @@ function AdminNavBar() {
         </div>
 
         <nav className="flex flex-col gap-1">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
+          {navItems.map(({ to, label, icon }) => {
+            const active = pathname === to;
 
             return (
               <Link
-                key={item.name}
-                to={item.path}
+                key={label}
+                to={to}
                 className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs transition ${
-                  isActive
+                  active
                     ? "bg-[#1e3a5f] text-blue-300"
                     : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
                 }`}
               >
-                {item.icon}
-                {item.name}
+                {icon}
+                {label}
               </Link>
             );
           })}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import AdminNavBar from "../components/AdminNavBar";
+import AdminNavBar from "../components/adminnav";
 
 function AddUser() {
   const navigate = useNavigate();

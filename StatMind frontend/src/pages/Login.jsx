@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { googleLogin, loginUser } from '../api/authApi';
 import { addNotification } from '../utils/notifications';
+import logo from "../assets/logo-UniCore.png"
 import './Auth.css';
 
 const getErrorMessage = (err) => {
@@ -42,6 +43,16 @@ function Login() {
     const resolvedRole = String(data.role || '').toUpperCase();
     const resolvedUserId = data.userId || data.id;
     const resolvedName = data.userName || data.fullName || data.name || 'User';
+
+
+   if (resolvedUserId) {
+  await addNotification({
+    userId: resolvedUserId,
+    title: `👋 Welcome back, ${resolvedName}!`,
+    message: `You have successfully logged in to your UniCore workspace.`,
+    type: "LOGIN",
+  });
+}
 
     if (resolvedRole === 'USER' && resolvedUserId) {
   await addNotification({
@@ -84,7 +95,7 @@ function Login() {
         password: formData.password,
       });
 
-      handleAuthSuccess(data);
+     await handleAuthSuccess(data);
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
@@ -93,23 +104,27 @@ function Login() {
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
-    if (!credentialResponse?.credential) {
-      setError('Google authentication failed. Please try again.');
-      return;
-    }
+  if (!credentialResponse?.credential) {
+    setError("Google authentication failed");
+    return;
+  }
 
-    setLoading(true);
-    setError('');
+  try {
+    // 🔥 decode JWT token
+    const payload = JSON.parse(atob(credentialResponse.credential.split(".")[1]));
 
-    try {
-      const data = await googleLogin({ idToken: credentialResponse.credential });
-      handleAuthSuccess(data);
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  };
+    const data = await googleLogin({
+      email: payload.email,
+      name: payload.name,
+    });
+
+    await handleAuthSuccess(data);
+
+  } catch (err) {
+    console.error(err);
+    setError("Google login failed");
+  }
+};
 
   return (
     <div className="auth-page login-page">
@@ -117,7 +132,7 @@ function Login() {
         <section className="auth-info-section" aria-label="UniCore overview">
           <div className="brand-lockup" aria-label="UniCore">
             <span className="brand-mark">
-              <img src="/favicon.svg" alt="" />
+              <img src={logo} alt="" />
             </span>
             <span className="brand-name">UniCore</span>
           </div>
