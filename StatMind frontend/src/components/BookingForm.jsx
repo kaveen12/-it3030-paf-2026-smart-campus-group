@@ -44,9 +44,6 @@ function BookingForm() {
   const validate = () => {
     const errors = {};
 
-    if (!form.userId.trim())
-      errors.userId = "User ID is required.";
-
     if (!form.userName.trim())
       errors.userName = "User Name is required.";
 
