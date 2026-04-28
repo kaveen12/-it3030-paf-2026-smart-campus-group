@@ -31,7 +31,7 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
   const [formError, setFormError] = useState({});
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [fileErrors, setFileErrors] = useState("");
-
+  const [ignoredAiSuggestion, setIgnoredAiSuggestion] = useState(false);
   const categories = [
     "Equipment Failure",
     "Network Issue",
@@ -49,26 +49,29 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
     fetchResources();
   }, []);
 
-  useEffect(() => {
-    const timeout = setTimeout(async () => {
-      if (!formData.description?.trim()) {
-        setAutoPriority("");
-        return;
-      }
+useEffect(() => {
+  const timeout = setTimeout(async () => {
+    if (!formData.description?.trim()) {
+      setAutoPriority("");
+      setIgnoredAiSuggestion(false);
+      return;
+    }
 
-      try {
-        setAnalyzingPriority(true);
-        const result = await ticketAPI.analyzePriority(formData.description);
-        setAutoPriority(result);
-      } catch {
-        console.log("AI priority detection failed");
-      } finally {
-        setAnalyzingPriority(false);
-      }
-    }, 500);
+    try {
+      setAnalyzingPriority(true);
+      const result = await ticketAPI.analyzePriority(formData.description);
+      setAutoPriority(result);
+      setIgnoredAiSuggestion(false);
+    } catch {
+      console.log("AI priority detection failed");
+    } finally {
+      setAnalyzingPriority(false);
+    }
+  }, 500);
 
-    return () => clearTimeout(timeout);
-  }, [formData.description]);
+  return () => clearTimeout(timeout);
+}, [formData.description]);
+
 
   const fetchResources = async () => {
     try {
@@ -348,7 +351,7 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
                 </span>
               </div>
 
-              {formData.priority !== autoPriority && (
+              {formData.priority !== autoPriority && !ignoredAiSuggestion && (
                 <div className="mt-4 rounded-lg bg-orange-50 border border-orange-200 p-3">
                   <p className="text-sm text-orange-800">
                     You selected <b>{formData.priority}</b>, but AI suggests{" "}
@@ -370,11 +373,13 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
                     </button>
 
                     <button
-                      type="button"
-                      className="px-3 py-1.5 bg-white text-orange-700 border border-orange-300 rounded-md text-xs font-medium"
-                    >
-                      Keep My Selection
-                    </button>
+  type="button"
+  onClick={() => setIgnoredAiSuggestion(true)}
+  className="px-3 py-1.5 bg-white text-orange-700 border border-orange-300 rounded-md text-xs font-medium hover:bg-orange-100"
+>
+  Keep My Selection
+</button>
+                    
                   </div>
                 </div>
               )}

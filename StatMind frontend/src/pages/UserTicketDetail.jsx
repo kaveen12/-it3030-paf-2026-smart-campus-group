@@ -24,6 +24,9 @@ export const UserTicketDetail = () => {
     attachmentUrls: [],
   });
 
+  const [previewImages, setPreviewImages] = useState([]);
+  const [newImageUrls, setNewImageUrls] = useState(["", "", ""]);
+
   const categories = [
     "Equipment Failure",
     "Network Issue",
@@ -102,11 +105,6 @@ export const UserTicketDetail = () => {
     }
   };
 
-  const formatImageUrl = (url) => {
-    if (!url) return "";
-    return url.startsWith("http") ? url : `http://localhost:8081${url}`;
-  };
-
   if (loading) {
     return <div className="p-8 text-gray-700">Loading ticket...</div>;
   }
@@ -117,7 +115,6 @@ export const UserTicketDetail = () => {
         <div className="bg-red-100 text-red-700 p-4 rounded-lg">
           {error || "Ticket not found"}
         </div>
-
         <button
           onClick={() => navigate("/user/tickets/list")}
           className="mt-4 text-blue-600 underline font-medium"
@@ -132,97 +129,77 @@ export const UserTicketDetail = () => {
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
-      {/* Top Header */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
-        <div className="flex justify-between items-start gap-4">
+      <div className="bg-white rounded-xl shadow p-6 mb-6 border border-gray-100">
+        <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">
-              My Ticket Details
+            <h1 className="text-2xl font-bold text-gray-900">
+              Ticket #{ticket.id?.substring(0, 8)}
             </h1>
-            <p className="text-sm text-slate-500 mt-1">
-              View and manage your submitted incident report
+            <p className="text-gray-600 mt-1">
+              Track your submitted incident ticket
             </p>
           </div>
 
           <button
             onClick={() => navigate("/user/tickets/list")}
-            className="text-blue-600 hover:text-blue-800 font-semibold text-sm"
+            className="text-[#1e3a5f] font-medium hover:underline"
           >
             ← Back
           </button>
         </div>
 
-        <div className="flex flex-wrap gap-2 mt-4">
+        <div className="flex gap-2 mt-4">
           <StatusBadge status={ticket.status} />
           <PriorityBadge priority={ticket.priority} />
         </div>
       </div>
 
-      {/* One Main Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="px-8 py-6 bg-gradient-to-r from-slate-900 to-slate-700">
-          <h2 className="text-2xl font-bold text-white">Ticket Overview</h2>
-          <p className="text-sm text-slate-300 mt-1">
-            Ticket details, status, evidence, comments, and available actions
-          </p>
-        </div>
-
-        <div className="p-8 space-y-8">
-          {/* Ticket Details */}
-          <section>
-            <h3 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2 space-y-6">
+          <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
               Ticket Details
-            </h3>
+            </h2>
 
             {!editMode ? (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-                    <p className="text-xs font-medium text-slate-500">Resource</p>
-                    <p className="text-base font-bold text-slate-900 mt-1">
-                      {ticket.resourceName || ticket.resourceOrLocation || "N/A"}
-                    </p>
-                  </div>
-
-                  <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-                    <p className="text-xs font-medium text-slate-500">Location</p>
-                    <p className="text-base font-bold text-slate-900 mt-1">
-                      {ticket.location || ticket.resourceOrLocation || "N/A"}
-                    </p>
-                  </div>
-
-                  <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-                    <p className="text-xs font-medium text-slate-500">Category</p>
-                    <p className="text-base font-bold text-slate-900 mt-1">
-                      {ticket.category || "N/A"}
-                    </p>
-                  </div>
-
-                  <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-                    <p className="text-xs font-medium text-slate-500">
-                      Preferred Contact
-                    </p>
-                    <p className="text-base font-bold text-slate-900 mt-1">
-                      {ticket.preferredContact || "N/A"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-5">
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                    Description
-                  </p>
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
-                    <p className="text-base text-slate-800 leading-7 whitespace-pre-wrap">
-                      {ticket.description || "No description provided"}
-                    </p>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="space-y-4 bg-slate-50 border border-slate-200 rounded-xl p-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  <p className="text-sm text-gray-600">Resource</p>
+                  <p className="font-medium text-gray-900">
+                    {ticket.resourceName || ticket.resourceOrLocation || "N/A"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-600">Location</p>
+                  <p className="font-medium text-gray-900">
+                    {ticket.location || ticket.resourceOrLocation || "N/A"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-600">Category</p>
+                  <p className="font-medium text-gray-900">{ticket.category}</p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-600">Preferred Contact</p>
+                  <p className="font-medium text-gray-900">
+                    {ticket.preferredContact}
+                  </p>
+                </div>
+
+                <div className="md:col-span-2">
+                  <p className="text-sm text-gray-600">Description</p>
+                  <p className="font-medium text-gray-900 whitespace-pre-wrap">
+                    {ticket.description}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Location / Resource
                   </label>
                   <input
@@ -234,13 +211,13 @@ export const UserTicketDetail = () => {
                         resourceOrLocation: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Category
                     </label>
                     <select
@@ -248,7 +225,7 @@ export const UserTicketDetail = () => {
                       onChange={(e) =>
                         setEditData({ ...editData, category: e.target.value })
                       }
-                      className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       {categories.map((category) => (
                         <option key={category} value={category}>
@@ -259,7 +236,7 @@ export const UserTicketDetail = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Priority
                     </label>
                     <select
@@ -267,7 +244,7 @@ export const UserTicketDetail = () => {
                       onChange={(e) =>
                         setEditData({ ...editData, priority: e.target.value })
                       }
-                      className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       {priorities.map((priority) => (
                         <option key={priority} value={priority}>
@@ -279,7 +256,7 @@ export const UserTicketDetail = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Description
                   </label>
                   <textarea
@@ -291,12 +268,12 @@ export const UserTicketDetail = () => {
                       })
                     }
                     rows="4"
-                    className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Preferred Contact
                   </label>
                   <input
@@ -308,171 +285,142 @@ export const UserTicketDetail = () => {
                         preferredContact: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
             )}
-          </section>
+          </div>
 
-          {/* Status */}
-          <section>
-            <h3 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4">
-              Status
-            </h3>
+          {/* Attachments Section */}
+          <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              � Evidence Photos
+            </h2>
 
-            <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <span className="text-sm font-medium text-slate-500">
-                  Current Status
-                </span>
-                <StatusBadge status={ticket.status} />
-              </div>
+            {ticket.attachmentUrls && ticket.attachmentUrls.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {ticket.attachmentUrls.map((url, idx) => {
+                  const imageUrl = url.startsWith('http') 
+                    ? url 
+                    : `http://localhost:8081${url}`;
 
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <span className="text-sm font-medium text-slate-500">
-                  Priority
-                </span>
-                <PriorityBadge priority={ticket.priority} />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-slate-500">
-                  Assigned Technician
-                </span>
-                <span className="text-sm font-bold text-slate-900">
-                  {ticket.assignedTechnicianName || "Not assigned yet"}
-                </span>
-              </div>
-
-              {ticket.rejectionReason && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <p className="text-sm font-bold text-red-700">
-                    Rejection Reason
-                  </p>
-                  <p className="text-sm text-red-800 mt-1">
-                    {ticket.rejectionReason}
-                  </p>
-                </div>
-              )}
-
-              {ticket.resolutionNotes && (
-                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
-                  <p className="text-sm font-bold text-emerald-700">
-                    Resolution Notes
-                  </p>
-                  <p className="text-sm text-emerald-800 mt-1">
-                    {ticket.resolutionNotes}
-                  </p>
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* Evidence Photos */}
-          <section>
-            <h3 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4">
-              Evidence Photos
-            </h3>
-
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 min-h-[170px]">
-              {ticket.attachmentUrls && ticket.attachmentUrls.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {ticket.attachmentUrls.map((url, idx) => {
-                    const imageUrl = formatImageUrl(url);
-
-                    return (
-                      <a
-                        key={idx}
-                        href={imageUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block rounded-lg overflow-hidden border border-slate-200 bg-white aspect-square hover:shadow-lg transition"
-                      >
+                  return (
+                    <div key={idx} className="relative group rounded-lg overflow-hidden bg-gray-100 border border-gray-200 aspect-square cursor-pointer">
+                      <a href={imageUrl} target="_blank" rel="noopener noreferrer">
                         <img
                           src={imageUrl}
                           alt={`Evidence ${idx + 1}`}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover group-hover:opacity-80 transition"
                           onError={(e) => {
                             e.target.style.display = "none";
+                            e.target.nextElementSibling.style.display = "flex";
                           }}
                         />
+                        <div
+                          style={{ display: "none" }}
+                          className="absolute inset-0 bg-gray-50 flex items-center justify-center text-center p-2"
+                        >
+                          <span className="text-blue-600 text-sm font-medium">
+                            View Image
+                          </span>
+                        </div>
                       </a>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="text-sm text-slate-500">No photos attached</p>
-              )}
-            </div>
-          </section>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-sm">No photos attached</p>
+            )}
+          </div>
 
-          {/* Comments & Notes */}
-          <section>
-            <h3 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4">
-              Comments & Notes
-            </h3>
+          <CommentsSection
+            ticketId={ticketId}
+            comments={comments}
+            currentUserName="User"
+            currentUserRole="USER"
+          />
+        </div>
 
-            <CommentsSection
-              ticketId={ticketId}
-              comments={comments}
-              currentUserName="User"
-              currentUserRole="USER"
-              onRefresh={fetchTicketDetails}
-            />
-          </section>
+        <div className="space-y-6">
+          <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Status
+            </h2>
 
-          {/* User Actions */}
-          <section className="border-t border-slate-200 pt-6">
-            <h3 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4">
+            <p className="text-sm text-gray-600">Current Status</p>
+            <p className="font-semibold text-gray-900 mb-4">{ticket.status}</p>
+
+            <p className="text-sm text-gray-600">Assigned Technician</p>
+            <p className="font-semibold text-gray-900 mb-4">
+              {ticket.assignedTechnicianName || "Not assigned yet"}
+            </p>
+
+            {ticket.rejectionReason && (
+              <>
+                <p className="text-sm text-gray-600">Rejection Reason</p>
+                <p className="font-semibold text-red-600 mb-4">
+                  {ticket.rejectionReason}
+                </p>
+              </>
+            )}
+
+            {ticket.resolutionNotes && (
+              <>
+                <p className="text-sm text-gray-600">Resolution Notes</p>
+                <p className="font-semibold text-green-600">
+                  {ticket.resolutionNotes}
+                </p>
+              </>
+            )}
+          </div>
+
+          <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
               User Actions
-            </h3>
+            </h2>
 
             {!canEditOrDelete && (
-              <div className="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <p className="text-sm text-yellow-800">
-                  This ticket can no longer be edited or deleted because its
-                  status is <b>{ticket.status}</b>.
-                </p>
-              </div>
+              <p className="text-sm text-gray-600 mb-4">
+                This ticket can no longer be edited or deleted because its
+                status is {ticket.status}.
+              </p>
             )}
 
             {!editMode ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <button
-                  disabled={!canEditOrDelete}
-                  onClick={() => setEditMode(true)}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white py-3 rounded-lg font-semibold text-sm transition"
-                >
-                  Edit Ticket
-                </button>
-
-                <button
-                  disabled={!canEditOrDelete}
-                  onClick={handleDeleteTicket}
-                  className="bg-red-600 hover:bg-red-700 disabled:bg-slate-400 text-white py-3 rounded-lg font-semibold text-sm transition"
-                >
-                  Delete Ticket
-                </button>
-              </div>
+              <button
+                disabled={!canEditOrDelete}
+                onClick={() => setEditMode(true)}
+                className="w-full bg-[#2563eb] hover:bg-[#1e40af] disabled:bg-gray-400 text-white py-2 rounded-lg mb-3 font-medium transition"
+              >
+                Edit Ticket
+              </button>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-3">
                 <button
                   onClick={handleUpdateTicket}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-semibold text-sm transition"
+                  className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-medium"
                 >
                   Save Changes
                 </button>
-
                 <button
                   onClick={() => setEditMode(false)}
-                  className="bg-slate-600 hover:bg-slate-700 text-white py-3 rounded-lg font-semibold text-sm transition"
+                  className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg font-medium"
                 >
                   Cancel
                 </button>
               </div>
             )}
-          </section>
+
+            <button
+              disabled={!canEditOrDelete}
+              onClick={handleDeleteTicket}
+              className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white py-2 rounded-lg mt-3 font-medium"
+            >
+              Delete Ticket
+            </button>
+          </div>
         </div>
       </div>
     </div>

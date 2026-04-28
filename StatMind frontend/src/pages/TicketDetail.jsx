@@ -214,6 +214,11 @@ export const TicketDetail = () => {
     });
   };
 
+  const formatImageUrl = (url) => {
+    if (!url) return '';
+    return url.startsWith('http') ? url : `http://localhost:8081${url}`;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -444,30 +449,27 @@ export const TicketDetail = () => {
             {ticket.attachmentUrls && ticket.attachmentUrls.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {ticket.attachmentUrls.map((url, idx) => {
-                  const imageUrl =
-                    url && url.startsWith("http")
-                      ? url
-                      : `http://localhost:8081${url}`;
+  const imageUrl = formatImageUrl(url);
 
-                  return (
-                    <a
-                      key={idx}
-                      href={imageUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block rounded-lg overflow-hidden border border-slate-200 bg-white aspect-square hover:shadow-lg transition"
-                    >
-                      <img
-                        src={imageUrl}
-                        alt={`Evidence ${idx + 1}`}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                        }}
-                      />
-                    </a>
-                  );
-                })}
+  return (
+    <a
+      key={idx}
+      href={imageUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block rounded-lg overflow-hidden border border-slate-200 bg-white aspect-square hover:shadow-lg transition"
+    >
+      <img
+        src={imageUrl}
+        alt={`Evidence ${idx + 1}`}
+        className="w-full h-full object-cover"
+        onError={(e) => {
+          e.currentTarget.style.display = "none";
+        }}
+      />
+    </a>
+  );
+})}
               </div>
             ) : (
               <p className="text-sm text-slate-500">No photos attached</p>
