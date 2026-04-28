@@ -12,7 +12,6 @@ import com.statmind.paf.repository.ResourceRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,18 +27,24 @@ public class IncidentTicketService {
     private final IncidentTicketRepository repository;
     private final ResourceRepository resourceRepository;
     private final TicketActivityLogService activityLogService;
+    private final TicketPriorityService ticketPriorityService;
 
     public IncidentTicketService(IncidentTicketRepository repository,
                                  ResourceRepository resourceRepository,
-                                 TicketActivityLogService activityLogService) {
+                                 TicketActivityLogService activityLogService,
+                                 TicketPriorityService ticketPriorityService) {
         this.repository = repository;
         this.resourceRepository = resourceRepository;
         this.activityLogService = activityLogService;
+        this.ticketPriorityService = ticketPriorityService;
+    }
+
+    public String analyzePriority(String description) {
+        return ticketPriorityService.analyzePriority(description);
     }
 
     public IncidentTicket createTicket(IncidentTicket ticket) {
         if (ticket.getResourceId() != null && !ticket.getResourceId().isBlank()) {
-
             Resource resource = resourceRepository.findById(ticket.getResourceId()).orElse(null);
 
             if (resource == null) {
@@ -50,6 +55,12 @@ public class IncidentTicketService {
             ticket.setResourceCode(resource.getResourceCode());
             ticket.setLocation(resource.getLocation());
         }
+
+        String autoPriority = ticketPriorityService.analyzePriority(ticket.getDescription());
+
+if (ticket.getPriority() == null || ticket.getPriority().isBlank()) {
+    ticket.setPriority(autoPriority);
+}
 
         ticket.setStatus("OPEN");
         ticket.setCreatedAt(LocalDateTime.now());
@@ -62,7 +73,7 @@ public class IncidentTicketService {
                 "CREATED",
                 saved.getCreatedByName() != null ? saved.getCreatedByName() : "SYSTEM",
                 saved.getCreatedByRole() != null ? saved.getCreatedByRole() : "USER",
-                "Ticket created"
+                "Ticket created with auto priority: " + autoPriority
         );
 
         return saved;
@@ -99,13 +110,16 @@ public class IncidentTicketService {
         existing.setResourceOrLocation(updatedTicket.getResourceOrLocation());
         existing.setCategory(updatedTicket.getCategory());
         existing.setDescription(updatedTicket.getDescription());
-        existing.setPriority(updatedTicket.getPriority());
+
+        String autoPriority = ticketPriorityService.analyzePriority(updatedTicket.getDescription());
+
+if (updatedTicket.getPriority() == null || updatedTicket.getPriority().isBlank()) {
+    existing.setPriority(autoPriority);
+} else {
+    existing.setPriority(updatedTicket.getPriority());
+}
+
         existing.setPreferredContact(updatedTicket.getPreferredContact());
-
-        existing.setCreatedById(updatedTicket.getCreatedById());
-        existing.setCreatedByName(updatedTicket.getCreatedByName());
-        existing.setCreatedByRole(updatedTicket.getCreatedByRole());
-
         existing.setUpdatedAt(LocalDateTime.now());
 
         IncidentTicket saved = repository.save(existing);
@@ -115,7 +129,7 @@ public class IncidentTicketService {
                 "UPDATED",
                 saved.getCreatedByName() != null ? saved.getCreatedByName() : "SYSTEM",
                 saved.getCreatedByRole() != null ? saved.getCreatedByRole() : "USER",
-                "Ticket details updated"
+                "Ticket details updated with auto priority: " + autoPriority
         );
 
         return saved;
@@ -160,10 +174,10 @@ public class IncidentTicketService {
         String newStatus = request.getStatus().toUpperCase();
 
         if (!newStatus.equals("OPEN") &&
-            !newStatus.equals("IN_PROGRESS") &&
-            !newStatus.equals("RESOLVED") &&
-            !newStatus.equals("CLOSED") &&
-            !newStatus.equals("REJECTED")) {
+                !newStatus.equals("IN_PROGRESS") &&
+                !newStatus.equals("RESOLVED") &&
+                !newStatus.equals("CLOSED") &&
+                !newStatus.equals("REJECTED")) {
             throw new IllegalArgumentException("Invalid status value");
         }
 
@@ -276,7 +290,7 @@ public class IncidentTicketService {
         List<String> currentAttachments = existing.getAttachmentUrls();
 
         if (currentAttachments == null) {
-            currentAttachments = new java.util.ArrayList<>();
+            currentAttachments = new ArrayList<>();
         }
 
         int newTotal = currentAttachments.size() + request.getAttachmentUrls().size();
@@ -309,55 +323,47 @@ public class IncidentTicketService {
             return null;
         }
 
-        // Validate file count
         if (files.length > 3) {
             throw new IllegalArgumentException("Maximum 3 files allowed");
         }
 
-        // Get current attachments
         List<String> currentAttachments = existing.getAttachmentUrls();
+
         if (currentAttachments == null) {
             currentAttachments = new ArrayList<>();
         }
 
-        // Check total count
         if (currentAttachments.size() + files.length > 3) {
             throw new IllegalStateException("A ticket can have a maximum of 3 attachments total");
         }
 
-        // Create directory for ticket uploads
         String uploadDir = "uploads/tickets/" + id;
         Path dirPath = Paths.get(uploadDir);
-        
+
         if (!Files.exists(dirPath)) {
             Files.createDirectories(dirPath);
         }
 
         List<String> newUrls = new ArrayList<>();
 
-        // Process each file
         for (MultipartFile file : files) {
-            // Validate file type
             String contentType = file.getContentType();
+
             if (!isAllowedImageType(contentType)) {
                 throw new IllegalArgumentException("Only JPG/JPEG and PNG images are allowed");
             }
 
-            // Generate unique filename
             String originalFilename = file.getOriginalFilename();
             String fileExtension = getFileExtension(originalFilename);
-            String uniqueFilename = UUID.randomUUID().toString() + "." + fileExtension;
+            String uniqueFilename = UUID.randomUUID() + "." + fileExtension;
 
-            // Save file
             Path filePath = dirPath.resolve(uniqueFilename);
             Files.write(filePath, file.getBytes());
 
-            // Generate accessible URL
             String fileUrl = "/uploads/tickets/" + id + "/" + uniqueFilename;
             newUrls.add(fileUrl);
         }
 
-        // Update ticket
         currentAttachments.addAll(newUrls);
         existing.setAttachmentUrls(currentAttachments);
         existing.setUpdatedAt(LocalDateTime.now());
@@ -377,8 +383,8 @@ public class IncidentTicketService {
 
     private boolean isAllowedImageType(String contentType) {
         return contentType != null && (
-            contentType.equals("image/jpeg") || 
-            contentType.equals("image/png")
+                contentType.equals("image/jpeg") ||
+                        contentType.equals("image/png")
         );
     }
 
@@ -386,6 +392,7 @@ public class IncidentTicketService {
         if (filename == null || !filename.contains(".")) {
             return "jpg";
         }
+
         return filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
     }
 

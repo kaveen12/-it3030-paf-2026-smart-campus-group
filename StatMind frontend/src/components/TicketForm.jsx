@@ -1,51 +1,74 @@
-import { useState, useEffect } from 'react';
-import { resourceAPI } from '../api/ticketService';
-import { getSessionUser } from '../utils/sessionUser';
+import { useState, useEffect } from "react";
+import { resourceAPI, ticketAPI } from "../api/ticketService";
+import { getSessionUser } from "../utils/sessionUser";
 
 const getLoggedTicketUser = () => {
   const sessionUser = getSessionUser();
 
   return {
-    id: sessionUser.userId || 'USER001',
-    name: sessionUser.userName || 'User',
-    role: sessionUser.role || 'USER',
+    id: sessionUser.userId || "USER001",
+    name: sessionUser.userName || "User",
+    role: sessionUser.role || "USER",
   };
 };
 
 export const TicketForm = ({ initialData, onSubmit, loading }) => {
   const [resources, setResources] = useState([]);
-  const [loggedUser, setLoggedUser] = useState(getLoggedTicketUser);
+  const [loggedUser, setLoggedUser] = useState(getLoggedTicketUser());
   const [formData, setFormData] = useState(
     initialData || {
-      resourceId: '',
-      category: '',
-      description: '',
-      priority: 'MEDIUM',
-      preferredContact: '',
+      resourceId: "",
+      category: "",
+      description: "",
+      priority: "MEDIUM",
+      preferredContact: "",
     }
   );
 
-  const [error, setError] = useState('');
+  const [autoPriority, setAutoPriority] = useState("");
+  const [analyzingPriority, setAnalyzingPriority] = useState(false);
+  const [error, setError] = useState("");
   const [formError, setFormError] = useState({});
   const [selectedFiles, setSelectedFiles] = useState([]);
-  const [fileErrors, setFileErrors] = useState('');
+  const [fileErrors, setFileErrors] = useState("");
 
   const categories = [
-    'Equipment Failure',
-    'Network Issue',
-    'Electrical Issue',
-    'Room Damage',
-    'Cleaning Issue',
-    'Safety Hazard',
-    'Other',
+    "Equipment Failure",
+    "Network Issue",
+    "Electrical Issue",
+    "Room Damage",
+    "Cleaning Issue",
+    "Safety Hazard",
+    "Other",
   ];
 
-  const priorities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+  const priorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 
   useEffect(() => {
     setLoggedUser(getLoggedTicketUser());
     fetchResources();
   }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(async () => {
+      if (!formData.description?.trim()) {
+        setAutoPriority("");
+        return;
+      }
+
+      try {
+        setAnalyzingPriority(true);
+        const result = await ticketAPI.analyzePriority(formData.description);
+        setAutoPriority(result);
+      } catch {
+        console.log("AI priority detection failed");
+      } finally {
+        setAnalyzingPriority(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [formData.description]);
 
   const fetchResources = async () => {
     try {
@@ -59,81 +82,72 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === 'resourceId') {
-      setFormData((prev) => ({
-        ...prev,
-        resourceId: value,
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
 
     if (formError[name]) {
       setFormError((prev) => ({
         ...prev,
-        [name]: '',
+        [name]: "",
       }));
     }
   };
 
   const handleFileChange = (e) => {
     const newFiles = Array.from(e.target.files || []);
-    setFileErrors('');
+    setFileErrors("");
 
     if (newFiles.length === 0) return;
 
-    // Calculate total files (existing + new)
     const totalFiles = selectedFiles.length + newFiles.length;
 
     if (totalFiles > 3) {
-      setFileErrors(`Cannot add ${newFiles.length} file(s). You can upload maximum 3 images total. Currently selected: ${selectedFiles.length}`);
+      setFileErrors(
+        `Cannot add ${newFiles.length} file(s). You can upload maximum 3 images total. Currently selected: ${selectedFiles.length}`
+      );
       return;
     }
 
-    // Validate file types
-    const validTypes = ['image/jpeg', 'image/png'];
-    const invalidFiles = newFiles.filter(file => !validTypes.includes(file.type));
-    
+    const validTypes = ["image/jpeg", "image/png"];
+    const invalidFiles = newFiles.filter((file) => !validTypes.includes(file.type));
+
     if (invalidFiles.length > 0) {
-      setFileErrors('Only JPG/JPEG and PNG files are allowed');
+      setFileErrors("Only JPG/JPEG and PNG files are allowed");
       return;
     }
 
-    // APPEND new files to existing ones instead of replacing
     setSelectedFiles((prev) => [...prev, ...newFiles]);
-    
-    // Reset file input so user can select more files
-    e.target.value = '';
+    e.target.value = "";
   };
 
   const removeFile = (index) => {
-    const newFiles = selectedFiles.filter((_, i) => i !== index);
-    setSelectedFiles(newFiles);
-    setFileErrors('');
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setFileErrors("");
   };
 
   const validateForm = () => {
     const errors = {};
 
-    if (!formData.resourceId.trim()) {
-      errors.resourceId = 'Resource selection is required';
+    if (!formData.resourceId?.trim()) {
+      errors.resourceId = "Resource selection is required";
     }
-    if (!formData.category.trim()) {
-      errors.category = 'Category is required';
+
+    if (!formData.category?.trim()) {
+      errors.category = "Category is required";
     }
-    if (!formData.description.trim()) {
-      errors.description = 'Description is required';
+
+    if (!formData.description?.trim()) {
+      errors.description = "Description is required";
     }
-    
-    if (!formData.preferredContact.trim()) {
-      errors.preferredContact = 'Preferred contact is required';
+
+    if (!formData.preferredContact?.trim()) {
+      errors.preferredContact = "Preferred contact is required";
     } else {
       const phoneRegex = /^07\d{8}$/;
       if (!phoneRegex.test(formData.preferredContact.trim())) {
-        errors.preferredContact = 'Phone number must start with 07 and be exactly 10 digits';
+        errors.preferredContact = "Phone number must start with 07 and be exactly 10 digits";
       }
     }
 
@@ -141,23 +155,39 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
     return Object.keys(errors).length === 0;
   };
 
+  const priorityBadgeClass = (priority) => {
+    if (priority === "HIGH" || priority === "CRITICAL") {
+      return "bg-red-100 text-red-700 border border-red-200 animate-pulse";
+    }
+
+    if (priority === "MEDIUM") {
+      return "bg-yellow-100 text-yellow-700 border border-yellow-200";
+    }
+
+    return "bg-green-100 text-green-700 border border-green-200";
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (!validateForm()) {
-      setError('Please fill in all required fields correctly');
+      setError("Please fill in all required fields correctly");
       return;
     }
 
-    const selectedResource = resources.find((resource) => resource.id === formData.resourceId);
+    const selectedResource = resources.find(
+      (resource) => resource.id === formData.resourceId
+    );
 
     const payload = {
       resourceId: formData.resourceId,
-      resourceName: selectedResource?.name || '',
-      resourceCode: selectedResource?.resourceCode || '',
-      location: selectedResource?.location || '',
-      resourceOrLocation: selectedResource ? `${selectedResource.name} - ${selectedResource.location}` : '',
+      resourceName: selectedResource?.name || "",
+      resourceCode: selectedResource?.resourceCode || "",
+      location: selectedResource?.location || "",
+      resourceOrLocation: selectedResource
+        ? `${selectedResource.name} - ${selectedResource.location}`
+        : "",
       category: formData.category,
       description: formData.description,
       priority: formData.priority,
@@ -167,13 +197,15 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
       createdByRole: loggedUser.role,
     };
 
-    console.log('Create ticket payload:', payload);
+    console.log("Create ticket payload:", payload);
     onSubmit(payload, selectedFiles);
   };
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Create Incident Ticket</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">
+        Create Incident Ticket
+      </h2>
 
       {error && (
         <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg">
@@ -189,7 +221,6 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
             </label>
             <input
               type="text"
-              name="createdByName"
               value={loggedUser.name}
               readOnly
               className="w-full px-4 py-3 bg-gray-50 border border-slate-300 rounded-lg text-gray-700 cursor-not-allowed focus:outline-none"
@@ -202,7 +233,6 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
             </label>
             <input
               type="text"
-              name="createdByRole"
               value={loggedUser.role}
               readOnly
               className="w-full px-4 py-3 bg-gray-50 border border-slate-300 rounded-lg text-gray-700 cursor-not-allowed focus:outline-none"
@@ -210,7 +240,6 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
           </div>
         </div>
 
-        {/* Resource Selection - REQUIRED */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Select Resource <span className="text-red-500">*</span>
@@ -219,7 +248,7 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
             name="resourceId"
             value={formData.resourceId}
             onChange={handleChange}
-            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">-- Choose a resource --</option>
             {resources.map((resource) => (
@@ -242,11 +271,13 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
               name="category"
               value={formData.category}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">-- Select category --</option>
               {categories.map((cat) => (
-                <option key={cat} value={cat}>{cat}</option>
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
               ))}
             </select>
             {formError.category && (
@@ -262,10 +293,12 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
               name="priority"
               value={formData.priority}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               {priorities.map((pri) => (
-                <option key={pri} value={pri}>{pri}</option>
+                <option key={pri} value={pri}>
+                  {pri}
+                </option>
               ))}
             </select>
           </div>
@@ -281,10 +314,71 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
             onChange={handleChange}
             placeholder="Describe the issue in detail..."
             rows="5"
-            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+
           {formError.description && (
             <p className="text-red-500 text-sm mt-1">{formError.description}</p>
+          )}
+
+          {analyzingPriority && (
+            <p className="text-xs text-slate-500 mt-2">
+              Analyzing priority...
+            </p>
+          )}
+
+          {autoPriority && (
+            <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">
+                    AI Priority Suggestion
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Based on keywords found in your description
+                  </p>
+                </div>
+
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-bold ${priorityBadgeClass(
+                    autoPriority
+                  )}`}
+                >
+                  {autoPriority}
+                </span>
+              </div>
+
+              {formData.priority !== autoPriority && (
+                <div className="mt-4 rounded-lg bg-orange-50 border border-orange-200 p-3">
+                  <p className="text-sm text-orange-800">
+                    You selected <b>{formData.priority}</b>, but AI suggests{" "}
+                    <b>{autoPriority}</b>.
+                  </p>
+
+                  <div className="flex gap-2 mt-3">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          priority: autoPriority,
+                        }))
+                      }
+                      className="px-3 py-1.5 bg-orange-600 text-white rounded-md text-xs font-medium hover:bg-orange-700"
+                    >
+                      Use AI Priority
+                    </button>
+
+                    <button
+                      type="button"
+                      className="px-3 py-1.5 bg-white text-orange-700 border border-orange-300 rounded-md text-xs font-medium"
+                    >
+                      Keep My Selection
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </div>
 
@@ -301,42 +395,49 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
             maxLength="10"
             inputMode="numeric"
             pattern="07[0-9]{8}"
-            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {formError.preferredContact && (
-            <p className="text-red-500 text-sm mt-1">{formError.preferredContact}</p>
+            <p className="text-red-500 text-sm mt-1">
+              {formError.preferredContact}
+            </p>
           )}
         </div>
 
-        {/* Image Attachments Section */}
         <div className="border-t border-slate-200 pt-6">
-          <h3 className="text-lg font-semibold text-slate-900 mb-4">📸 Evidence Photos (Optional)</h3>
-          <p className="text-sm text-slate-600 mb-4">Add up to 3 JPG or PNG images showing the issue</p>
-          
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">
+            📸 Evidence Photos (Optional)
+          </h3>
+          <p className="text-sm text-slate-600 mb-4">
+            Add up to 3 JPG or PNG images showing the issue
+          </p>
+
           <div className="space-y-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <label className="block">
-              <input
-                type="file"
-                multiple
-                accept="image/png,image/jpeg"
-                onChange={handleFileChange}
-                disabled={selectedFiles.length >= 3}
-                className="block w-full text-sm text-slate-600 border border-slate-300 rounded-lg px-3 py-2 bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-              <p className="text-xs text-slate-500 mt-2">
-                Selected: {selectedFiles.length} file{selectedFiles.length !== 1 ? 's' : ''} (max 3)
-              </p>
-            </label>
+            <input
+              type="file"
+              multiple
+              accept="image/png,image/jpeg"
+              onChange={handleFileChange}
+              disabled={selectedFiles.length >= 3}
+              className="block w-full text-sm text-slate-600 border border-slate-300 rounded-lg px-3 py-2 bg-white cursor-pointer"
+            />
+
+            <p className="text-xs text-slate-500">
+              Selected: {selectedFiles.length} file
+              {selectedFiles.length !== 1 ? "s" : ""} (max 3)
+            </p>
 
             {fileErrors && (
-              <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded px-3 py-2">{fileErrors}</p>
+              <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded px-3 py-2">
+                {fileErrors}
+              </p>
             )}
 
             {selectedFiles.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {selectedFiles.map((file, index) => (
                   <div key={index} className="relative">
-                    <div className="w-full h-24 bg-slate-100 rounded-lg overflow-hidden border border-slate-300 flex items-center justify-center">
+                    <div className="w-full h-24 bg-slate-100 rounded-lg overflow-hidden border border-slate-300">
                       <img
                         src={URL.createObjectURL(file)}
                         alt={`Preview ${index + 1}`}
@@ -346,13 +447,13 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
                     <button
                       type="button"
                       onClick={() => removeFile(index)}
-                      className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold transition"
-                      title="Remove image"
-                      aria-label={`Remove ${file.name}`}
+                      className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold"
                     >
                       ×
                     </button>
-                    <p className="text-xs text-slate-600 mt-1 truncate">{file.name}</p>
+                    <p className="text-xs text-slate-600 mt-1 truncate">
+                      {file.name}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -365,7 +466,7 @@ export const TicketForm = ({ initialData, onSubmit, loading }) => {
           disabled={loading}
           className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          {loading ? 'Creating Ticket...' : 'Create Ticket'}
+          {loading ? "Creating Ticket..." : "Create Ticket"}
         </button>
       </div>
     </form>

@@ -1,26 +1,22 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_BASE_URL = 'http://localhost:8081/api';
+const API_BASE_URL = "http://localhost:8081/api";
 
-// Create axios instance
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
 });
 
-// Ticket endpoints
 export const ticketAPI = {
-  // Get all tickets
   getAllTickets: async () => {
     try {
-      const response = await apiClient.get('/tickets');
+      const response = await apiClient.get("/tickets");
       return response.data;
     } catch (error) {
       throw handleApiError(error);
     }
   },
 
-  // Get ticket by ID
   getTicketById: async (id) => {
     try {
       const response = await apiClient.get(`/tickets/${id}`);
@@ -30,17 +26,32 @@ export const ticketAPI = {
     }
   },
 
-  // Create new ticket
   createTicket: async (ticketData) => {
     try {
-      const response = await apiClient.post('/tickets', ticketData);
+      const response = await apiClient.post("/tickets", ticketData);
       return response.data;
     } catch (error) {
       throw handleApiError(error);
     }
   },
 
-  // Update ticket
+  analyzePriority: async (description) => {
+    try {
+      const response = await apiClient.post(
+        "/tickets/analyze-priority",
+        description,
+        {
+          headers: {
+            "Content-Type": "text/plain",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
   updateTicket: async (id, ticketData) => {
     try {
       const response = await apiClient.put(`/tickets/${id}`, ticketData);
@@ -50,7 +61,6 @@ export const ticketAPI = {
     }
   },
 
-  // Delete ticket
   deleteTicket: async (id) => {
     try {
       const response = await apiClient.delete(`/tickets/${id}`);
@@ -60,7 +70,6 @@ export const ticketAPI = {
     }
   },
 
-  // Assign technician
   assignTechnician: async (id, assignData) => {
     try {
       const response = await apiClient.patch(`/tickets/${id}/assign`, assignData);
@@ -70,7 +79,6 @@ export const ticketAPI = {
     }
   },
 
-  // Update ticket status
   updateTicketStatus: async (id, statusData) => {
     try {
       const response = await apiClient.patch(`/tickets/${id}/status`, statusData);
@@ -80,7 +88,6 @@ export const ticketAPI = {
     }
   },
 
-  // Reject ticket
   rejectTicket: async (id, rejectData) => {
     try {
       const response = await apiClient.patch(`/tickets/${id}/reject`, rejectData);
@@ -90,7 +97,6 @@ export const ticketAPI = {
     }
   },
 
-  // Resolve ticket
   resolveTicket: async (id, resolveData) => {
     try {
       const response = await apiClient.patch(`/tickets/${id}/resolve`, resolveData);
@@ -100,7 +106,6 @@ export const ticketAPI = {
     }
   },
 
-  // Close ticket
   closeTicket: async (id) => {
     try {
       const response = await apiClient.patch(`/tickets/${id}/close`, {});
@@ -110,7 +115,6 @@ export const ticketAPI = {
     }
   },
 
-  // Add attachments
   addAttachments: async (id, attachmentData) => {
     try {
       const response = await apiClient.patch(`/tickets/${id}/attachments`, attachmentData);
@@ -120,21 +124,24 @@ export const ticketAPI = {
     }
   },
 
-  // Upload ticket images
   uploadTicketImages: async (ticketId, files) => {
     try {
       const formData = new FormData();
-      
-      // Add each file to FormData
+
       files.forEach((file) => {
-        formData.append('files', file);
+        formData.append("files", file);
       });
 
-      const response = await apiClient.post(`/tickets/${ticketId}/attachments/upload`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await apiClient.post(
+        `/tickets/${ticketId}/attachments/upload`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
       return response.data;
     } catch (error) {
       throw handleApiError(error);
@@ -142,9 +149,7 @@ export const ticketAPI = {
   },
 };
 
-// Comment endpoints
 export const commentAPI = {
-  // Get comments for a ticket
   getComments: async (ticketId) => {
     try {
       const response = await apiClient.get(`/tickets/${ticketId}/comments`);
@@ -154,42 +159,45 @@ export const commentAPI = {
     }
   },
 
-  // Create comment
   createComment: async (ticketId, commentData) => {
     try {
-      const response = await apiClient.post(`/tickets/${ticketId}/comments`, commentData);
+      const response = await apiClient.post(
+        `/tickets/${ticketId}/comments`,
+        commentData
+      );
       return response.data;
     } catch (error) {
       throw handleApiError(error);
     }
   },
 
-  // Update comment
   updateComment: async (ticketId, commentId, commentData) => {
     try {
-      const response = await apiClient.put(`/tickets/${ticketId}/comments/${commentId}`, commentData);
+      const response = await apiClient.put(
+        `/tickets/${ticketId}/comments/${commentId}`,
+        commentData
+      );
       return response.data;
     } catch (error) {
       throw handleApiError(error);
     }
   },
 
-  // Delete comment
   deleteComment: async (ticketId, commentId, authorName) => {
-  try {
-    const response = await apiClient.delete(
-      `/tickets/${ticketId}/comments/${commentId}`,
-      {
-        data: { authorName },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    throw handleApiError(error);
-  }
-},
+    try {
+      const response = await apiClient.delete(
+        `/tickets/${ticketId}/comments/${commentId}`,
+        {
+          data: { authorName },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
 };
-// Activity log endpoints
+
 export const activityLogAPI = {
   getActivityLogs: async (ticketId) => {
     try {
@@ -201,12 +209,10 @@ export const activityLogAPI = {
   },
 };
 
-// Resource endpoints
 export const resourceAPI = {
-  // Get all resources
   getResources: async () => {
     try {
-      const response = await apiClient.get('/resources');
+      const response = await apiClient.get("/resources");
       return response.data;
     } catch (error) {
       throw handleApiError(error);
@@ -214,17 +220,20 @@ export const resourceAPI = {
   },
 };
 
-// Error handling
 const handleApiError = (error) => {
   if (error.response) {
-    // Server responded with an error status
-    const errorMessage = error.response.data?.message || error.response.data?.error || 'An error occurred';
+    const errorMessage =
+      error.response.data?.message ||
+      error.response.data?.error ||
+      error.response.data ||
+      "An error occurred";
+
     return new Error(errorMessage);
-  } else if (error.request) {
-    // Request was made but no response was received
-    return new Error('No response from server. Please check if backend is running.');
-  } else {
-    // Something else happened
-    return error;
   }
+
+  if (error.request) {
+    return new Error("No response from server. Please check if backend is running.");
+  }
+
+  return error;
 };

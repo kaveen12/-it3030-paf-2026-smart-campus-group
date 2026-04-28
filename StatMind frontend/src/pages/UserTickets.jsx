@@ -3,44 +3,47 @@ import { useNavigate } from "react-router-dom";
 import { ticketAPI } from "../api/ticketService";
 import { StatusBadge } from "../components/StatusBadge";
 import { PriorityBadge } from "../components/PriorityBadge";
-
+import { getSessionUser } from "../utils/sessionUser";
 export const UserTickets = () => {
   const [tickets, setTickets] = useState([]);
   const [sortBy, setSortBy] = useState("updatedAt");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
   const navigate = useNavigate();
+
+
 
   useEffect(() => {
     fetchTickets();
   }, [sortBy]);
 
-  const fetchTickets = async () => {
-    setLoading(true);
-    setError("");
+  const sessionUser = getSessionUser();
 
-    try {
-      const data = await ticketAPI.getAllTickets();
+const fetchTickets = async () => {
+  setLoading(true);
+  setError("");
 
-      const userTickets = Array.isArray(data)
-        ? data
-            .filter((ticket) => ticket.createdByRole === "USER")
-            .sort(
-              (a, b) =>
-                new Date(b[sortBy] || 0) - new Date(a[sortBy] || 0)
-            )
-        : [];
+  try {
+    const data = await ticketAPI.getAllTickets();
 
-      setTickets(userTickets);
-    } catch (err) {
-      console.error("Failed to fetch tickets:", err);
-      setError("Failed to load tickets");
-      setTickets([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const userTickets = Array.isArray(data)
+      ? data
+          .filter((ticket) => ticket.createdById === sessionUser.userId)
+          .sort(
+            (a, b) =>
+              new Date(b[sortBy] || 0) - new Date(a[sortBy] || 0)
+          )
+      : [];
+
+    setTickets(userTickets);
+  } catch (err) {
+    console.error("Failed to fetch tickets:", err);
+    setError("Failed to load tickets");
+    setTickets([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const formatDate = (date) => {
     if (!date) return "N/A";

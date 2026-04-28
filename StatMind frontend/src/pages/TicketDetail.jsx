@@ -35,13 +35,19 @@ export const TicketDetail = () => {
 
   const fetchTechnicians = async () => {
   try {
-    const res = await fetch("http://localhost:8081/api/users"); // change if needed
+    const res = await fetch("http://localhost:8081/api/users");
     const data = await res.json();
 
-    const techs = data.filter(user => user.role === "TECHNICIAN");
+    const techs = Array.isArray(data)
+      ? data.filter((user) => user.role === "TECHNICIAN")
+      : [];
+
     setTechnicians(techs);
   } catch (err) {
-    console.log("Failed to load technicians");
+    console.log("Failed to load technicians", err);
+
+    // fallback (optional)
+    setTechnicians([]);
   }
 };
 
@@ -238,8 +244,12 @@ export const TicketDetail = () => {
       <div className="bg-white border-b border-slate-200 px-8 py-6 shadow-sm">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">🎫 Ticket #{ticket.id?.substring(0, 8)}</h1>
-            <p className="text-slate-600 mt-1">Incident ticket management</p>
+            <h1 className="text-3xl font-bold text-slate-900">
+  Incident Ticket Details
+</h1>
+<p className="text-slate-600 mt-1">
+  Review, assign, and manage this incident report
+</p>
           </div>
           <button
             onClick={() => navigate('/admin/tickets')}
@@ -281,206 +291,259 @@ export const TicketDetail = () => {
 
         <div className="max-w-5xl">
           {/* Details Tab */}
-          {activeTab === 'details' && (
-            <div className="space-y-6">
-              {/* Ticket Information */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">📋</span>
-                <h3 className="text-lg font-semibold text-slate-900">Ticket Information</h3>
+          {activeTab === "details" && (
+  <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+    {/* Header */}
+    <div className="px-8 py-6 border-b border-slate-200 bg-gradient-to-r from-slate-900 to-slate-700">
+      <h2 className="text-2xl font-bold text-white">Ticket Overview</h2>
+      <p className="text-sm text-slate-300 mt-1">
+        Complete incident details, assignment status, evidence, and timeline
+      </p>
+    </div>
+
+    <div className="p-8 space-y-8">
+      {/* Ticket Information */}
+      <section>
+        <h3 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4">
+          Ticket Information
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+            <p className="text-xs font-medium text-slate-500">Resource Name</p>
+            <p className="text-base font-bold text-slate-900 mt-1">
+              {ticket.resourceName || "N/A"}
+            </p>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+            <p className="text-xs font-medium text-slate-500">Resource Code</p>
+            <p className="text-base font-bold text-slate-900 mt-1">
+              {ticket.resourceCode || "N/A"}
+            </p>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+            <p className="text-xs font-medium text-slate-500">Location</p>
+            <p className="text-base font-bold text-slate-900 mt-1">
+              {ticket.location || ticket.resourceOrLocation || "N/A"}
+            </p>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+            <p className="text-xs font-medium text-slate-500">Category</p>
+            <p className="text-base font-bold text-slate-900 mt-1">
+              {ticket.category || "N/A"}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Description */}
+      <section>
+        <h3 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4">
+          Description
+        </h3>
+
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
+          <p className="text-base text-slate-800 leading-7 whitespace-pre-wrap">
+            {ticket.description || "No description provided"}
+          </p>
+        </div>
+      </section>
+
+      {/* Status + Creator */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+          <h3 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4">
+            Status & Assignment
+          </h3>
+
+          <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4 shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <span className="text-sm font-medium text-slate-500">Status</span>
+              <StatusBadge status={ticket.status} />
+            </div>
+
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <span className="text-sm font-medium text-slate-500">Priority</span>
+              <PriorityBadge priority={ticket.priority} />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-slate-500">
+                Assigned Technician
+              </span>
+              <span className="text-sm font-bold text-slate-900">
+                {ticket.assignedTechnicianName || "Unassigned"}
+              </span>
+            </div>
+
+            {ticket.rejectionReason && (
+              <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-sm font-bold text-red-700">Rejection Reason</p>
+                <p className="text-sm text-red-800 mt-1">
+                  {ticket.rejectionReason}
+                </p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">Resource Name</p>
-                  <p className="font-medium text-slate-900 mt-1">{ticket.resourceName || 'N/A'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">Resource Code</p>
-                  <p className="font-medium text-slate-900 mt-1">{ticket.resourceCode || 'N/A'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">Location</p>
-                  <p className="font-medium text-slate-900 mt-1">{ticket.location || ticket.resourceOrLocation || 'N/A'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">Category</p>
-                  <p className="font-medium text-slate-900 mt-1">{ticket.category}</p>
-                </div>
+            )}
+
+            {ticket.resolutionNotes && (
+              <div className="mt-4 bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                <p className="text-sm font-bold text-emerald-700">
+                  Resolution Notes
+                </p>
+                <p className="text-sm text-emerald-800 mt-1">
+                  {ticket.resolutionNotes}
+                </p>
               </div>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4">
+            Creator Information
+          </h3>
+
+          <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4 shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <span className="text-sm font-medium text-slate-500">Name</span>
+              <span className="text-sm font-bold text-slate-900">
+                {ticket.createdByName || "N/A"}
+              </span>
             </div>
 
-            {/* Description */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">📝</span>
-                <h3 className="text-lg font-semibold text-slate-900">Description</h3>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <span className="text-sm font-medium text-slate-500">Role</span>
+              <span className="text-sm font-bold text-slate-900">
+                {ticket.createdByRole || "N/A"}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-slate-500">
+                Preferred Contact
+              </span>
+              <span className="text-sm font-bold text-slate-900">
+                {ticket.preferredContact || "N/A"}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Evidence + Timeline */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+          <h3 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4">
+            Evidence Photos
+          </h3>
+
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 min-h-[180px]">
+            {ticket.attachmentUrls && ticket.attachmentUrls.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {ticket.attachmentUrls.map((url, idx) => {
+                  const imageUrl =
+                    url && url.startsWith("http")
+                      ? url
+                      : `http://localhost:8081${url}`;
+
+                  return (
+                    <a
+                      key={idx}
+                      href={imageUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block rounded-lg overflow-hidden border border-slate-200 bg-white aspect-square hover:shadow-lg transition"
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={`Evidence ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                        }}
+                      />
+                    </a>
+                  );
+                })}
               </div>
-              <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">{ticket.description}</p>
+            ) : (
+              <p className="text-sm text-slate-500">No photos attached</p>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4">
+            Timeline
+          </h3>
+
+          <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4 shadow-sm">
+            <div>
+              <p className="text-sm font-medium text-slate-500">Created At</p>
+              <p className="text-base font-bold text-slate-900 mt-1">
+                {formatDate(ticket.createdAt)}
+              </p>
             </div>
 
-            {/* Status & Assignment */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">⚙️</span>
-                <h3 className="text-lg font-semibold text-slate-900">Status & Assignment</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">Status</p>
-                  <p className="font-medium text-slate-900 mt-1">{ticket.status}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">Assigned Technician</p>
-                  <p className="font-medium text-slate-900 mt-1">{ticket.assignedTechnicianName || 'Unassigned'}</p>
-                </div>
-              </div>
-
-              {ticket.rejectionReason && (
-                <div className="bg-red-50 p-4 rounded-lg border border-red-200 mb-4">
-                  <p className="text-sm text-red-600 font-medium">Rejection Reason</p>
-                  <p className="text-slate-900 mt-1">{ticket.rejectionReason}</p>
-                </div>
-              )}
-
-              {ticket.resolutionNotes && (
-                <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200 mb-4">
-                  <p className="text-sm text-emerald-600 font-medium">Resolution Notes</p>
-                  <p className="text-slate-900 mt-1">{ticket.resolutionNotes}</p>
-                </div>
-              )}
+            <div className="pt-4 border-t border-slate-100">
+              <p className="text-sm font-medium text-slate-500">Updated At</p>
+              <p className="text-base font-bold text-slate-900 mt-1">
+                {formatDate(ticket.updatedAt)}
+              </p>
             </div>
+          </div>
+        </div>
+      </section>
 
-            {/* Creator Information */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">👤</span>
-                <h3 className="text-lg font-semibold text-slate-900">Creator Information</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">Name</p>
-                  <p className="font-medium text-slate-900 mt-1">{ticket.createdByName}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">Role</p>
-                  <p className="font-medium text-slate-900 mt-1">{ticket.createdByRole}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">Preferred Contact</p>
-                  <p className="font-medium text-slate-900 mt-1">{ticket.preferredContact}</p>
-                </div>
-              </div>
-            </div>
+      {/* Admin Actions */}
+      <section className="border-t border-slate-200 pt-6">
+        <h3 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4">
+          Admin Actions
+        </h3>
 
-            {/* Attachments */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-2xl">�</span>
-                  <h3 className="text-lg font-semibold text-slate-900">Evidence Photos</h3>
-                </div>
-                {ticket.attachmentUrls && ticket.attachmentUrls.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {ticket.attachmentUrls.map((url, idx) => {
-                      const imageUrl = url.startsWith('http') 
-                        ? url 
-                        : `http://localhost:8081${url}`;
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <button
+            onClick={() => setAssignModalOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold text-sm transition"
+          >
+            Assign Technician
+          </button>
 
-                      return (
-                        <div key={idx} className="relative group rounded-lg overflow-hidden bg-slate-100 border border-slate-200 aspect-square hover:shadow-md transition cursor-pointer">
-                          <a href={imageUrl} target="_blank" rel="noopener noreferrer">
-                            <img
-                              src={imageUrl}
-                              alt={`Evidence ${idx + 1}`}
-                              className="w-full h-full object-cover group-hover:opacity-80 transition"
-                              onError={(e) => {
-                                e.target.style.display = "none";
-                                e.target.nextElementSibling.style.display = "flex";
-                              }}
-                            />
-                            <div
-                              style={{ display: "none" }}
-                              className="absolute inset-0 bg-slate-50 flex items-center justify-center text-center p-2"
-                            >
-                              <span className="text-blue-600 text-sm font-medium">View</span>
-                            </div>
-                          </a>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <p className="text-slate-500 text-sm">No photos attached</p>
-                )}
-            </div>
+          <button
+            onClick={() => setStatusModalOpen(true)}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold text-sm transition"
+          >
+            Update Status
+          </button>
 
-            {/* Timestamps */}
-            {/* Timestamps */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-2xl">🕐</span>
-                  <h3 className="text-lg font-semibold text-slate-900">Timeline</h3>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <p className="text-sm text-slate-500 font-medium">Created At</p>
-                    <p className="font-medium text-slate-900 mt-1">{formatDate(ticket.createdAt)}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-slate-500 font-medium">Updated At</p>
-                    <p className="font-medium text-slate-900 mt-1">{formatDate(ticket.updatedAt)}</p>
-                  </div>
-                </div>
-            </div>
+          <button
+            onClick={() => setRejectModalOpen(true)}
+            className="bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold text-sm transition"
+          >
+            Reject Ticket
+          </button>
 
-            {/* Action Buttons */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-2xl">🎯</span>
-                  <h3 className="text-lg font-semibold text-slate-900">Admin Actions</h3>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <button
-                    onClick={() => setAssignModalOpen(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition font-medium text-sm"
-                  >
-                    👤 Assign Tech
-                  </button>
-                  <button
-                    onClick={() => setStatusModalOpen(true)}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg transition font-medium text-sm"
-                  >
-                    ⚙️ Update Status
-                  </button>
-                  <button
-                    onClick={() => setRejectModalOpen(true)}
-                    className="bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition font-medium text-sm"
-                  >
-                    ❌ Reject
-                  </button>
-                  <button
-                    onClick={() => setResolveModalOpen(true)}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg transition font-medium text-sm"
-                  >
-                    ✓ Resolve
-                  </button>
-                  <button
-                    onClick={() => setAttachmentsModalOpen(true)}
-                    className="bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg transition font-medium text-sm disabled:bg-slate-400"
-                    disabled={(ticket.attachmentUrls?.length || 0) >= 3}
-                  >
-                    📎 Add Image
-                  </button>
-                  <button
-                    onClick={handleDeleteTicket}
-                    className="bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-lg transition font-medium text-sm"
-                  >
-                    🗑️ Delete
-                  </button>
-                </div>
-            </div>
-            </div>
-          )}
+          <button
+            onClick={() => setResolveModalOpen(true)}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-semibold text-sm transition"
+          >
+            Resolve Ticket
+          </button>
 
+          <button
+            onClick={handleDeleteTicket}
+            className="bg-slate-700 hover:bg-slate-800 text-white py-3 rounded-lg font-semibold text-sm transition md:col-span-2"
+          >
+            Delete Ticket
+          </button>
+        </div>
+      </section>
+    </div>
+  </div>
+)}
           {/* Comments Tab */}
           {activeTab === 'comments' && (
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200">
@@ -526,22 +589,29 @@ export const TicketDetail = () => {
           <select
   value={assignData.assignedTechnicianId}
   onChange={(e) => {
-    const selected = technicians.find(t => t.id === e.target.value);
+    const selected = technicians.find(
+      (t) => String(t.userId || t.id) === String(e.target.value)
+    );
 
     setAssignData({
-      assignedTechnicianId: selected?.id || '',
-      assignedTechnicianName: selected?.name || '',
+      assignedTechnicianId: selected?.userId || selected?.id || "",
+      assignedTechnicianName: selected?.userName || selected?.name || "",
     });
   }}
   className="w-full px-4 py-3 border border-slate-300 rounded-lg"
 >
   <option value="">-- Select Technician --</option>
 
-  {technicians.map((tech) => (
-    <option key={tech.id} value={tech.id}>
-      {tech.name}
-    </option>
-  ))}
+  {technicians.map((tech) => {
+    const techId = tech.userId || tech.id;
+    const techName = tech.userName || tech.name;
+
+    return (
+      <option key={techId} value={techId}>
+        {techName}
+      </option>
+    );
+  })}
 </select>
       </Modal>
 
