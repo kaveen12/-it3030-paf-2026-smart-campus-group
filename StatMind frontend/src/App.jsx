@@ -1,5 +1,6 @@
 // src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
 import ResourceDashboardPage from "./pages/ResourceDashboardPage";
 import Notifications from "./pages/Notifications";
 import UserManagement from "./pages/UserManagement";
@@ -13,6 +14,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import UserViewResource from "./pages/UserViewResource";
 import UserDashboard from "./pages/UserDashboard";
 import CreateBooking from "./pages/CreateBooking";
+import BookingListPage from "./pages/BookingListPage";
 import BookingListPage from "./pages/BookingListPage";
 import UserBookings from "./pages/UserBookings";
 import UniversityHomePage from "./pages/Home";
@@ -47,11 +49,11 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/add-user" element={<AddUser />} />
 
+        {/* DASHBOARDS */}
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/user/dashboard" element={<UserDashboard />} />
         <Route path="/resources" element={<UserViewResource />} />
         <Route path="/resourceDashboard" element={<ResourceDashboardPage />} />
-
         <Route path="/addResource" element={<AddResource />} />
         <Route path="/viewResource" element={<ViewResources />} />
         <Route path="/editResource/:id" element={<EditResource />} />

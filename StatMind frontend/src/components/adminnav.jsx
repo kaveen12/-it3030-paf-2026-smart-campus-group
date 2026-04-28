@@ -1,12 +1,20 @@
 import { Link, useLocation } from "react-router-dom";
+<<<<<<< HEAD
 import { useEffect, useState } from "react";
 import axios from "axios";
+=======
+>>>>>>> c60b22795405ea4083d9dc73851f820aecb0373d
 import logo from "../assets/logo-UniCore.png";
 
 const navItems = [
   {
+<<<<<<< HEAD
     to: "/AdminDashboard",
     label: "Dashboard",
+=======
+    path: "/admin",
+    name: "Dashboard",
+>>>>>>> c60b22795405ea4083d9dc73851f820aecb0373d
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
         <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
@@ -17,16 +25,30 @@ const navItems = [
     ),
   },
   {
+<<<<<<< HEAD
     to: "/users",
     label: "User Management",
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
         <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8" />
         <path d="M4 20c0-3.314 3.582-6 8-6s8 2.686 8 6" stroke="currentColor" strokeWidth="1.8" />
+=======
+    path: "/users",
+    name: "User Management",
+    icon: (
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8" />
+        <path
+          d="M4 20c0-3.314 3.582-6 8-6s8 2.686 8 6"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        />
+>>>>>>> c60b22795405ea4083d9dc73851f820aecb0373d
       </svg>
     ),
   },
   {
+<<<<<<< HEAD
   to: "/send-notification",
   label: "Send Notifications",
   icon: (
@@ -39,6 +61,10 @@ const navItems = [
   {
     to: "/resourceDashboard",
     label: "Resource Management",
+=======
+    path: "/resourceDashboard",
+    name: "Resource Management",
+>>>>>>> c60b22795405ea4083d9dc73851f820aecb0373d
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
         <ellipse cx="12" cy="7" rx="8" ry="3" stroke="currentColor" strokeWidth="1.8" />
@@ -48,8 +74,13 @@ const navItems = [
     ),
   },
   {
+<<<<<<< HEAD
     to: "/Bookings",
     label: "Booking Management",
+=======
+    path: "/bookings",
+    name: "Booking Management",
+>>>>>>> c60b22795405ea4083d9dc73851f820aecb0373d
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
         <rect x="3" y="4" width="18" height="17" rx="2" stroke="currentColor" strokeWidth="1.8" />
@@ -60,17 +91,30 @@ const navItems = [
     ),
   },
   {
+<<<<<<< HEAD
     to: "/tickets",
     label: "Ticket Management",
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
         <path d="M2 9a2 2 0 012-2h16a2 2 0 012 2v1.5a2.5 2.5 0 000 5V17a2 2 0 01-2 2H4a2 2 0 01-2-2v-1.5a2.5 2.5 0 000-5V9z" stroke="currentColor" strokeWidth="1.8" />
+=======
+    path: "/admin/tickets",
+    name: "Ticket Management",
+    icon: (
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M2 9a2 2 0 012-2h16a2 2 0 012 2v1.5a2.5 2.5 0 000 5V17a2 2 0 01-2 2H4a2 2 0 01-2-2v-1.5a2.5 2.5 0 000-5V9z"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        />
+>>>>>>> c60b22795405ea4083d9dc73851f820aecb0373d
         <path d="M9 2v3M9 19v3M15 2v3M15 19v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     ),
   },
 ];
 
+<<<<<<< HEAD
 function AdminNavBar() {
   const { pathname } = useLocation();
 
@@ -140,16 +184,49 @@ function AdminNavBar() {
                 to={to}
                 className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs transition ${
                   active
+=======
+function AdminNavbar() {
+  const location = useLocation();
+
+  return (
+    <>
+      {/* SIDEBAR */}
+      <aside className="fixed left-0 top-0 w-56 h-screen bg-[#0f172a] flex flex-col p-4 z-50">
+
+        {/* LOGO */}
+        <div className="flex items-center gap-3 mb-8">
+          <img src={logo} alt="UniCore Logo" className="w-8 h-8 rounded-lg" />
+          <span className="text-white font-semibold text-sm">UniCore</span>
+        </div>
+
+        {/* NAV LINKS */}
+        <nav className="flex flex-col gap-1">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+
+            return (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs transition ${
+                  isActive
+>>>>>>> c60b22795405ea4083d9dc73851f820aecb0373d
                     ? "bg-[#1e3a5f] text-blue-300"
                     : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
                 }`}
               >
+<<<<<<< HEAD
                 {icon}
                 {label}
+=======
+                {item.icon}
+                {item.name}
+>>>>>>> c60b22795405ea4083d9dc73851f820aecb0373d
               </Link>
             );
           })}
         </nav>
+<<<<<<< HEAD
       </aside>
 
       <header className="fixed top-0 left-56 right-0 h-14 bg-white border-b flex items-center justify-between px-6 z-40 shadow-sm">
@@ -244,6 +321,27 @@ function AdminNavBar() {
             onClick={logout}
             className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm"
           >
+=======
+
+        {/* LOGOUT */}
+        <div className="mt-auto pt-4 border-t border-gray-700">
+          <button className="w-full text-left px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-red-400 rounded">
+            Logout
+          </button>
+        </div>
+      </aside>
+
+      {/* TOP NAVBAR */}
+      <header className="fixed top-0 left-56 right-0 h-14 bg-white border-b flex items-center justify-between px-6 z-40 shadow-sm">
+        
+        <h1 className="text-lg font-semibold text-gray-800">
+          Admin Panel
+        </h1>
+
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-600">Admin</span>
+          <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm">
+>>>>>>> c60b22795405ea4083d9dc73851f820aecb0373d
             Logout
           </button>
         </div>
@@ -252,4 +350,8 @@ function AdminNavBar() {
   );
 }
 
+<<<<<<< HEAD
 export default AdminNavBar;
+=======
+export default AdminNavbar;
+>>>>>>> c60b22795405ea4083d9dc73851f820aecb0373d

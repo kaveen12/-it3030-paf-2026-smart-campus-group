@@ -1,22 +1,23 @@
 package com.statmind.paf.controller;
 
+import com.statmind.paf.dto.AddAttachmentsRequest;
+import com.statmind.paf.dto.AssignTechnicianRequest;
+import com.statmind.paf.dto.RejectTicketRequest;
+import com.statmind.paf.dto.ResolveTicketRequest;
+import com.statmind.paf.dto.UpdateStatusRequest;
 import com.statmind.paf.model.IncidentTicket;
 import com.statmind.paf.service.IncidentTicketService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.statmind.paf.dto.AssignTechnicianRequest;
-import com.statmind.paf.dto.UpdateStatusRequest;
-import com.statmind.paf.dto.RejectTicketRequest;
-import com.statmind.paf.dto.ResolveTicketRequest;
-import com.statmind.paf.dto.AddAttachmentsRequest;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/tickets")
-@CrossOrigin(origins = "*")
 public class IncidentTicketController {
 
     private final IncidentTicketService service;
@@ -25,9 +26,14 @@ public class IncidentTicketController {
         this.service = service;
     }
 
+    @PostMapping("/analyze-priority")
+    public ResponseEntity<String> analyzePriority(@RequestBody String description) {
+        return ResponseEntity.ok(service.analyzePriority(description));
+    }
+
     @PostMapping
     public ResponseEntity<IncidentTicket> createTicket(@Valid @RequestBody IncidentTicket ticket) {
-    return new ResponseEntity<>(service.createTicket(ticket), HttpStatus.CREATED);
+        return new ResponseEntity<>(service.createTicket(ticket), HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -47,7 +53,10 @@ public class IncidentTicketController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateTicket(@PathVariable String id, @Valid @RequestBody IncidentTicket updatedTicket) {
+    public ResponseEntity<?> updateTicket(
+            @PathVariable String id,
+            @Valid @RequestBody IncidentTicket updatedTicket
+    ) {
         IncidentTicket ticket = service.updateTicket(id, updatedTicket);
 
         if (ticket == null) {
@@ -58,95 +67,133 @@ public class IncidentTicketController {
     }
 
     @PatchMapping("/{id}/assign")
-    public ResponseEntity<?> assignTechnician(@PathVariable String id,
-                                          @Valid @RequestBody AssignTechnicianRequest request) {
-    IncidentTicket ticket = service.assignTechnician(id, request);
+    public ResponseEntity<?> assignTechnician(
+            @PathVariable String id,
+            @Valid @RequestBody AssignTechnicianRequest request
+    ) {
+        IncidentTicket ticket = service.assignTechnician(id, request);
 
-    if (ticket == null) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
-    }
+        if (ticket == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
+        }
 
-    return ResponseEntity.ok(ticket);
+        return ResponseEntity.ok(ticket);
     }
 
     @PatchMapping("/{id}/status")
-public ResponseEntity<?> updateTicketStatus(@PathVariable String id,
-                                            @Valid @RequestBody UpdateStatusRequest request) {
-    try {
-        IncidentTicket ticket = service.updateTicketStatus(id, request);
+    public ResponseEntity<?> updateTicketStatus(
+            @PathVariable String id,
+            @Valid @RequestBody UpdateStatusRequest request
+    ) {
+        try {
+            IncidentTicket ticket = service.updateTicketStatus(id, request);
 
-        if (ticket == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
+            if (ticket == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
+            }
+
+            return ResponseEntity.ok(ticket);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-        return ResponseEntity.ok(ticket);
-    } catch (IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
-    }
     }
 
     @PatchMapping("/{id}/reject")
-public ResponseEntity<?> rejectTicket(@PathVariable String id,
-                                      @Valid @RequestBody RejectTicketRequest request) {
-    try {
-        IncidentTicket ticket = service.rejectTicket(id, request);
+    public ResponseEntity<?> rejectTicket(
+            @PathVariable String id,
+            @Valid @RequestBody RejectTicketRequest request
+    ) {
+        try {
+            IncidentTicket ticket = service.rejectTicket(id, request);
 
-        if (ticket == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
+            if (ticket == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
+            }
+
+            return ResponseEntity.ok(ticket);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
 
-        return ResponseEntity.ok(ticket);
-    } catch (IllegalStateException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
-    }
-    }
     @PatchMapping("/{id}/resolve")
-    public ResponseEntity<?> resolveTicket(@PathVariable String id,
-                                       @Valid @RequestBody ResolveTicketRequest request) {
-    try {
-        IncidentTicket ticket = service.resolveTicket(id, request);
+    public ResponseEntity<?> resolveTicket(
+            @PathVariable String id,
+            @Valid @RequestBody ResolveTicketRequest request
+    ) {
+        try {
+            IncidentTicket ticket = service.resolveTicket(id, request);
 
-        if (ticket == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
+            if (ticket == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
+            }
+
+            return ResponseEntity.ok(ticket);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-        return ResponseEntity.ok(ticket);
-    } catch (IllegalStateException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
-    }
     }
 
     @PatchMapping("/{id}/close")
-public ResponseEntity<?> closeTicket(@PathVariable String id) {
-    try {
-        IncidentTicket ticket = service.closeTicket(id);
+    public ResponseEntity<?> closeTicket(@PathVariable String id) {
+        try {
+            IncidentTicket ticket = service.closeTicket(id);
 
-        if (ticket == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
+            if (ticket == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
+            }
+
+            return ResponseEntity.ok(ticket);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-        return ResponseEntity.ok(ticket);
-    } catch (IllegalStateException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
-    }
     }
 
     @PatchMapping("/{id}/attachments")
-    public ResponseEntity<?> addAttachments(@PathVariable String id,
-                                        @Valid @RequestBody AddAttachmentsRequest request) {
-    try {
-        IncidentTicket ticket = service.addAttachments(id, request);
+    public ResponseEntity<?> addAttachments(
+            @PathVariable String id,
+            @Valid @RequestBody AddAttachmentsRequest request
+    ) {
+        try {
+            IncidentTicket ticket = service.addAttachments(id, request);
 
-        if (ticket == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
+            if (ticket == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
+            }
+
+            return ResponseEntity.ok(ticket);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
 
-        return ResponseEntity.ok(ticket);
-    } catch (IllegalStateException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
+    @PostMapping("/{id}/attachments/upload")
+    public ResponseEntity<?> uploadAttachments(
+            @PathVariable String id,
+            @RequestParam("files") MultipartFile[] files
+    ) {
+        try {
+            if (files == null || files.length == 0) {
+                return ResponseEntity.badRequest().body("No files provided");
+            }
+
+            IncidentTicket ticket = service.uploadAttachments(id, files);
+
+            if (ticket == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ticket not found");
+            }
+
+            return ResponseEntity.ok(ticket);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("File upload failed: " + e.getMessage());
+        }
     }
-    }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTicket(@PathVariable String id) {
         boolean deleted = service.deleteTicket(id);
