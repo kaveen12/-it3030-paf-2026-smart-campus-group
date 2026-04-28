@@ -101,6 +101,10 @@ function Notifications() {
                 >
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">
+                      {notification.type === "LOGIN" && "👋 "}
+                      {notification.type === "ADMIN_MESSAGE" && "📢 "}
+                      {notification.type === "BOOKING" && "📅 "}
+                      {notification.type === "TICKET" && "🎫 "}
                       {notification.message}
                     </h3>
 
