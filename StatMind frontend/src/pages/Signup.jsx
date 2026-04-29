@@ -511,6 +511,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { googleLogin, registerUser } from '../api/authApi';
+import logo from "../assets/logo-UniCore.png";
 import './Auth.css';
 
 const getErrorMessage = (err) => {
@@ -544,7 +545,7 @@ function Signup() {
   const [loading, setLoading] = useState(false);
 
   const handleAuthSuccess = (data) => {
-    localStorage.setItem('flexitUser', JSON.stringify(data));
+    localStorage.setItem('UniCoreUser', JSON.stringify(data));
     if (data.role === 'ADMIN') {
       navigate('/admin-dashboard');
     } else {
@@ -581,11 +582,12 @@ function Signup() {
         return;
       }
 
-      await registerUser({
-        fullName: formData.fullName,
-        email: formData.email,
-        password: formData.password,
-      });
+  await registerUser({
+  name: formData.fullName,
+  email: formData.email,
+  password: formData.password,
+  role: "USER",
+});
 
       navigate('/login');
     } catch (err) {
@@ -596,23 +598,32 @@ function Signup() {
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
-    if (!credentialResponse?.credential) {
-      setError('Google authentication failed. Please try again.');
-      return;
-    }
+  if (!credentialResponse?.credential) {
+    setError("Google authentication failed");
+    return;
+  }
 
-    setLoading(true);
-    setError('');
+  setLoading(true);
+  setError("");
 
-    try {
-      const data = await googleLogin({ idToken: credentialResponse.credential });
-      handleAuthSuccess(data);
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const payload = JSON.parse(
+      atob(credentialResponse.credential.split(".")[1])
+    );
+
+    await googleLogin({
+      email: payload.email,
+      name: payload.name,
+    });
+
+    navigate("/login");
+  } catch (err) {
+    console.error(err);
+    setError("Google signup failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="auth-page signup-page">
@@ -621,7 +632,7 @@ function Signup() {
         {/* Left Side - Signup Form */}
         <div className="auth-card glass-form">
           <h2>Create Account</h2>
-          <p className="auth-subtitle">Join Flexit and manage resources efficiently</p>
+          <p className="auth-subtitle">Join UniCore and manage resources efficiently</p>
 
           {error && <div className="error-message">{error}</div>}
 
@@ -632,7 +643,7 @@ function Signup() {
                 type="text"
                 id="fullName"
                 name="fullName"
-                placeholder="John Doe"
+                placeholder="Nimantha Senarathne"
                 value={formData.fullName}
                 onChange={handleChange}
                 required
@@ -731,12 +742,15 @@ function Signup() {
 
         {/* Right Side - Content */}
         <div className="auth-info-section">
-          <div className="logo-section">
-            <img src="/images/flexit_logo_Darkbg1.png" alt="Flexit Logo" className="flexit-logo" />
-          </div>
+          <div className="brand-lockup" aria-label="UniCore">
+                      <span className="brand-mark">
+                        <img src={logo} alt="" />
+                      </span>
+                      <span className="brand-name">UniCore</span>
+                    </div>
           <h1 className="info-title">Join the Community</h1>
           <p className="info-desc">
-            Start your journey with us today. Create an account to unlock premium features and tools.
+            Start your journey with us. Create an account here.
           </p>
 
           <div className="mini-cards-container">

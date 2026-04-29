@@ -4,6 +4,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import { googleLogin, loginUser } from '../api/authApi';
 import { addNotification } from '../utils/notifications';
 import logo from "../assets/logo-UniCore.png"
+import logo from "../assets/logo-UniCore.png"
 import './Auth.css';
 
 const getErrorMessage = (err) => {
@@ -135,6 +136,7 @@ function Login() {
         <section className="auth-info-section" aria-label="UniCore overview">
           <div className="brand-lockup" aria-label="UniCore">
             <span className="brand-mark">
+              <img src={logo} alt="" />
               <img src={logo} alt="" />
             </span>
             <span className="brand-name">UniCore</span>
