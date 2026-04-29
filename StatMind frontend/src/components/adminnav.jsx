@@ -2,10 +2,11 @@ import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import logo from "../assets/logo-UniCore.png";
+import { useNavigate } from "react-router-dom";
 
 const navItems = [
   {
-    to: "/AdminDashboard",
+    to: "/admin",
     label: "Dashboard",
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
@@ -60,7 +61,7 @@ const navItems = [
     ),
   },
   {
-    to: "/tickets",
+    to: "/admin/tickets",
     label: "Ticket Management",
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
@@ -81,6 +82,7 @@ function AdminNavBar() {
   "User";
   const userEmail = localStorage.getItem("email") || "";
   const role = localStorage.getItem("role") || "ADMIN";
+  const navigate = useNavigate(); 
 
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -169,7 +171,7 @@ function AdminNavBar() {
           </button>
 
           {open && (
-            <div className="absolute right-40 top-12 w-96 bg-white rounded-2xl shadow-xl border p-4 z-50 max-h-[500px] overflow-y-auto">
+            <div className="absolute right-4 top-14 w-72 max-h-72 overflow-y-auto bg-white rounded-2xl shadow-xl p-3 z-50">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="font-bold text-gray-800">Notifications</h2>
                 <span className="text-sm text-gray-500">{unreadCount} unread</span>
@@ -178,10 +180,10 @@ function AdminNavBar() {
               {notifications.length === 0 ? (
                 <p className="text-center text-gray-500 py-4">No notifications</p>
               ) : (
-                notifications.map((n) => (
+                notifications.slice(0, 2).map((n) => (
                   <div
                     key={n.id}
-                    className={`p-4 mb-3 rounded-xl border ${
+                    className={`p-3 mb-2 rounded-xl border ${
                       n.read
                         ? "bg-white border-gray-200"
                         : "bg-green-50 border-green-300"
@@ -189,7 +191,7 @@ function AdminNavBar() {
                   >
                     <div className="flex justify-between gap-3">
                       <div>
-                        <p className="font-semibold text-gray-800">👋 {n.message}</p>
+                        <p className="text-sm font-semibold text-gray-800 leading-snug">👋 {n.message}</p>
                         <p className="text-sm text-gray-600 mt-1">Type: {n.type}</p>
                         <p className="text-xs text-gray-400 mt-1">{n.createdAt}</p>
                       </div>
@@ -216,28 +218,24 @@ function AdminNavBar() {
             </div>
           )}
 
-          <div className="flex items-center gap-3 bg-white border rounded-full px-4 py-2 shadow-sm">
-  
+          <div
+  onClick={() => navigate("/profile")}
+  className="flex items-center gap-3 bg-white border rounded-full px-4 py-2 shadow-sm cursor-pointer hover:bg-gray-50 transition"
+>
   {/* Avatar */}
   <div className="relative">
-  <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
-    {userName.charAt(0).toUpperCase()}
+    <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
+      {userName.charAt(0).toUpperCase()}
+    </div>
+
+    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
   </div>
 
-  <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
-</div>
-
-  {/* User Info */}
+  {/* Info */}
   <div>
-    <p className="text-sm font-semibold text-gray-800">
-      {userName}
-    </p>
-    <p className="text-xs text-gray-500">
-      {userEmail}
-    </p>
+    <p className="text-sm font-semibold text-gray-800">{userName}</p>
+    <p className="text-xs text-gray-500">{userEmail}</p>
   </div>
-  
-
 </div>
 
           <button

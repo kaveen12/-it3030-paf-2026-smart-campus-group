@@ -4,6 +4,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import { googleLogin, loginUser } from '../api/authApi';
 import { addNotification } from '../utils/notifications';
 import logo from "../assets/logo-UniCore.png"
+
 import './Auth.css';
 
 const getErrorMessage = (err) => {
@@ -18,7 +19,7 @@ const getErrorMessage = (err) => {
   }
 
   if (err.message === 'Network Error') {
-    return 'Cannot reach backend server. Please start Spring Boot backend on port 8080.';
+    return 'Cannot reach backend server. Please start Spring Boot backend on port 8081.';
   }
 
   return 'Login failed. Please try again.';
@@ -35,39 +36,42 @@ function Login() {
 
   const handleAuthSuccess = async (data) => {
     localStorage.setItem('flexitUser', JSON.stringify(data));
-  localStorage.setItem('userId', data.userId || data.id);
-  localStorage.setItem('name', data.userName || data.fullName || data.name);
-  localStorage.setItem('email', data.email);
-  localStorage.setItem('role', data.role);
+    localStorage.setItem('userId', data.userId || data.id);
+    localStorage.setItem('name', data.userName || data.fullName || data.name);
+    localStorage.setItem('email', data.email);
+    localStorage.setItem('role', data.role);
 
     const resolvedRole = String(data.role || '').toUpperCase();
     const resolvedUserId = data.userId || data.id;
     const resolvedName = data.userName || data.fullName || data.name || 'User';
 
 
-   if (resolvedUserId) {
-  await addNotification({
-    userId: resolvedUserId,
-    title: `👋 Welcome back, ${resolvedName}!`,
-    message: `You have successfully logged in to your UniCore workspace.`,
-    type: "LOGIN",
-  });
-}
+    if (resolvedUserId) {
+      await addNotification({
+        userId: resolvedUserId,
+        title: `👋 Welcome back, ${resolvedName}!`,
+        message: `You have successfully logged in to your UniCore workspace.`,
+        type: "LOGIN",
+      });
+    }
 
     if (resolvedRole === 'USER' && resolvedUserId) {
-  await addNotification({
-  userId: resolvedUserId,
-  title: `👋Welcome back, ${resolvedName}!`,
-  message: `You have successfully logged in to your UniCore workspace.`,
-  type: "LOGIN",
-});
+      await addNotification({
+        userId: resolvedUserId,
+        title: `👋Welcome back, ${resolvedName}!`,
+        message: `You have successfully logged in to your UniCore workspace.`,
+        type: "LOGIN",
+      });
     }
 
     if (resolvedRole === 'ADMIN') {
       navigate('/admin');
+    } else if (resolvedRole === 'TECHNICIAN') {
+      navigate('/technician/tickets');
     } else {
       navigate('/user/dashboard');
     }
+
   };
 
   const handleChange = (e) => {
@@ -95,7 +99,7 @@ function Login() {
         password: formData.password,
       });
 
-     await handleAuthSuccess(data);
+      await handleAuthSuccess(data);
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
@@ -104,27 +108,27 @@ function Login() {
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
-  if (!credentialResponse?.credential) {
-    setError("Google authentication failed");
-    return;
-  }
+    if (!credentialResponse?.credential) {
+      setError("Google authentication failed");
+      return;
+    }
 
-  try {
-    // 🔥 decode JWT token
-    const payload = JSON.parse(atob(credentialResponse.credential.split(".")[1]));
+    try {
+      // 🔥 decode JWT token
+      const payload = JSON.parse(atob(credentialResponse.credential.split(".")[1]));
 
-    const data = await googleLogin({
-      email: payload.email,
-      name: payload.name,
-    });
+      const data = await googleLogin({
+        email: payload.email,
+        name: payload.name,
+      });
 
-    await handleAuthSuccess(data);
+      await handleAuthSuccess(data);
 
-  } catch (err) {
-    console.error(err);
-    setError("Google login failed");
-  }
-};
+    } catch (err) {
+      console.error(err);
+      setError("Google login failed");
+    }
+  };
 
   return (
     <div className="auth-page login-page">
@@ -132,6 +136,7 @@ function Login() {
         <section className="auth-info-section" aria-label="UniCore overview">
           <div className="brand-lockup" aria-label="UniCore">
             <span className="brand-mark">
+              <img src={logo} alt="" />
               <img src={logo} alt="" />
             </span>
             <span className="brand-name">UniCore</span>

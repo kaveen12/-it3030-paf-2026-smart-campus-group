@@ -16,7 +16,7 @@
 // //   }
 
 // //   if (err.message === 'Network Error') {
-// //     return 'Cannot reach backend server. Please start Spring Boot backend on port 8080.';
+// //     return 'Cannot reach backend server. Please start Spring Boot backend on port 8081.';
 // //   }
 
 // //   return 'Signup failed. Please try again.';
@@ -255,7 +255,7 @@
 //   }
 
 //   if (err.message === 'Network Error') {
-//     return 'Cannot reach backend server. Please start Spring Boot backend on port 8080.';
+//     return 'Cannot reach backend server. Please start Spring Boot backend on port 8081.';
 //   }
 
 //   return 'Signup failed. Please try again.';
@@ -305,7 +305,7 @@
 //         setError('Please accept the terms and conditions');
 //         return;
 //       }
-      
+
 //       if (!formData.fullName || !formData.email || !formData.password) {
 //         setError('Please fill in all fields');
 //         return;
@@ -347,7 +347,7 @@
 //   return (
 //     <div className="auth-page">
 //       <div className="auth-container signup-layout">
-        
+
 //         {/* Left Side - Signup Form */}
 //         <div className="auth-card glass-form">
 //           <h2>Create Account</h2>
@@ -463,7 +463,7 @@
 //           <p className="info-desc">
 //             Start your journey with us today. Create an account to unlock premium features and tools.
 //           </p>
-          
+
 //           <div className="mini-cards-container">
 //             <div className="mini-card glass-panel">
 //               <div className="mini-card-icon">✨</div>
@@ -472,7 +472,7 @@
 //                 <p>Get started in just a few minutes.</p>
 //               </div>
 //             </div>
-            
+
 //             <div className="mini-card glass-panel">
 //               <div className="mini-card-icon">🤝</div>
 //               <div className="mini-card-text">
@@ -511,6 +511,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { googleLogin, registerUser } from '../api/authApi';
+import logo from "../assets/logo-UniCore.png";
 import './Auth.css';
 
 const getErrorMessage = (err) => {
@@ -525,7 +526,7 @@ const getErrorMessage = (err) => {
   }
 
   if (err.message === 'Network Error') {
-    return 'Cannot reach backend server. Please start Spring Boot backend on port 8080.';
+    return 'Cannot reach backend server. Please start Spring Boot backend on port 8081.';
   }
 
   return 'Signup failed. Please try again.';
@@ -544,7 +545,7 @@ function Signup() {
   const [loading, setLoading] = useState(false);
 
   const handleAuthSuccess = (data) => {
-    localStorage.setItem('flexitUser', JSON.stringify(data));
+    localStorage.setItem('UniCoreUser', JSON.stringify(data));
     if (data.role === 'ADMIN') {
       navigate('/admin-dashboard');
     } else {
@@ -575,17 +576,18 @@ function Signup() {
         setError('Please accept the terms and conditions');
         return;
       }
-      
+
       if (!formData.fullName || !formData.email || !formData.password) {
         setError('Please fill in all fields');
         return;
       }
 
-      await registerUser({
-        fullName: formData.fullName,
-        email: formData.email,
-        password: formData.password,
-      });
+  await registerUser({
+  name: formData.fullName,
+  email: formData.email,
+  password: formData.password,
+  role: "USER",
+});
 
       navigate('/login');
     } catch (err) {
@@ -596,32 +598,41 @@ function Signup() {
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
-    if (!credentialResponse?.credential) {
-      setError('Google authentication failed. Please try again.');
-      return;
-    }
+  if (!credentialResponse?.credential) {
+    setError("Google authentication failed");
+    return;
+  }
 
-    setLoading(true);
-    setError('');
+  setLoading(true);
+  setError("");
 
-    try {
-      const data = await googleLogin({ idToken: credentialResponse.credential });
-      handleAuthSuccess(data);
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const payload = JSON.parse(
+      atob(credentialResponse.credential.split(".")[1])
+    );
+
+    await googleLogin({
+      email: payload.email,
+      name: payload.name,
+    });
+
+    navigate("/login");
+  } catch (err) {
+    console.error(err);
+    setError("Google signup failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="auth-page signup-page">
       <div className="auth-container signup-layout">
-        
+
         {/* Left Side - Signup Form */}
         <div className="auth-card glass-form">
           <h2>Create Account</h2>
-          <p className="auth-subtitle">Join Flexit and manage resources efficiently</p>
+          <p className="auth-subtitle">Join UniCore and manage resources efficiently</p>
 
           {error && <div className="error-message">{error}</div>}
 
@@ -632,7 +643,7 @@ function Signup() {
                 type="text"
                 id="fullName"
                 name="fullName"
-                placeholder="John Doe"
+                placeholder="Nimantha Senarathne"
                 value={formData.fullName}
                 onChange={handleChange}
                 required
@@ -731,14 +742,17 @@ function Signup() {
 
         {/* Right Side - Content */}
         <div className="auth-info-section">
-          <div className="logo-section">
-            <img src="/images/flexit_logo_Darkbg1.png" alt="Flexit Logo" className="flexit-logo" />
-          </div>
+          <div className="brand-lockup" aria-label="UniCore">
+                      <span className="brand-mark">
+                        <img src={logo} alt="" />
+                      </span>
+                      <span className="brand-name">UniCore</span>
+                    </div>
           <h1 className="info-title">Join the Community</h1>
           <p className="info-desc">
-            Start your journey with us today. Create an account to unlock premium features and tools.
+            Start your journey with us. Create an account here.
           </p>
-          
+
           <div className="mini-cards-container">
             <div className="mini-card glass-panel">
               <div className="mini-card-icon">✨</div>
@@ -747,7 +761,7 @@ function Signup() {
                 <p>Get started in just a few minutes.</p>
               </div>
             </div>
-            
+
             <div className="mini-card glass-panel">
               <div className="mini-card-icon">🤝</div>
               <div className="mini-card-text">

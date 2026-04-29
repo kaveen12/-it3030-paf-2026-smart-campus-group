@@ -26,20 +26,20 @@ function BookingListPage() {
     fetchBookings();
   }, []);
 
-  const handleStatusChange = async (id, value) => {
-    try {
-      if (value === "APPROVED") {
-        await approveBooking(id);
-      } else if (value === "REJECTED") {
-        const reason = prompt("Enter rejection reason:");
-        if (!reason) return;
-        await rejectBooking(id, reason);
-      }
-      fetchBookings();
-    } catch (err) {
-      console.error(err);
-      alert("❌ Error updating status");
+  // ✅ Accept reason as 3rd argument — no more prompt()
+  const handleStatusChange = async (id, value, reason) => {
+  try {
+    if (value === "APPROVED") {
+      await approveBooking(id);
+    } else if (value === "REJECTED") {
+      if (!reason) return;
+      await rejectBooking(id, reason);
     }
+    fetchBookings();
+  } catch (err) {
+    console.error(err);
+    alert("❌ Error updating status");
+  }
   };
 
   const total = bookings.length;

@@ -66,4 +66,18 @@ public User updateUser(@PathVariable String id, @RequestBody User updatedUser) {
 
     return userRepository.save(user);
 }
+@PutMapping("/{id}/profile")
+public User updateProfile(@PathVariable String id, @RequestBody User updatedUser) {
+
+    User user = userRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    user.setName(updatedUser.getName());
+
+    if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
+        user.setPassword(updatedUser.getPassword());
+    }
+
+    return userRepository.save(user);
+}
 }
