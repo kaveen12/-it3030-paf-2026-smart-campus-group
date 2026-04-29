@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AdminNavBar from "../components/adminnav";
+import UserNavbar from "../components/usernav";
 
 function Profile() {
   const userId = localStorage.getItem("userId");
+  const role = localStorage.getItem("role");
 
   const [user, setUser] = useState({
     name: "",
@@ -61,7 +63,7 @@ function Profile() {
 
   return (
     <div className="flex bg-gray-100 min-h-screen">
-      <AdminNavBar />
+      {role === "ADMIN" ? <AdminNavBar /> : <UserNavbar />}
 
       <main className="ml-56 w-full p-8 pt-20">
         <div className="max-w-2xl mx-auto">

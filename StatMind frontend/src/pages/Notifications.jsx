@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AdminNavBar from "../components/adminnav";
+import UserNavbar from "../components/usernav";
 
 function Notifications() {
   const [notifications, setNotifications] = useState([]);
   const userId = localStorage.getItem("userId");
+   const role = localStorage.getItem("role");
 
   useEffect(() => {
     fetchNotifications();
@@ -64,7 +66,7 @@ function Notifications() {
 
   return (
     <div className="flex min-h-screen bg-[#f4f7fb] text-slate-800">
-      <AdminNavBar />
+      {role === "ADMIN" ? <AdminNavBar /> : <UserNavbar />}
 
       <main className="ml-56 w-full p-8 pt-24">
         <section className="rounded-3xl bg-gradient-to-r from-[#0f172a] via-[#1e3a8a] to-[#2563eb] p-8 text-white shadow-xl mb-8">
