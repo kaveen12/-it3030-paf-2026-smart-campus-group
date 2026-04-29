@@ -55,15 +55,6 @@ function Login() {
       });
     }
 
-    if (resolvedRole === 'USER' && resolvedUserId) {
-      await addNotification({
-        userId: resolvedUserId,
-        title: `👋Welcome back, ${resolvedName}!`,
-        message: `You have successfully logged in to your UniCore workspace.`,
-        type: "LOGIN",
-      });
-    }
-
     if (resolvedRole === 'ADMIN') {
       navigate('/admin');
     } else if (resolvedRole === 'TECHNICIAN') {
