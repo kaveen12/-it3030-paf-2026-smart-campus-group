@@ -1,27 +1,42 @@
 import React, { useState, useEffect } from "react";
 import UserNavbar from "../components/usernav";
+import { useNavigate } from "react-router-dom";
+import {
+  CalendarCheck,
+  Activity,
+  RefreshCw,
+  User,
+} from "lucide-react";
 
-const getInitials = (name = "") =>
-  name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
+function UserDashboard() {
+  const navigate = useNavigate();
 
-export default function UserDashboard() {
   const [userName, setUserName] = useState("User");
   const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [counts, setCounts] = useState({
+
+  const [stats, setStats] = useState({
     total: 0,
     approved: 0,
     pending: 0,
     rejected: 0,
   });
 
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
   useEffect(() => {
-    const storedName = localStorage.getItem("userName") || "User";
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+
+    // ✅ FIXED USER NAME
+    const storedName =
+      localStorage.getItem("userName") ||
+      localStorage.getItem("name") ||
+      "User";
+
     setUserName(storedName);
 
     const userId = localStorage.getItem("userId");
@@ -30,147 +45,223 @@ export default function UserDashboard() {
       return;
     }
 
-    fetch(`http://localhost:8081/api/bookings/user/${userId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setBookings(data);
-        setCounts({
-          total: data.length,
-          approved: data.filter((b) => b.status === "APPROVED").length,
-          pending: data.filter((b) => b.status === "PENDING").length,
-          rejected: data.filter((b) => b.status === "REJECTED").length,
-        });
-      })
-      .catch(() => { })
-      .finally(() => setLoading(false));
-  }, []);
+    try {
+      const res = await fetch(
+        `http://localhost:8081/api/bookings/user/${userId}`
+      );
+      const data = await res.json();
+
+      setBookings(data);
+
+      setStats({
+        total: data.length,
+        approved: data.filter((b) => b.status === "APPROVED").length,
+        pending: data.filter((b) => b.status === "PENDING").length,
+        rejected: data.filter((b) => b.status === "REJECTED").length,
+      });
+
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
+  };
+
+  const cards = [
+    {
+      title: "My Bookings",
+      desc: "View all your reservations",
+      path: "/my-bookings",
+      icon: <CalendarCheck size={20} />,
+      color: "from-purple-500 to-purple-700",
+    },
+    {
+      title: "Create Booking",
+      desc: "Make a new reservation",
+      path: "/create-booking",
+      icon: <Activity size={20} />,
+      color: "from-indigo-500 to-indigo-700",
+    },
+    {
+      title: "Profile",
+      desc: "Manage your account",
+      path: "/profile",
+      icon: <User size={20} />,
+      color: "from-green-500 to-green-700",
+    },
+  ];
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
+    <>
       <UserNavbar />
 
-      <main className="ml-56 mt-14 flex-1 py-10 px-6">
-        <div className="max-w-5xl mx-auto space-y-8">
+      <div className="ml-56 mt-14 bg-slate-100 min-h-screen">
+        <div className="p-6 space-y-6">
 
-          {/* Header */}
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 tracking-tight">
-              Welcome, {userName}
-            </h1>
-            <p className="text-gray-500 text-sm mt-1">
-              Here's your activity overview
-            </p>
+          {/* HEADER */}
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">
+                Welcome, {userName} 👋
+              </h1>
+              <p className="text-gray-500 mt-1">
+                Manage your bookings and activity
+              </p>
+            </div>
+
+            <button
+              onClick={handleRefresh}
+              className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow hover:shadow-md transition text-sm"
+            >
+              <RefreshCw
+                size={16}
+                className={refreshing ? "animate-spin" : ""}
+              />
+              Refresh
+            </button>
           </div>
 
-          {/* Profile Card */}
-          <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100">
-            <div className="h-24 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600" />
+          {/* STATS */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+            <StatCard title="Total Bookings" value={stats.total} loading={loading} color="border-gray-500" />
+            <StatCard title="Approved" value={stats.approved} loading={loading} color="border-green-500" />
+            <StatCard title="Pending" value={stats.pending} loading={loading} color="border-yellow-500" />
+            <StatCard title="Rejected" value={stats.rejected} loading={loading} color="border-red-500" />
+          </div>
 
-            <div className="px-8 pb-8">
-              <div className="-mt-10 mb-4 flex items-center gap-4">
-                <div className="w-20 h-20 rounded-2xl bg-white border-4 border-white shadow-lg flex items-center justify-center">
-                  <span className="text-2xl font-bold text-gray-700">
-                    {getInitials(userName)}
-                  </span>
+          {/* QUICK ACTIONS */}
+          <div className="bg-white p-5 rounded-xl shadow-sm">
+            <div className="flex items-center gap-2 mb-4 text-gray-700 font-semibold">
+              <Activity size={18} />
+              Quick Actions
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {cards.map((card) => (
+                <div
+                  key={card.title}
+                  onClick={() => navigate(card.path)}
+                  className={`cursor-pointer rounded-xl p-5 text-white shadow-md bg-gradient-to-r ${card.color} hover:scale-[1.03] transition`}
+                >
+                  <div className="flex justify-between items-center">
+                    <h2 className="font-semibold">{card.title}</h2>
+                    {card.icon}
+                  </div>
+                  <p className="text-sm text-white/80 mt-2">
+                    {card.desc}
+                  </p>
                 </div>
-
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">{userName}</h2>
-                  <p className="text-sm text-gray-400">Registered User</p>
-                </div>
-              </div>
-
-              {/* Stats */}
-              <div className="grid grid-cols-4 gap-5 mt-6">
-
-                <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 hover:shadow-md transition">
-                  <p className="text-xl font-bold text-gray-800">{counts.total}</p>
-                  <p className="text-xs text-gray-400 mt-1">Total</p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-green-50 border border-green-100 hover:shadow-md transition">
-                  <p className="text-xl font-bold text-green-600">{counts.approved}</p>
-                  <p className="text-xs text-green-400 mt-1">Approved</p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-yellow-50 border border-yellow-100 hover:shadow-md transition">
-                  <p className="text-xl font-bold text-yellow-600">{counts.pending}</p>
-                  <p className="text-xs text-yellow-500 mt-1">Pending</p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-red-50 border border-red-100 hover:shadow-md transition">
-                  <p className="text-xl font-bold text-red-500">{counts.rejected}</p>
-                  <p className="text-xs text-red-400 mt-1">Rejected</p>
-                </div>
-
-              </div>
+              ))}
             </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className="grid grid-cols-3 gap-6">
+          {/* ===== BOTTOM SECTIONS ===== */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-            <button className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white p-5 rounded-2xl shadow-md hover:shadow-lg hover:scale-[1.03] transition duration-200 text-left">
-              <p className="font-semibold">Make Booking</p>
-              <p className="text-xs opacity-80">Create a new reservation</p>
-            </button>
+            {/* ACCOUNT STATUS */}
+            <div className="bg-white p-5 rounded-xl shadow-sm">
+              <h2 className="font-semibold text-gray-700 mb-4">
+                Account Status
+              </h2>
 
-            <button className="bg-white p-5 rounded-2xl shadow-md hover:shadow-lg hover:bg-gray-50 transition text-left border border-gray-100">
-              <p className="font-semibold text-gray-800">View Bookings</p>
-              <p className="text-xs text-gray-400">Check your history</p>
-            </button>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Profile</span>
+                  <span className="text-green-600 font-semibold">Active</span>
+                </div>
 
-            <button className="bg-white p-5 rounded-2xl shadow-md hover:shadow-lg hover:bg-gray-50 transition text-left border border-gray-100">
-              <p className="font-semibold text-gray-800">Profile Settings</p>
-              <p className="text-xs text-gray-400">Update your details</p>
-            </button>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Bookings</span>
+                  <span className="text-green-600 font-semibold">Available</span>
+                </div>
 
-          </div>
-
-          {/* Recent Bookings */}
-          <div className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100">
-            <h3 className="font-semibold text-gray-800 mb-4 text-lg">
-              Recent Bookings
-            </h3>
-
-            {loading ? (
-              <p className="text-gray-400 text-sm">Loading...</p>
-            ) : bookings.length === 0 ? (
-              <p className="text-gray-400 text-sm">No bookings yet</p>
-            ) : (
-              <div className="divide-y">
-                {bookings.slice(0, 3).map((b, i) => (
-                  <div
-                    key={i}
-                    className="flex justify-between items-center py-3 px-2 rounded-lg hover:bg-gray-50 transition"
-                  >
-                    <div>
-                      <p className="font-medium text-gray-800">
-                        {b.service || "Service"}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {b.date || "No date"}
-                      </p>
-                    </div>
-
-                    <span
-                      className={`text-xs px-3 py-1 rounded-full font-semibold ${b.status === "APPROVED"
-                        ? "bg-green-100 text-green-600"
-                        : b.status === "PENDING"
-                          ? "bg-yellow-100 text-yellow-600"
-                          : "bg-red-100 text-red-500"
-                        }`}
-                    >
-                      {b.status}
-                    </span>
-                  </div>
-                ))}
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Access</span>
+                  <span className="text-green-600 font-semibold">Granted</span>
+                </div>
               </div>
-            )}
+            </div>
+
+            {/* ACTIVITY BARS */}
+            <div className="bg-white p-5 rounded-xl shadow-sm">
+              <h2 className="font-semibold text-gray-700 mb-4">
+                Your Activity
+              </h2>
+
+              <div className="space-y-3">
+                <Progress label="Approved" value={stats.approved} total={stats.total} color="bg-green-500" />
+                <Progress label="Pending" value={stats.pending} total={stats.total} color="bg-yellow-500" />
+                <Progress label="Rejected" value={stats.rejected} total={stats.total} color="bg-red-500" />
+              </div>
+            </div>
+
+            {/* RECENT BOOKINGS */}
+            <div className="bg-white p-5 rounded-xl shadow-sm">
+              <h2 className="font-semibold text-gray-700 mb-4">
+                Recent Bookings
+              </h2>
+
+              {loading ? (
+                <p className="text-gray-400 text-sm">Loading...</p>
+              ) : bookings.length === 0 ? (
+                <p className="text-gray-400 text-sm">No bookings yet</p>
+              ) : (
+                <ul className="space-y-3 text-sm text-gray-600">
+                  {bookings.slice(0, 4).map((b, i) => (
+                    <li key={i}>
+                      ✔ {b.service} ({b.status})
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
           </div>
 
         </div>
-      </main>
+      </div>
+    </>
+  );
+}
+
+/* STAT CARD */
+function StatCard({ title, value, loading, color }) {
+  return (
+    <div className={`bg-white p-5 rounded-xl shadow-sm border-l-4 ${color}`}>
+      <p className="text-sm text-gray-500">{title}</p>
+
+      {loading ? (
+        <div className="h-8 w-16 bg-gray-200 animate-pulse rounded mt-2"></div>
+      ) : (
+        <h2 className="text-2xl font-bold text-gray-800 mt-2">
+          {value}
+        </h2>
+      )}
     </div>
   );
 }
+
+/* PROGRESS BAR */
+function Progress({ label, value, total, color }) {
+  const percent = total === 0 ? 0 : (value / total) * 100;
+
+  return (
+    <div>
+      <div className="h-2 bg-gray-200 rounded">
+        <div
+          className={`h-2 ${color} rounded`}
+          style={{ width: `${percent}%` }}
+        ></div>
+      </div>
+      <p className="text-xs text-gray-500 mt-1">{label}</p>
+    </div>
+  );
+}
+
+export default UserDashboard;
