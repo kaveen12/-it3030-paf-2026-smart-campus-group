@@ -10,7 +10,7 @@ function UniversityHomePage() {
       <nav className="fixed top-0 left-0 right-0 bg-[#0f172a] text-white shadow z-50">
         <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
 
-          <h1 className="text-lg font-semibold tracking-wide">
+          <h1 className="text-lg font-semibold tracking-wide  text-white !text-white">
             UniCore
           </h1>
 
@@ -42,7 +42,7 @@ function UniversityHomePage() {
 
           <div className="absolute inset-0 bg-black/60 flex flex-col justify-center items-center text-center text-white px-4">
 
-            <h1 className="text-4xl md:text-5xl font-bold">
+            <h1 className="text-4xl md:text-5xl font-bold text-white !text-white">
               Welcome to Smart University
             </h1>
 
@@ -116,7 +116,7 @@ function UniversityHomePage() {
       {/* ================= CONTACT (FIXED THEME) ================= */}
       <section className="bg-[#0f172a] text-white py-16 text-center">
 
-        <h2 className="text-2xl font-bold">
+        <h2 className="text-2xl font-bold  text-white !text-white">
           Contact Us
         </h2>
 
