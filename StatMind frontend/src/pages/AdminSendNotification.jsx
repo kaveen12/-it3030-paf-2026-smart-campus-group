@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import AdminNavBar from "../components/AdminNavBar";
+import AdminNavBar from "../components/adminnav";
 
 function AdminSendNotification() {
   const [role, setRole] = useState("USER");

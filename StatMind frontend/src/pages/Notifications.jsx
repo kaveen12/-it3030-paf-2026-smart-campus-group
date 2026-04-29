@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import AdminNavBar from "../components/AdminNavBar";
+import AdminNavBar from "../components/adminnav";
 
 function Notifications() {
   const [notifications, setNotifications] = useState([]);
@@ -34,13 +34,9 @@ function Notifications() {
     return "🔔";
   };
 
-  const formatDate = (date) => {
-    if (!date) return "Just now";
-    return new Date(date).toLocaleString();
-  };
+ 
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
-  const readCount = notifications.length - unreadCount;
+  
 
   const getIcon = (type) => {
     if (type === "LOGIN") return "👋";

@@ -34,6 +34,7 @@ import CreateTicket from "./pages/CreateTicket";
 import UserTicketHome from "./pages/UserTicketHome";
 import UserTickets from "./pages/UserTickets";
 import UserTicketDetail from "./pages/UserTicketDetail";
+import Profile from "./pages/Profile";
 
 import TechnicianTickets from "./pages/TechnicianTickets";
 import TechnicianTicketDetail from "./pages/TechnicianTicketDetail";
@@ -56,6 +57,7 @@ function App() {
         {/* ADMIN */}
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/send-notification" element={<AdminSendNotification />} />
+        <Route path="/profile" element={<Profile />} />
 
         {/* RESOURCE MANAGEMENT */}
         <Route path="/resourcedashboard" element={<ResourceDashboardPage />} />

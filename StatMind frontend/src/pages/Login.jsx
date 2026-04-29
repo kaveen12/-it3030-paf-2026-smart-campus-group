@@ -4,7 +4,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import { googleLogin, loginUser } from '../api/authApi';
 import { addNotification } from '../utils/notifications';
 import logo from "../assets/logo-UniCore.png"
-import logo from "../assets/logo-UniCore.png"
+
 import './Auth.css';
 
 const getErrorMessage = (err) => {
