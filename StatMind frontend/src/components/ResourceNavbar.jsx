@@ -1,5 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
-
+import { useEffect, useState } from "react";
+import axios from "axios";
+import logo from "../assets/logo-UniCore.png";
+import { useNavigate } from "react-router-dom";
 
 const navItems = [
     {
@@ -49,40 +52,79 @@ const navItems = [
   },
 ];
 
-function ResourcesNavbar() {
+
+function AdminNavBar() {
   const { pathname } = useLocation();
+
+  const userId = localStorage.getItem("userId");
+  const userName =
+  localStorage.getItem("name") ||
+  localStorage.getItem("email")?.split("@")[0] ||
+  "User";
+  const userEmail = localStorage.getItem("email") || "";
+  const role = localStorage.getItem("role") || "ADMIN";
+  const navigate = useNavigate(); 
+
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    fetchNotifications();
+    fetchUnreadCount();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8081/api/notifications/user/${userId}`
+      );
+      setNotifications(res.data);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  const fetchUnreadCount = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8081/api/notifications/user/${userId}/unread-count`
+      );
+      setUnreadCount(res.data);
+    } catch (error) {
+      console.error("Error fetching unread count:", error);
+    }
+  };
+
+  const logout = () => {
+    localStorage.clear();
+    window.location.href = "/";
+  };
 
   return (
     <>
-      {/* 🔷 SIDEBAR */}
       <aside className="fixed left-0 top-0 w-56 h-screen bg-[#0f172a] flex flex-col p-4 z-50">
-
-        {/* LOGO */}
         <div className="flex items-center gap-2.5 px-2 mb-7">
-          <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <rect x="2" y="2" width="5" height="5" rx="1.5" fill="white" />
-              <rect x="9" y="2" width="5" height="5" rx="1.5" fill="white" opacity="0.6" />
-              <rect x="2" y="9" width="5" height="5" rx="1.5" fill="white" opacity="0.6" />
-              <rect x="9" y="9" width="5" height="5" rx="1.5" fill="white" />
-            </svg>
-          </div>
-          <span className="text-[15px] font-medium text-white">StatMind</span>
+          <img
+            src={logo}
+            alt="StatMind Logo"
+            className="w-8 h-8 object-contain rounded-lg"
+          />
+          <span className="text-[15px] font-medium text-white">UniCore</span>
         </div>
 
-        {/* NAVIGATION */}
         <nav className="flex flex-col gap-1">
           {navItems.map(({ to, label, icon }) => {
             const active = pathname === to;
 
             return (
               <Link
-                key={to}
+                key={label}
                 to={to}
-                className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition ${
+                className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs transition ${
                   active
                     ? "bg-[#1e3a5f] text-blue-300"
-                    :"text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                    : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
                 }`}
               >
                 {icon}
@@ -91,38 +133,102 @@ function ResourcesNavbar() {
             );
           })}
         </nav>
-
-        {/* SIDEBAR LOGOUT */}
-        <div className="mt-auto pt-4 border-t border-gray-700">
-          <button className="w-full text-left px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-red-400 rounded">
-            Logout
-          </button>
-        </div>
       </aside>
 
-      {/* 🔷 TOP NAVBAR */}
       <header className="fixed top-0 left-56 right-0 h-14 bg-white border-b flex items-center justify-between px-6 z-40 shadow-sm">
-        
-        {/* LEFT */}
-        <h1 className="text-lg font-semibold text-gray-800">
-          Admin Panel
-        </h1>
+        <h1 className="text-lg font-semibold text-gray-800">Admin Panel</h1>
 
-        {/* RIGHT */}
-        <div className="flex items-center gap-4">
-          
-          <span className="text-sm text-gray-600">
-            Admin
-          </span>
-
-          <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm">
-            Logout
+        <div className="flex items-center gap-4 relative">
+          <button
+            onClick={() => setOpen(!open)}
+            className="relative w-10 h-10 rounded-full bg-white border shadow flex items-center justify-center"
+          >
+            🔔
+            {unreadCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold">
+                {unreadCount}
+              </span>
+            )}
           </button>
 
+          {open && (
+            <div className="absolute right-4 top-14 w-72 max-h-72 overflow-y-auto bg-white rounded-2xl shadow-xl p-3 z-50">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="font-bold text-gray-800">Notifications</h2>
+                <span className="text-sm text-gray-500">{unreadCount} unread</span>
+              </div>
+
+              {notifications.length === 0 ? (
+                <p className="text-center text-gray-500 py-4">No notifications</p>
+              ) : (
+                notifications.slice(0, 2).map((n) => (
+                  <div
+                    key={n.id}
+                    className={`p-3 mb-2 rounded-xl border ${
+                      n.read
+                        ? "bg-white border-gray-200"
+                        : "bg-green-50 border-green-300"
+                    }`}
+                  >
+                    <div className="flex justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-800 leading-snug">👋 {n.message}</p>
+                        <p className="text-sm text-gray-600 mt-1">Type: {n.type}</p>
+                        <p className="text-xs text-gray-400 mt-1">{n.createdAt}</p>
+                      </div>
+
+                      <span
+                        className={`text-xs font-semibold ${
+                          n.read ? "text-gray-400" : "text-green-600"
+                        }`}
+                      >
+                        {n.read ? "Read" : "Unread"}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+
+              <Link
+                to="/notifications"
+                onClick={() => setOpen(false)}
+                className="block text-center bg-[#0f172a] text-white py-3 rounded-xl font-semibold mt-3"
+              >
+                View all notifications
+              </Link>
+            </div>
+          )}
+
+          <div
+  onClick={() => navigate("/profile")}
+  className="flex items-center gap-3 bg-white border rounded-full px-4 py-2 shadow-sm cursor-pointer hover:bg-gray-50 transition"
+>
+  {/* Avatar */}
+  <div className="relative">
+    <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
+      {userName.charAt(0).toUpperCase()}
+    </div>
+
+    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+  </div>
+
+  {/* Info */}
+  <div>
+    <p className="text-sm font-semibold text-gray-800">{userName}</p>
+    <p className="text-xs text-gray-500">{userEmail}</p>
+  </div>
+</div>
+
+          <button
+            onClick={logout}
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm"
+          >
+            Logout
+          </button>
         </div>
       </header>
     </>
   );
 }
 
-export default ResourcesNavbar;
+export default AdminNavBar;
